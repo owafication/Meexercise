@@ -1,0 +1,76 @@
+{
+    "packVersion":  "0.2.0",
+    "record":  "BR-20260817-01",
+    "files":  [
+                  {
+                      "path":  "AGENTS.md",
+                      "bytes":  2882,
+                      "sha256":  "88734825210911a42d2986cca4542226d8905c598c380af40791996a86f90369"
+                  },
+                  {
+                      "path":  "PROJECT_SETTINGS.md",
+                      "bytes":  7677,
+                      "sha256":  "32c279f5ee5e82e8fd347174a03ec49529e11b85bd960329ef89ddc93955ee1f"
+                  },
+                  {
+                      "path":  "README.md",
+                      "bytes":  1996,
+                      "sha256":  "970da380a67c695e8efba34310958562c11244136fb579bd6a0ec93f7df3a8fb"
+                  },
+                  {
+                      "path":  "REVISION_AUDIT.md",
+                      "bytes":  1965,
+                      "sha256":  "ad38ab9cfe0de35d4ea0e9cc1c81cf03601588fb813209c994a28f6b7b8285ca"
+                  },
+                  {
+                      "path":  "project_docs/ARCHITECTURE_AND_DATA.md",
+                      "bytes":  6227,
+                      "sha256":  "343022aa7619016759b11f2c51bb76e57c7991f0380dff87d93eefaaa1f6d958"
+                  },
+                  {
+                      "path":  "project_docs/DEBUGGING_AND_MAINTENANCE.md",
+                      "bytes":  4154,
+                      "sha256":  "25fa248ee13dd5abcdf43f76aff8841632f5a771c2803d3c3664ef9b68aeba79"
+                  },
+                  {
+                      "path":  "project_docs/DECISIONS_AND_HISTORY.md",
+                      "bytes":  5171,
+                      "sha256":  "c2e29ca6da8ff5d7d9c0058631ec590dce103c88757741ee92279b4775ca61a7"
+                  },
+                  {
+                      "path":  "project_docs/IMPLEMENTATION_PLAN.md",
+                      "bytes":  7087,
+                      "sha256":  "a5281711c604df0e1de747e00de00f6cf0de2a997aa7c3eac7d799a2b6258ae4"
+                  },
+                  {
+                      "path":  "project_docs/PRODUCT_FOUNDATION.md",
+                      "bytes":  12651,
+                      "sha256":  "405f251840646022a9911b8fb8c8d87c4105e69eb5712d20559a1c753b51c672"
+                  },
+                  {
+                      "path":  "project_docs/PROJECT_INDEX.md",
+                      "bytes":  5420,
+                      "sha256":  "f3cc0805f8a799e165404cb54fe8b09707c8451176bfdbc9391e88f3f123f80a"
+                  },
+                  {
+                      "path":  "project_docs/REPOSITORY_AND_RELEASE.md",
+                      "bytes":  4022,
+                      "sha256":  "c0fe22558f14f90aafb323bda08d19a796bf6ad3c9ffb809d54f8e2d5bf7f3d9"
+                  },
+                  {
+                      "path":  "project_docs/SECURITY_PRIVACY_AND_RISK.md",
+                      "bytes":  6416,
+                      "sha256":  "5ac1aabe900642c372483a7c16dc0159167b8f4be2e4cdc3d3a5da5431802241"
+                  },
+                  {
+                      "path":  "project_docs/UI_UX_AND_ROUTES.md",
+                      "bytes":  5076,
+                      "sha256":  "59fd0e40ac3293cc0ece5496846150764d12749f7b36bf12507d9905afb83a0c"
+                  },
+                  {
+                      "path":  "project_docs/VALIDATION_AND_EVIDENCE.md",
+                      "bytes":  4660,
+                      "sha256":  "8e443314bf15cbf6597bbfc112b356f4456a97ed1150641f5ab49e28321445ba"
+                  }
+              ]
+}

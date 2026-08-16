@@ -1,0 +1,74 @@
+# Project Index
+
+**Status:** Proposed canonical router v0.2.0  
+**Mode of latest record:** File generation  
+**Repository state:** Unproven in this revision
+
+## Frozen terminology
+- **MeExercise:** product/repository name.
+- **General wellness:** self-directed exercise, mobility, activity, scheduling, progress and non-clinical meal planning without diagnosis/treatment.
+- **Plan:** coordinated routines, schedule and progression intent.
+- **Routine:** ordered versioned exercise/mobility instructions.
+- **Program:** reusable authored collection of plans/routines.
+- **Professional program:** professionally authored general-wellness content; no direct care relationship implied.
+- **Direct professional management:** later access/assignment/monitoring/communication involving individual user data.
+- **Free:** complete general-wellness capability defined in `PRODUCT_FOUNDATION.md`.
+- **Premium:** specialised content/services/integrations or genuinely higher-cost optional capability.
+
+## Canonical manifest
+| Path | Owns | Read when |
+|---|---|---|
+| `/AGENTS.md` | runtime routing, evidence/stop rules | every task |
+| `/PROJECT_SETTINGS.md` | project operating policy and complexity gate | project setup or ambiguous architecture/process work |
+| `/README.md` | concise public/developer orientation | repository orientation |
+| `project_docs/PROJECT_INDEX.md` | routing, ID registry, phase/status and supersession | every task after AGENTS |
+| `project_docs/PRODUCT_FOUNDATION.md` | identity, scope, requirements, acceptance | product/feature/claims/acceptance |
+| `project_docs/ARCHITECTURE_AND_DATA.md` | modules, data authority, interfaces, auth, sync, AI boundary | architecture/data/integration |
+| `project_docs/UI_UX_AND_ROUTES.md` | IA, flows, routes, states, accessibility, print | frontend/UX |
+| `project_docs/IMPLEMENTATION_PLAN.md` | PH-00–PH-10 sequencing/gates/rollback | planning/delivery |
+| `project_docs/SECURITY_PRIVACY_AND_RISK.md` | wellness safety, privacy/security, RISK register | sensitive data/access/security |
+| `project_docs/VALIDATION_AND_EVIDENCE.md` | validation catalogue, traceability/evidence | testing/status/release claims |
+| `project_docs/REPOSITORY_AND_RELEASE.md` | Git/dependencies/config/CI/providers/release/recovery | repository/release/ops |
+| `project_docs/DECISIONS_AND_HISTORY.md` | DEC records, open decisions, governance history | consequential decisions/change history |
+| `project_docs/DEBUGGING_AND_MAINTENANCE.md` | diagnostics, triggers, deletion/maintenance | debugging/refactor/operations |
+
+## Routing
+| Task | Required owners | Add when affected |
+|---|---|---|
+| Scope/feature/pricing | PRODUCT_FOUNDATION, DECISIONS_AND_HISTORY | SECURITY_PRIVACY_AND_RISK |
+| UI/navigation/print | UI_UX_AND_ROUTES, PRODUCT_FOUNDATION | ARCHITECTURE_AND_DATA, VALIDATION_AND_EVIDENCE |
+| Data/auth/sync/migration | ARCHITECTURE_AND_DATA, PRODUCT_FOUNDATION | SECURITY_PRIVACY_AND_RISK, VALIDATION_AND_EVIDENCE |
+| Routine generation/progression | PRODUCT_FOUNDATION, ARCHITECTURE_AND_DATA | SECURITY_PRIVACY_AND_RISK, VALIDATION_AND_EVIDENCE |
+| Meal planning | PRODUCT_FOUNDATION, ARCHITECTURE_AND_DATA, UI_UX_AND_ROUTES | SECURITY_PRIVACY_AND_RISK |
+| Professional/premium | PRODUCT_FOUNDATION, DECISIONS_AND_HISTORY | SECURITY_PRIVACY_AND_RISK, ARCHITECTURE_AND_DATA, VALIDATION_AND_EVIDENCE |
+| Repository/dependency/release | REPOSITORY_AND_RELEASE, IMPLEMENTATION_PLAN | VALIDATION_AND_EVIDENCE, DECISIONS_AND_HISTORY |
+| Debug/refactor | DEBUGGING_AND_MAINTENANCE | owning domain + validation |
+
+## Current phase/status
+- `PH-00` — **Partial / Proposed integration**: revised governance pack generated; actual repository reconciliation, commit and remote publication are unproven here.
+- `PH-01`–`PH-10` — **Proposed**.
+
+## ID registry
+- `REQ-001`–`REQ-052`: retained from prior MeExercise foundation; canonical in PRODUCT_FOUNDATION.
+- `AC-001`–`AC-028`: retained; canonical in PRODUCT_FOUNDATION.
+- `PH-00`–`PH-10`: retained; canonical in IMPLEMENTATION_PLAN.
+- `DEC-001`–`DEC-012`: legacy-reserved; definitions unavailable in supplied pack. New decisions start `DEC-013`.
+- `RISK-001`–`RISK-014`: legacy-reserved; definitions unavailable in supplied pack. New risks start `RISK-015`.
+- `ROUTE-001`–`ROUTE-014`: legacy-reserved; definitions unavailable in supplied pack. New routes start `ROUTE-015`.
+- `VAL-001`–`VAL-020`: legacy-reserved; definitions unavailable in supplied pack. New validations start `VAL-021`.
+- `BR-20260805-01`: historical prior foundation record.
+- `BR-20260817-01`: this governance revision/file-generation record.
+
+## Traceability rule
+For non-trivial implementation: `REQ → scope → architecture/contract → PH/slice → files/surfaces → AC → VAL → status`.
+
+## Supersession from v0.1
+This revision consolidates the prior proposed owners:
+- `PRODUCT_SCOPE.md` + `REQUIREMENTS.md` → `PRODUCT_FOUNDATION.md`;
+- `ARCHITECTURE.md` + `DATA_AND_STATE.md` → `ARCHITECTURE_AND_DATA.md`;
+- `UI_UX.md` → `UI_UX_AND_ROUTES.md`;
+- `SAFETY_PRIVACY.md` → `SECURITY_PRIVACY_AND_RISK.md`;
+- `VALIDATION.md` + `BUILD_STATUS.md` → `VALIDATION_AND_EVIDENCE.md` plus this index status;
+- `DECISIONS.md` + `CHANGELOG.md` → `DECISIONS_AND_HISTORY.md`.
+
+Do not keep both old and new canonical owners after repository integration unless the old files are retained only as clearly marked historical redirects.
