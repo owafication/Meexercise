@@ -38,6 +38,16 @@ Prior `VAL-001`–`VAL-020` are legacy-reserved because their original definitio
 | `VAL-038` | Entitlement/professional isolation | free capability gates, expiry, content provenance, no initial user-record access by professional roles |
 | `VAL-039` | Release smoke/rollback | production-like deploy/start/core flow/rollback or recovery for declared release target |
 
+## Recorded repository evidence
+
+### `BR-20260817-02`
+- **Mode/scope:** Repository execution; `PH-00`, `VAL-021`, `VAL-022`.
+- **Governance evidence:** all manifest-governed files passed byte and SHA-256 verification after the stale `PROJECT_SETTINGS.md`/`REVISION_AUDIT.md` manifest entries were repaired; the staged initial-commit scope was explicitly reviewed.
+- **Local evidence:** commit `0f3db2b5abda7f4fea6315baa01218dade562caa` exists on clean local `main`, with `main` tracking `origin/main` at the same commit.
+- **Remote evidence:** independent GitHub inspection verified `refs/heads/main` at `0f3db2b5abda7f4fea6315baa01218dade562caa` with commit message `docs: establish MeExercise governance v0.2.0`.
+- **Passed / Verified:** governance structure/integrity, repository baseline, commit and remote publication for PH-00.
+- **Unproven:** application framework/toolchain, dependencies, build, tests, runtime, deployment and all PH-01+ behaviour.
+
 ## Requirement mapping
 | Requirement group | Primary validations |
 |---|---|
