@@ -44,6 +44,7 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 | `BR-20260805-01` | 2026-08-05 | Historical file generation | Prior v0.1 governance foundation; repository integration remained unproven in supplied material. |
 | `BR-20260817-01` | 2026-08-17 | File generation | v0.2 governance rewritten/consolidated against new project settings and ten supplied engineering research files. No application code or repository command executed. |
 | `BR-20260817-02` | 2026-08-17 | Repository execution | PH-00 governance integration completed. Local `main` was clean and tracking `origin/main`; GitHub `main` was independently verified at `0f3db2b5abda7f4fea6315baa01218dade562caa`. Application implementation remains unproven. |
+| `BR-20260817-03` | 2026-08-17 | Governance path canonicalization | Canonical governance paths corrected to the tracked repository root plus `project_docs/`; the detached `Meexercise-governance-v0.2.0` source-pack directory was designated non-canonical and eligible for removal only after verified merge/synchronization. |
 
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.

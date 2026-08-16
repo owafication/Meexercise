@@ -1,6 +1,6 @@
 {
     "packVersion":  "0.2.0",
-    "record":  "BR-20260817-02",
+    "record":  "BR-20260817-03",
     "files":  [
                   {
                       "path":  ".gitattributes",
@@ -14,8 +14,8 @@
                   },
                   {
                       "path":  "PROJECT_SETTINGS.md",
-                      "bytes":  7677,
-                      "sha256":  "32c279f5ee5e82e8fd347174a03ec49529e11b85bd960329ef89ddc93955ee1f"
+                      "bytes":  7707,
+                      "sha256":  "f4f8d714c88e4368120137c0f1cadc197f7e661227a57f15cf1fdd9dc3fbd32e"
                   },
                   {
                       "path":  "README.md",
@@ -39,8 +39,8 @@
                   },
                   {
                       "path":  "project_docs/DECISIONS_AND_HISTORY.md",
-                      "bytes":  5454,
-                      "sha256":  "1d15e9329dd630de4f2413aab9a2dda402554267812d7e70a582cc90ea5c8d40"
+                      "bytes":  5778,
+                      "sha256":  "eeb0061bed5fb3e436198bde7cf3f53a54e84c0f06298f405cb026856da708a4"
                   },
                   {
                       "path":  "project_docs/IMPLEMENTATION_PLAN.md",
@@ -54,13 +54,13 @@
                   },
                   {
                       "path":  "project_docs/PROJECT_INDEX.md",
-                      "bytes":  5736,
-                      "sha256":  "49d1ceedf74ceb269e2342fb1c326dbe41baa20f4bb81a07e0cd45d2eb12280c"
+                      "bytes":  5863,
+                      "sha256":  "4240db5e6c2df9e850b032fae78ec948172e80ba80dd90dbae37a14cab5afff9"
                   },
                   {
                       "path":  "project_docs/REPOSITORY_AND_RELEASE.md",
-                      "bytes":  4610,
-                      "sha256":  "99dd602872c046883bcb619e3659d88333c3dcaf8da4349068cb3f7d76fa6421"
+                      "bytes":  5142,
+                      "sha256":  "3500d14f3ad1da6a57b5b114f3cb4efdd7cf7e1241f1b1d2fa977924789151ca"
                   },
                   {
                       "path":  "project_docs/SECURITY_PRIVACY_AND_RISK.md",
@@ -74,8 +74,8 @@
                   },
                   {
                       "path":  "project_docs/VALIDATION_AND_EVIDENCE.md",
-                      "bytes":  5618,
-                      "sha256":  "f4d4e891839235acc3acb425fb7262532e6505562a829908b6f40346bbe1fa49"
+                      "bytes":  6645,
+                      "sha256":  "8ced508cffcf3f039521d0d9bb96e8077502d4e286698803146017ae6f02a167"
                   }
               ]
 }

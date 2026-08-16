@@ -12,6 +12,12 @@ At PH-00 inspect and record the actual root, default branch, remotes, history, i
 
 The initial commit contains the canonical v0.2.0 governance plus `.gitattributes` for deterministic LF handling. Governance manifest byte/SHA checks passed before publication. Application framework, dependencies, build, runtime and deployment remain `Unproven`.
 
+## Canonical governance location
+
+Canonical governance is stored in the tracked repository root and `project_docs/` according to `project_docs/PROJECT_INDEX.md`. Detached/versioned source-pack directories are non-canonical after repository integration and should not remain as competing working sources.
+
+A temporary source-pack copy may be removed only after its replacement governance is committed, remotely merged, and local `main` is synchronized. Removing such a duplicate does not remove canonical governance or Git history.
+
 ## Working model
 For solo/agent work, coherent direct commits can be technically valid, but the proposed default for non-trivial agent changes is a short `agent/<task>` branch plus draft pull request because it provides review and rollback without a heavy branch taxonomy. Do not create long-lived develop/release branches without a release-support requirement.
 

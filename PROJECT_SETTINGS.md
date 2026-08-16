@@ -9,7 +9,8 @@ Do not delegate coding, debugging, architecture or manual file editing when Chat
 ## Paths
 
 * Repo: `C:\Apps\Meexercise\`
-* Governance: `C:\Apps\Meexercise\Meexercise-governance-v0.2.0\`
+* Governance root: `C:\Apps\Meexercise\`
+* Governance docs: `C:\Apps\Meexercise\project_docs\`
 * GitHub: `owafication/Meexercise`
 * Default branch: `main`
 

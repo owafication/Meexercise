@@ -1,8 +1,8 @@
 # Project Index
 
 **Status:** Canonical router v0.2.0  
-**Mode of latest record:** Repository execution  
-**Repository state:** Verified on `main` at `0f3db2b5abda7f4fea6315baa01218dade562caa` (`BR-20260817-02`)
+**Mode of latest record:** Governance path canonicalization  
+**Repository state:** PH-00 verified; canonical governance is the tracked repository root plus `project_docs/` (`BR-20260817-03`)
 
 ## Frozen terminology
 - **MeExercise:** product/repository name.
@@ -59,6 +59,7 @@
 - `BR-20260805-01`: historical prior foundation record.
 - `BR-20260817-01`: this governance revision/file-generation record.
 - `BR-20260817-02`: PH-00 repository baseline and governance-integration evidence record.
+- `BR-20260817-03`: canonical governance-path and duplicate-source-pack retirement record.
 
 ## Traceability rule
 For non-trivial implementation: `REQ → scope → architecture/contract → PH/slice → files/surfaces → AC → VAL → status`.

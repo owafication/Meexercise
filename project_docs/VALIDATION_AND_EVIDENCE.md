@@ -48,6 +48,14 @@ Prior `VAL-001`–`VAL-020` are legacy-reserved because their original definitio
 - **Passed / Verified:** governance structure/integrity, repository baseline, commit and remote publication for PH-00.
 - **Unproven:** application framework/toolchain, dependencies, build, tests, runtime, deployment and all PH-01+ behaviour.
 
+### `BR-20260817-03`
+- **Mode/scope:** Governance path canonicalization; PH-00 maintenance; `VAL-021`, `VAL-022`.
+- **Starting evidence:** clean local `main` and `origin/main` at `4bf02cf47ebc31bde796938950b76a265c7603a8` before mutation.
+- **Change:** `PROJECT_SETTINGS.md` names the tracked repository root and `project_docs/` as canonical governance locations; repository policy designates detached/versioned source-pack copies as non-canonical after integration.
+- **Validation contract:** exact changed-file scope, manifest byte/SHA-256 verification, project-settings size limit, staged-content check, PR base/head/file-scope verification, verified remote merge and local-main synchronization.
+- **Deletion boundary:** the detached local source-pack directory may be deleted only after merge and synchronization are verified; its deletion is local cleanup rather than application implementation evidence.
+- **Unproven:** application framework/toolchain, dependencies, build, runtime, deployment and all PH-01+ behaviour.
+
 ## Requirement mapping
 | Requirement group | Primary validations |
 |---|---|
