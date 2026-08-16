@@ -1,10 +1,16 @@
 # Repository and Release
 
-**Status:** Proposed procedure; current remote/local state not re-inspected by this file generation  
+**Status:** Proposed release/operations procedure; repository baseline verified 2026-08-17  
 **Intended repository:** `owafication/Meexercise`
 
 ## Repository baseline
 At PH-00 inspect and record the actual root, default branch, remotes, history, ignore rules and working tree before mutation. Do not infer those facts from this pack or from an old conversation.
+
+## Verified repository baseline
+
+`BR-20260817-02` records the PH-00 repository execution completed on 2026-08-17. Local PowerShell evidence showed `C:\Apps\Meexercise` clean on `main`, tracking `origin/main` at `0f3db2b5abda7f4fea6315baa01218dade562caa`. Independent GitHub inspection verified `refs/heads/main` at that same commit.
+
+The initial commit contains the canonical v0.2.0 governance plus `.gitattributes` for deterministic LF handling. Governance manifest byte/SHA checks passed before publication. Application framework, dependencies, build, runtime and deployment remain `Unproven`.
 
 ## Working model
 For solo/agent work, coherent direct commits can be technically valid, but the proposed default for non-trivial agent changes is a short `agent/<task>` branch plus draft pull request because it provides review and rollback without a heavy branch taxonomy. Do not create long-lived develop/release branches without a release-support requirement.

@@ -1,8 +1,8 @@
 # Project Index
 
-**Status:** Proposed canonical router v0.2.0  
-**Mode of latest record:** File generation  
-**Repository state:** Unproven in this revision
+**Status:** Canonical router v0.2.0  
+**Mode of latest record:** Repository execution  
+**Repository state:** Verified on `main` at `0f3db2b5abda7f4fea6315baa01218dade562caa` (`BR-20260817-02`)
 
 ## Frozen terminology
 - **MeExercise:** product/repository name.
@@ -45,7 +45,7 @@
 | Debug/refactor | DEBUGGING_AND_MAINTENANCE | owning domain + validation |
 
 ## Current phase/status
-- `PH-00` — **Partial / Proposed integration**: revised governance pack generated; actual repository reconciliation, commit and remote publication are unproven here.
+- `PH-00` — **Passed / Verified**: repository baseline established at `C:\Apps\Meexercise`; canonical v0.2.0 governance integrated and manifest-verified; initial commit `0f3db2b5abda7f4fea6315baa01218dade562caa` published; local `main` and GitHub `main` independently verified at the same commit (`BR-20260817-02`; `VAL-021`, `VAL-022`).
 - `PH-01`–`PH-10` — **Proposed**.
 
 ## ID registry
@@ -58,6 +58,7 @@
 - `VAL-001`–`VAL-020`: legacy-reserved; definitions unavailable in supplied pack. New validations start `VAL-021`.
 - `BR-20260805-01`: historical prior foundation record.
 - `BR-20260817-01`: this governance revision/file-generation record.
+- `BR-20260817-02`: PH-00 repository baseline and governance-integration evidence record.
 
 ## Traceability rule
 For non-trivial implementation: `REQ → scope → architecture/contract → PH/slice → files/surfaces → AC → VAL → status`.
