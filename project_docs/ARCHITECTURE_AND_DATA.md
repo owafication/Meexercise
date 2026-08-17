@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 application shell implemented; persistence/auth/provider architecture remains proposed  
+**Status:** PH-01 shell implemented; Supabase Auth/Postgres selected for PH-02; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -34,7 +34,7 @@ A module owns its invariants and mutations. Shared physical persistence does not
 ## Data authority
 
 ### Server-authoritative durable state
-Cross-device accounts require a shared durable authority once implemented. The exact database/provider is undecided. A relational database is the proposed default candidate because MeExercise has structured entities, versioned content, ownership, relationships, migrations and transactions; select the actual engine only after stack/deployment constraints are inspected.
+Cross-device accounts require a shared durable authority once implemented. `DEC-024` selects Supabase PostgreSQL for the PH-02 persistence baseline because MeExercise needs structured entities, versioned content, ownership, relationships, migrations and transactions. Development is local-first: schema and policy changes are version-controlled migrations and may be exercised against the local Supabase stack before any remote project exists. The production Supabase project and physical data region are selected later at release/deployment readiness, before real sensitive user data is placed in shared production infrastructure.
 
 ### Client state
 - transient UI interaction: local component state;
@@ -65,7 +65,7 @@ Completed sessions and historical plan snapshots retain the semantic content use
 Use explicit concurrency/version checks when multiple devices can edit the same record. Lost updates are unacceptable. Resolve automatically only when rules are deterministic and lossless; otherwise preserve both changes and request user review. Retries must not duplicate non-idempotent changes.
 
 ## Authentication and authorisation
-An account boundary is required for cross-device private data. Exact auth provider is undecided. Server-side authorisation must enforce ownership/roles; client route guards are UX only. Identity proofing is not assumed. Professional authors initially have content-author permissions only, not user-record access.
+An account boundary is required for cross-device private data. `DEC-024` selects Supabase Auth for the PH-02 authentication baseline, integrated with the same PostgreSQL project. Server-side MeExercise authorisation must enforce ownership/roles; Row Level Security is defence-in-depth rather than a substitute for application ownership checks, and client route guards are UX only. Identity proofing is not assumed. Professional authors initially have content-author permissions only, not user-record access.
 
 ## APIs and integrations
 Do not create a public/network API merely to make the code look layered. Use the selected web framework's simplest server interface for the application. Introduce stable external API contracts only for real independent consumers/integrations. Validate every network/import boundary.
@@ -87,6 +87,6 @@ Runtime AI is conditional. If introduced later it must sit behind a narrow appli
 - no long-term AI memory, RAG, tool calling or agents unless independently justified.
 
 ## Configuration and dependencies
-Hard-code true invariants. Configure demonstrated deployment variability. Persist real user preferences. Add flags only for actual rollout/runtime variants. Keep secrets out of source.
+Hard-code true invariants. Configure demonstrated deployment variability. Persist real user preferences. Add flags only for actual rollout/runtime variants. Keep secrets out of source. Supabase project URLs/keys are environment configuration; privileged/service credentials remain server-only and are never exposed to browser code.
 
 Before adopting a dependency: identify capability gap, standard/platform alternative, transitive surface, maintenance/security status, licence compatibility, runtime/bundle cost, portability and exit cost. Do not add an abstraction around a dependency unless replacement/substitutability is a real requirement.

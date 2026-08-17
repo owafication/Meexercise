@@ -141,6 +141,8 @@ Do not put credentials, sensitive wellness values or private user content in ord
 
 Migration work must consider existing readers/writers, historical data, recovery/rollback and verification.
 
+Production hosting and data-region selection may be deferred until release readiness. Before that decision, use local or non-production infrastructure and do not place real sensitive wellness/user data in shared remote environments.
+
 ## Decisions
 
 Inspect available evidence before asking questions. For local, reversible choices with a clear convention, state an assumption and proceed.

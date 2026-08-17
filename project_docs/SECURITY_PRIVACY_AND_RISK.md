@@ -19,6 +19,8 @@ Collect only data justified by the feature. Do not collect speculative clinical 
 
 If a jurisdictional privacy regime applies (for example Australian Privacy Principles, GDPR or another regime), its binding collection, security, retention, cross-border and rights requirements override this generic baseline. Applicability must be established rather than assumed.
 
+Production hosting and physical data region are intentionally deferred until release/deployment readiness so they can be selected against the actual distribution footprint and legal/privacy requirements. Until that decision is accepted, development uses local infrastructure or non-production remote infrastructure with synthetic/non-sensitive test data; real sensitive wellness/user data must not be placed in a shared remote environment.
+
 ## Baseline controls by trigger
 - **Secrets exist:** keep them outside committed source; restrict access; use platform/managed secret handling when lifecycle needs justify it.
 - **Private accounts exist:** secure authentication/session handling and server-side authorisation/ownership checks.

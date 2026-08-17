@@ -1,6 +1,6 @@
 # Repository and Release
 
-**Status:** Repository baseline and PH-01 local toolchain verified; deployment/release target unresolved  
+**Status:** Repository/PH-01 verified; Supabase Auth/Postgres selected for PH-02; production hosting/region unresolved by design
 **Intended repository:** `owafication/Meexercise`
 
 ## Repository baseline
@@ -48,7 +48,11 @@ Minimal CI becomes justified after a reproducible scaffold exists and remote val
 Do not invent an application version or semantic-versioning contract before application/release tooling is selected. Tag/release identifiers should point to a known revision once distribution begins. Generated artefacts belong in release/artifact storage unless the repository itself is their distribution mechanism.
 
 ## Hosting/deployment
-Web hosting, database, auth, object storage, email, analytics, payments and AI providers are unresolved. Select providers from requirements, privacy/security, operational capability, recurring cost and exit implications. Containers, orchestration, multi-region deployment, autoscaling and permanent staging are premature until a concrete deployment requirement exists.
+`DEC-024` selects Supabase Auth and Supabase PostgreSQL for the application identity/persistence baseline. PH-02 development is local-first using version-controlled schema migrations; a remote Supabase project is not required merely to build the app. If a remote development project is introduced before production-region selection, it is non-production and must not contain real sensitive wellness/user data.
+
+Production web hosting and the production Supabase project/data region are selected later at PH-10 release/deployment readiness, using the actual distribution footprint, privacy/security obligations, operational capability, recurring cost and exit/migration implications. This decision must be complete before public release or before shared production infrastructure stores real sensitive user data.
+
+A Docker-compatible runtime used solely to run Supabase's documented local development stack is a development-tool dependency, not an application deployment architecture decision. Application containers, orchestration, multi-region deployment, autoscaling and permanent staging remain premature until independently justified.
 
 ## Data operations before real users
 Before irreplaceable shared data becomes production-dependent:

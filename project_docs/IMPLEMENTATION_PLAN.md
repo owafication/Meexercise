@@ -23,7 +23,7 @@ Each phase is implemented in small verifiable slices. A walking skeleton is used
 
 ## `PH-02 Identity, Profiles, Assessments and Sync Foundation`
 **Objective:** Account/private-data boundary, versioned assessment flow, save/resume and first server-authoritative persistence slice.  
-**Prerequisites:** PH-01; auth and persistence choices; data classification.  
+**Prerequisites:** PH-01; `DEC-024` Supabase Auth/PostgreSQL selection; data classification. Production web-hosting provider and production Supabase region are intentionally not PH-02 prerequisites.
 **Tasks:** account lifecycle; profile; consent/collection notices as applicable; assessment versions/sessions; safety flags; draft recovery; ownership/authorisation; concurrency token; export/deletion foundation.  
 **Validation:** `VAL-024`, `VAL-025`, `VAL-032`, `VAL-033`.  
 **Rollback:** reversible schema migration/feature rollback preserving records.  
@@ -79,7 +79,7 @@ Each phase is implemented in small verifiable slices. A walking skeleton is used
 
 ## `PH-10 Production Readiness and Release`
 **Objective:** Verify declared release scope across security/privacy, accessibility, migrations/recovery, supported browsers/devices, performance, operations and release rollback.  
-**Tasks:** applicable threat/privacy review; restore drill; retention/deletion; dependency/licence review; release smoke; support/incident paths appropriate to exposure; performance only against actual targets; accessibility evaluation; release notes/limitations.  
+**Tasks:** select and verify production web hosting and production Supabase project/data region against the intended distribution/privacy requirements; applicable threat/privacy review; restore drill; retention/deletion; dependency/licence review; release smoke; support/incident paths appropriate to exposure; performance only against actual targets; accessibility evaluation; release notes/limitations.
 **Validation:** `VAL-023`–`VAL-039` as applicable.  
 **Rollback:** last verified release plus tested data recovery path.  
 **Stop:** material failed/unproven release requirement, critical privacy/security/safety/accessibility/data-loss issue, or unsupported claim.
