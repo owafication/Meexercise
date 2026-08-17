@@ -1,6 +1,6 @@
 {
     "packVersion":  "0.2.0",
-    "record":  "BR-20260817-04",
+    "record":  "BR-20260817-05",
     "files":  [
                   {
                       "path":  ".gitattributes",
@@ -14,8 +14,8 @@
                   },
                   {
                       "path":  "PROJECT_SETTINGS.md",
-                      "bytes":  7707,
-                      "sha256":  "f4f8d714c88e4368120137c0f1cadc197f7e661227a57f15cf1fdd9dc3fbd32e"
+                      "bytes":  7941,
+                      "sha256":  "d3b541a9a9b41e989aab176b4e33a777f12c3f667c267e61098aef7df26e3779"
                   },
                   {
                       "path":  "README.md",
@@ -29,8 +29,8 @@
                   },
                   {
                       "path":  "project_docs/ARCHITECTURE_AND_DATA.md",
-                      "bytes":  6837,
-                      "sha256":  "5f99bb0eecafb59bba5996d2a3e6ec867346827bd4a80a5d3c66485f8227efd3"
+                      "bytes":  7453,
+                      "sha256":  "b57aaf6cb1efa7084c9ae7319ed4ccd32c40e2ab37bba910b8e8f0b71024b0c1"
                   },
                   {
                       "path":  "project_docs/DEBUGGING_AND_MAINTENANCE.md",
@@ -39,13 +39,13 @@
                   },
                   {
                       "path":  "project_docs/DECISIONS_AND_HISTORY.md",
-                      "bytes":  6414,
-                      "sha256":  "24d422adf80b27fd959b04cb6982a48c34d07c7d47069a7ed617fdb14ebba7b3"
+                      "bytes":  7596,
+                      "sha256":  "a7bd994d25b177832a76712075edb98d0ee36d7a7cb78daac4e80d3b60040f3b"
                   },
                   {
                       "path":  "project_docs/IMPLEMENTATION_PLAN.md",
-                      "bytes":  7087,
-                      "sha256":  "a5281711c604df0e1de747e00de00f6cf0de2a997aa7c3eac7d799a2b6258ae4"
+                      "bytes":  7346,
+                      "sha256":  "459d0ff768ff7da5d9a49bf685cff6782a62be00143116e4fa0d6d822cea3850"
                   },
                   {
                       "path":  "project_docs/PRODUCT_FOUNDATION.md",
@@ -54,18 +54,18 @@
                   },
                   {
                       "path":  "project_docs/PROJECT_INDEX.md",
-                      "bytes":  6359,
-                      "sha256":  "cc3a265cac4572a843a2558cefdb4dd265d98958db97598d3db25b4f0b369d7c"
+                      "bytes":  6808,
+                      "sha256":  "471525724c43d8b3bf069185ce3857ff768c3297803e69275213df9d17e035ea"
                   },
                   {
                       "path":  "project_docs/REPOSITORY_AND_RELEASE.md",
-                      "bytes":  5156,
-                      "sha256":  "7e6590a03ea7530e880743b09d2e34839d1f48fcadc4d699bd40fb6ea62981eb"
+                      "bytes":  5948,
+                      "sha256":  "6fab1bce118d9919413196fb042c7dd705681e5973e91d16ca211489b08baa8e"
                   },
                   {
                       "path":  "project_docs/SECURITY_PRIVACY_AND_RISK.md",
-                      "bytes":  6416,
-                      "sha256":  "5ac1aabe900642c372483a7c16dc0159167b8f4be2e4cdc3d3a5da5431802241"
+                      "bytes":  6857,
+                      "sha256":  "abb509f0f426445f02a9c88a26b2bfc093e32aab305879d8954fb0264f0bc2ae"
                   },
                   {
                       "path":  "project_docs/UI_UX_AND_ROUTES.md",

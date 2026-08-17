@@ -16,14 +16,15 @@ The prior MeExercise index declared `DEC-001`–`DEC-012`, but the original deci
 | `DEC-018` | Proposed default | Advanced routine generation initially uses approved structured content plus deterministic constraints; runtime AI is optional later. | Meets current outcome while keeping safety rules testable and avoiding premature AI infrastructure. |
 | `DEC-019` | Proposed default | Nutrition is a separate module/domain sharing identity, scheduling and other stable primitives, not exercise tables. | Prevents future schema/logic contradiction while avoiding a separate service. |
 | `DEC-020` | Proposed default | Introduce executable entitlement logic only when premium capability activates; keep the boundary defined now but do not scatter placeholder checks. | Avoids speculative flags while protecting future data ownership. |
-| `DEC-021` | Proposed default | Use a relational server datastore as the leading persistence candidate, but select engine/provider only after the web stack/deployment constraints are inspected. | Versioned relational data/transactions are likely useful; provider choice is premature. |
+| `DEC-021` | Superseded by `DEC-024` | Use a relational server datastore as the leading persistence candidate, but select engine/provider only after the web stack/deployment constraints are inspected. | Superseded after PH-01 established the web stack and PH-02 requirements justified an actual provider selection. |
 | `DEC-022` | Proposed | PWA installation/offline capabilities are conditional enhancements, not a release claim until implemented and validated. | A web app does not automatically require PWA/offline machinery. |
 | `DEC-023` | Accepted | Use Next.js App Router with TypeScript and npm on Node.js 24 LTS for the application baseline. | PH-01 requires a responsive full-stack-capable web shell; this fits the accepted single-deployable modular-monolith direction without adding a separate client/server framework split or extra package-manager abstraction. |
+| `DEC-024` | Accepted | Use Supabase Auth plus Supabase PostgreSQL for the PH-02 identity/persistence baseline. Develop local-first with version-controlled migrations; defer production web hosting and the production Supabase project/data region until release/deployment readiness. | One maintained provider covers auth and relational persistence while retaining PostgreSQL schema portability. Deferring the production region avoids premature infrastructure lock-in; real sensitive user data is prohibited from shared remote environments until that region/privacy decision is accepted. |
 
 ## Decision required
 - Meal-planning release timing: first public release vs later pre-v1 free phase. This does not change that meal planning is free when delivered.
-- Database, authentication, hosting and deployment providers remain unresolved until their phase requirements are inspected.
-- Jurisdictions/distribution footprint and resulting privacy/legal requirements before public release.
+- Production web-hosting provider and production Supabase project/data region are intentionally deferred until PH-10 release/deployment readiness; they must be selected before public release or real sensitive user data enters shared production infrastructure.
+- Jurisdictions/distribution footprint and resulting privacy/legal requirements before public release; these inform the production hosting/data-region decision.
 
 ## Research basis for v0.2.0
 The supplied research was used as engineering evidence, not copied as universal law:
@@ -47,6 +48,7 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 | `BR-20260817-02` | 2026-08-17 | Repository execution | PH-00 governance integration completed. Local `main` was clean and tracking `origin/main`; GitHub `main` was independently verified at `0f3db2b5abda7f4fea6315baa01218dade562caa`. Application implementation remains unproven. |
 | `BR-20260817-03` | 2026-08-17 | Governance path canonicalization | Canonical governance paths corrected to the tracked repository root plus `project_docs/`; the detached `Meexercise-governance-v0.2.0` source-pack directory was designated non-canonical and eligible for removal only after verified merge/synchronization. |
 | `BR-20260817-04` | 2026-08-17 | Application implementation | PH-01 shell implemented on `agent/ph01-shell`; selected toolchain and shell routes recorded; local lint/typecheck/unit/build/Chromium accessibility validation passed. Remote CI/publication remains separately observable through the PR. |
+| `BR-20260817-05` | 2026-08-17 | PH-02 architecture decision | Accepted Supabase Auth/PostgreSQL for identity/persistence and changed the deployment gate so production hosting/data region is selected at release readiness rather than blocking application construction. No PH-02 runtime implementation or production infrastructure is claimed by this governance change. |
 
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
