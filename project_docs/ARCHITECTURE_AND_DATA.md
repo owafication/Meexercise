@@ -1,12 +1,17 @@
 # Architecture and Data
 
-**Status:** Proposed architecture; repository/framework/provider implementation unproven  
+**Status:** PH-01 application shell implemented; persistence/auth/provider architecture remains proposed  
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
 ## Architecture decision rule
 Use the smallest mechanism that closes an applicable failure mode. A future possibility is not by itself a requirement.
 
+## Implemented PH-01 application structure
+
+`BR-20260817-04` establishes one Next.js App Router application written in TypeScript and managed with npm on Node.js 24 LTS. The root layout owns the shared shell and primary navigation; route content lives under `src/app`; shared shell components live under `src/components`.
+
+This implements only the application-shell boundary. Domain modules, authentication, persistence, server-authoritative data, external integrations and provider-specific infrastructure are not scaffolded prematurely and remain governed by their later phase prerequisites.
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.
 

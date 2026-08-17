@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** Proposed interaction contract; final framework paths unproven  
+**Status:** PH-01 shell routes implemented; later feature-route paths remain proposed  
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -42,7 +42,14 @@ Prior `ROUTE-001`–`ROUTE-014` are legacy-reserved because their original canon
 | `ROUTE-026` | Print/PDF | canonical routine/plan snapshot projection |
 | `ROUTE-027` | Professional programs | later authored general-wellness catalogue/program detail |
 
-Final URL syntax is selected with the framework; route semantics and stable record IDs are the contract.
+PH-01 establishes these shell URLs:
+- `ROUTE-015` Today → `/`
+- `ROUTE-017` Plans → `/plans`
+- `ROUTE-019` Create routine shell → `/create`
+- `ROUTE-022` Progress → `/progress`
+- `ROUTE-025` Profile/settings shell → `/profile`
+
+Unimplemented route URL syntax remains deferred until its owning capability exists. Route semantics and stable record IDs remain the contract.
 
 ## Core flows
 

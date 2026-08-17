@@ -1,8 +1,8 @@
 # MeExercise
 
-**Governance status:** Proposed canonical foundation v0.2.0  
-**Mode of this revision:** File generation  
-**Application implementation:** Unproven in this pack
+**Governance status:** Canonical foundation v0.2.0  
+**Mode of latest record:** PH-01 application implementation  
+**Application implementation:** PH-01 shell implemented and locally verified; PH-02+ unproven
 
 MeExercise is a self-directed general-wellness web application for assessing current exercise and mobility context, defining goals and constraints, creating and tracking exercise/mobility plans, producing detailed printable instructions, reviewing progression and trends, and later supporting general meal planning and professionally authored general-wellness programs.
 
@@ -24,4 +24,4 @@ The governance is deliberately compact. Definitions belong in one canonical owne
 
 ## Current delivery state
 
-This pack was generated from the accepted MeExercise scope plus the supplied engineering research. It does not prove current GitHub repository contents, a selected framework/provider, a working build, deployed infrastructure, runtime behaviour, or release readiness.
+PH-01 establishes the responsive application shell with the canonical Today, Plans, Create, Progress and Profile destinations using the selected Next.js App Router toolchain. Local Windows validation covers lint, type checking, unit/component tests, production build and automated Chromium accessibility/keyboard/reflow checks. Authentication, persistence, deployment, the broader browser/device support matrix, manual assistive-technology evaluation and all PH-02+ product behaviour remain unproven.
