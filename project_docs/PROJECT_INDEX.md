@@ -1,8 +1,8 @@
 # Project Index
 
 **Status:** Canonical router v0.2.0  
-**Mode of latest record:** Governance path canonicalization  
-**Repository state:** PH-00 verified; canonical governance is the tracked repository root plus `project_docs/` (`BR-20260817-03`)
+**Mode of latest record:** PH-01 application implementation  
+**Repository state:** PH-00 verified; PH-01 application shell has local validation evidence (`BR-20260817-04`)
 
 ## Frozen terminology
 - **MeExercise:** product/repository name.
@@ -46,7 +46,8 @@
 
 ## Current phase/status
 - `PH-00` — **Passed / Verified**: repository baseline established at `C:\Apps\Meexercise`; canonical v0.2.0 governance integrated and manifest-verified; initial commit `0f3db2b5abda7f4fea6315baa01218dade562caa` published; local `main` and GitHub `main` independently verified at the same commit (`BR-20260817-02`; `VAL-021`, `VAL-022`).
-- `PH-01`–`PH-10` — **Proposed**.
+- `PH-01` — **Passed / Verified (shell scope)**: Next.js App Router application shell implemented with Today, Plans, Create, Progress and Profile navigation; lint, typecheck, unit/component tests, production build and automated Chromium accessibility/keyboard/reflow/reduced-motion checks passed locally (`BR-20260817-04`; `VAL-023`, `VAL-034`). Release support-matrix and manual assistive-technology claims remain unproven.
+- `PH-02`–`PH-10` — **Proposed**.
 
 ## ID registry
 - `REQ-001`–`REQ-052`: retained from prior MeExercise foundation; canonical in PRODUCT_FOUNDATION.
@@ -60,6 +61,7 @@
 - `BR-20260817-01`: this governance revision/file-generation record.
 - `BR-20260817-02`: PH-00 repository baseline and governance-integration evidence record.
 - `BR-20260817-03`: canonical governance-path and duplicate-source-pack retirement record.
+- `BR-20260817-04`: PH-01 application-shell implementation and local validation record.
 
 ## Traceability rule
 For non-trivial implementation: `REQ → scope → architecture/contract → PH/slice → files/surfaces → AC → VAL → status`.
