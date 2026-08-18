@@ -66,6 +66,16 @@ Prior `VAL-001`–`VAL-020` are legacy-reserved because their original definitio
 - **CI follow-up in this slice:** CI adds an independent database job using the project-pinned CLI, local database startup, migration/seed replay and `supabase test db`; remote CI remains `Unproven` until the branch is pushed and GitHub Actions completes.
 - **Not proven by this record:** account signup/sign-in/recovery/deletion, profile/assessment UI, save/resume safety behaviour, application server-side ownership checks, export/deletion lifecycle, remote Supabase, production region, persistent local-stack network isolation, production/runtime release behaviour.
 
+### `BR-20260818-02`
+- **Mode/scope:** PH-02 Auth/private-profile implementation and local runtime verification; partial `REQ-001`, `REQ-002`, `REQ-036`, `REQ-037`, `REQ-048`, `REQ-049`, `REQ-052`; partial `VAL-024`, `VAL-032`, `VAL-034`, `VAL-036`.
+- **Implemented:** local Supabase Auth/account UI/actions, Auth callback/session integration, authenticated private-profile form/actions, validation modules/tests, optimistic profile conflict handling, dedicated Auth/profile Playwright integration, local environment helper and related CI/config changes.
+- **Database continuity:** V4 reset/replayed the existing PH-02 migration and synthetic seed and reran the database suite successfully: `Files=1, Tests=21`, `Result: PASS`. Local Supabase ran with the active default-route adapter disabled and was stopped before network restoration.
+- **Auth/profile runtime:** V5 reset the local database and `npm run test:e2e:auth` passed its Chromium flow (`1 passed`), exercising signup/sign-in/sign-out, private-profile persistence and a two-session stale-write conflict. The stale save produced the intended user-visible reload-before-saving message rather than overwriting the newer profile.
+- **Test-harness correction:** V4's Auth/profile failure was a Playwright strict-mode locator ambiguity between the application `role="alert"` and Next.js' route announcer, not an application concurrency failure. V5 narrowed the assertion to the conflict alert text and the flow passed.
+- **Generated-state correction:** V5's later full verification exposed ESLint scanning Supabase-generated `supabase/.temp/...` runtime code. V6 excluded `supabase/.temp/` and `supabase/.branches/` from Git and ESLint rather than modifying generated code.
+- **Regression evidence:** V6 `npm run lint` passed and `npm run verify` passed, covering lint, TypeScript, Vitest, production build and the ordinary Chromium Playwright suite (`12 passed`). The Auth/profile test was not rerun in V6 because V6 changed only Git/lint discovery; its V5 pass remains the runtime evidence for that flow.
+- **Still unproven:** password-recovery delivery/end-to-end update, account deletion, assessment save/resume/safety UI, export/correction/deletion lifecycle, complete negative cross-user application-authorisation coverage, remote Supabase, production region/hosting, remote GitHub Actions for this branch and release/runtime behaviour.
+
 ## Requirement mapping
 | Requirement group | Primary validations |
 |---|---|

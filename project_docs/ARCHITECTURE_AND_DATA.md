@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; Supabase Auth/Postgres selected for PH-02; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 database foundation and local Auth/private-profile slice implemented/verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -12,6 +12,11 @@ Use the smallest mechanism that closes an applicable failure mode. A future poss
 `BR-20260817-04` establishes one Next.js App Router application written in TypeScript and managed with npm on Node.js 24 LTS. The root layout owns the shared shell and primary navigation; route content lives under `src/app`; shared shell components live under `src/components`.
 
 This implements only the application-shell boundary. Domain modules, authentication, persistence, server-authoritative data, external integrations and provider-specific infrastructure are not scaffolded prematurely and remain governed by their later phase prerequisites.
+
+## Implemented PH-02 Auth/private-profile slice
+The local browser integration now exercises account signup, sign-in, sign-out, authenticated private-profile persistence and optimistic stale-write rejection against the local Supabase stack. A second browser session attempting to save an obsolete profile version receives a user-visible conflict rather than silently overwriting the newer value. This extends the server-authoritative private-data boundary beyond the database-only foundation while preserving the existing PostgreSQL/RLS/version contracts.
+
+Password-recovery/update routes are present in this slice, but end-to-end recovery delivery, account deletion, assessment UI/save-resume/safety behaviour, export/deletion lifecycle, broader negative application-layer authorisation, remote Supabase and production deployment remain unproven.
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.
 

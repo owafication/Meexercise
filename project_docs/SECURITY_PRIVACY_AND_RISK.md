@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Proposed risk baseline; legal applicability and production exposure unproven  
+**Status:** Risk baseline active; PH-02 local private-account/profile boundary partially verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule
@@ -29,6 +29,9 @@ Production hosting and physical data region are intentionally deferred until rel
 - **User content renders into executable contexts:** rely on framework escaping/safe rendering; avoid raw injection escapes.
 - **Destructive account/data action:** authorisation plus appropriate review/undo/recovery.
 - **Irreplaceable persisted data:** backup/recovery objective and restore evidence before release dependency.
+
+## PH-02 local private-data evidence
+Local browser integration verifies signup, sign-in, sign-out, access to the authenticated user's private profile, profile persistence and rejection of a stale concurrent profile write. The database foundation separately passed 21 pgTAP assertions covering RLS ownership/concurrency/immutability. These checks reduce `RISK-019` and `RISK-027` for the tested paths but do not prove all application-layer negative cross-user access, password recovery, account deletion, production transport/configuration, remote exposure or legal/privacy compliance.
 
 No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system or complex RBAC is assumed before its threat/contract/exposure requires it.
 

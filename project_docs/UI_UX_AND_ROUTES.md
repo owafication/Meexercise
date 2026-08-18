@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell routes implemented; later feature-route paths remain proposed  
+**Status:** PH-01 shell routes plus PH-02 Auth/private-profile routes implemented locally; later feature-route paths remain proposed
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -47,7 +47,16 @@ PH-01 establishes these shell URLs:
 - `ROUTE-017` Plans → `/plans`
 - `ROUTE-019` Create routine shell → `/create`
 - `ROUTE-022` Progress → `/progress`
-- `ROUTE-025` Profile/settings shell → `/profile`
+- `ROUTE-025` Profile/settings → `/profile` (authenticated private-profile surface in the PH-02 slice)
+
+PH-02 also establishes account-support URLs under the existing onboarding/account concepts:
+- signup → `/auth/sign-up`;
+- sign-in → `/auth/sign-in`;
+- password-recovery request → `/auth/forgot-password`;
+- password update → `/auth/update-password`;
+- Supabase Auth callback → `/auth/callback`.
+
+Signup/sign-in/sign-out/profile/concurrent-edit behaviour is locally browser-verified. Password-recovery delivery/update is not yet end-to-end verified.
 
 Unimplemented route URL syntax remains deferred until its owning capability exists. Route semantics and stable record IDs remain the contract.
 
