@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 database foundation and local Auth/private-profile slice implemented/verified; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 database, Auth/private-profile and readiness-assessment slices implemented/locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -16,7 +16,13 @@ This implements only the application-shell boundary. Domain modules, authenticat
 ## Implemented PH-02 Auth/private-profile slice
 The local browser integration now exercises account signup, sign-in, sign-out, authenticated private-profile persistence and optimistic stale-write rejection against the local Supabase stack. A second browser session attempting to save an obsolete profile version receives a user-visible conflict rather than silently overwriting the newer value. This extends the server-authoritative private-data boundary beyond the database-only foundation while preserving the existing PostgreSQL/RLS/version contracts.
 
-Password-recovery/update routes are present in this slice, but end-to-end recovery delivery, account deletion, assessment UI/save-resume/safety behaviour, export/deletion lifecycle, broader negative application-layer authorisation, remote Supabase and production deployment remain unproven.
+## Implemented PH-02 readiness-assessment slice
+`/profile/assessment` now provides one bounded versioned general-wellness readiness assessment rather than a speculative generic form engine. Authenticated users can start a published template version, save incomplete answers, reload/resume them, and complete the session with optimistic `row_version` protection. Completed assessment sessions remain immutable historical records.
+
+Completion derives immutable server-side safety flags from the stored response. Recorded movement limitations produce `restrict_generation`; an answer other than an explicit independent-exercise `yes` or professional-restriction `no` produces `block_generation`, so missing/uncertain readiness fails closed. These outcomes are conservative planning controls only: they do not diagnose, treat, certify medical safety or provide medical clearance. Actual consumption of these flags by later routine generation remains a PH-04 responsibility.
+
+Password-recovery/update delivery, account deletion, export/deletion lifecycle, broader negative application-layer authorisation, remote Supabase and production deployment remain unproven.
+
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.
 

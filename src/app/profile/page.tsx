@@ -57,15 +57,27 @@ export default async function ProfilePage() {
             <p className="status-label">Private profile</p>
             <h2 id="private-profile-title">Your profile</h2>
             <p>
-              This slice stores only an optional display name. Wellness
-              assessment fields are added separately with their own purpose and
-              safety rules.
+              This slice stores an optional private display name. Assessment
+              answers are kept separately against their own versioned
+              general-wellness assessment.
             </p>
 
             <ProfileForm
               initialDisplayName={state.profile?.displayName ?? null}
               initialRowVersion={state.profile?.rowVersion ?? null}
             />
+          </section>
+
+          <section className="card" aria-labelledby="assessment-card-title">
+            <p className="status-label">Assessment</p>
+            <h2 id="assessment-card-title">Readiness and movement context</h2>
+            <p>
+              Save or resume your versioned readiness assessment, record
+              movement limitations, and review conservative planning outcomes.
+            </p>
+            <Link className="button button-secondary" href="/profile/assessment">
+              Open readiness assessment
+            </Link>
           </section>
 
           <section className="card" aria-labelledby="account-controls-title">
