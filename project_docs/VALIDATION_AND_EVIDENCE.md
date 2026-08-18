@@ -56,13 +56,16 @@ Prior `VAL-001`–`VAL-020` are legacy-reserved because their original definitio
 - **Deletion boundary:** the detached local source-pack directory may be deleted only after merge and synchronization are verified; its deletion is local cleanup rather than application implementation evidence.
 - **Unproven:** application framework/toolchain, dependencies, build, runtime, deployment and all PH-01+ behaviour.
 
-### `BR-20260817-03`
-- **Mode/scope:** Governance path canonicalization; PH-00 maintenance; `VAL-021`, `VAL-022`.
-- **Starting evidence:** clean local `main` and `origin/main` at `4bf02cf47ebc31bde796938950b76a265c7603a8` before mutation.
-- **Change:** `PROJECT_SETTINGS.md` names the tracked repository root and `project_docs/` as canonical governance locations; repository policy designates detached/versioned source-pack copies as non-canonical after integration.
-- **Validation contract:** exact changed-file scope, manifest byte/SHA-256 verification, project-settings size limit, staged-content check, PR base/head/file-scope verification, verified remote merge and local-main synchronization.
-- **Deletion boundary:** the detached local source-pack directory may be deleted only after merge and synchronization are verified; its deletion is local cleanup rather than application implementation evidence.
-- **Unproven:** application framework/toolchain, dependencies, build, runtime, deployment and all PH-01+ behaviour.
+### `BR-20260818-01`
+- **Mode/scope:** PH-02 database-foundation implementation and local verification; `REQ-002`–`REQ-006`, `REQ-036`–`REQ-040`, `REQ-051`; partial `VAL-024`, `VAL-025`, `VAL-032`, `VAL-033`, `VAL-035`, `VAL-036`.
+- **Implemented:** project-pinned `supabase@2.114.0`; version-controlled `supabase/config.toml`, migration, synthetic seed and pgTAP suite; profile/assessment-version/session schema; RLS ownership policies; row-version concurrency; immutable published assessment versions and completed assessment sessions.
+- **Migration evidence:** local `supabase db reset` completed successfully from a clean local database and replayed the migration plus synthetic `seed.sql`.
+- **Database-test evidence:** cached Supabase `pg_prove:3.36` image `sha256:eda7c5e68719e9c8287e78c017118407b48df904a51c935f5ab6098b8c0bc6bc` executed the repository test file; `Files=1, Tests=21`, `Result: PASS`.
+- **Isolation evidence:** during migration/database verification the Windows adapter carrying the active IPv4/IPv6 default route was disabled; localhost API/DB remained reachable; Supabase was stopped before that adapter was restored. Persistent safe host exposure of the local development stack remains `Unproven` and is not relied upon.
+- **Application regression evidence:** `npm run verify` passed after database verification: lint, TypeScript check, 2 Vitest tests, Next.js 16.3.1 production build and 12 Playwright tests.
+- **CI follow-up in this slice:** CI adds an independent database job using the project-pinned CLI, local database startup, migration/seed replay and `supabase test db`; remote CI remains `Unproven` until the branch is pushed and GitHub Actions completes.
+- **Not proven by this record:** account signup/sign-in/recovery/deletion, profile/assessment UI, save/resume safety behaviour, application server-side ownership checks, export/deletion lifecycle, remote Supabase, production region, persistent local-stack network isolation, production/runtime release behaviour.
+
 ## Requirement mapping
 | Requirement group | Primary validations |
 |---|---|

@@ -1,6 +1,6 @@
 {
     "packVersion":  "0.2.0",
-    "record":  "BR-20260817-05",
+    "record":  "BR-20260818-01",
     "files":  [
                   {
                       "path":  ".gitattributes",
@@ -54,13 +54,13 @@
                   },
                   {
                       "path":  "project_docs/PROJECT_INDEX.md",
-                      "bytes":  6808,
-                      "sha256":  "471525724c43d8b3bf069185ce3857ff768c3297803e69275213df9d17e035ea"
+                      "bytes":  7284,
+                      "sha256":  "cb7812c70f62017ddc67afe617ea1c01387974aae12ac7899b28770c6dc64910"
                   },
                   {
                       "path":  "project_docs/REPOSITORY_AND_RELEASE.md",
-                      "bytes":  5948,
-                      "sha256":  "6fab1bce118d9919413196fb042c7dd705681e5973e91d16ca211489b08baa8e"
+                      "bytes":  6887,
+                      "sha256":  "d5c52014ea4b18f39d0b4df1674fa2cacf5d6fff9411b7abd5af5bb4664701bc"
                   },
                   {
                       "path":  "project_docs/SECURITY_PRIVACY_AND_RISK.md",
@@ -74,8 +74,8 @@
                   },
                   {
                       "path":  "project_docs/VALIDATION_AND_EVIDENCE.md",
-                      "bytes":  7671,
-                      "sha256":  "a0a327692e0f7f4cbff0b9d4a565c5333171bf8a1d9bc84fa237cf6d7ead7ce0"
+                      "bytes":  8656,
+                      "sha256":  "4aed0b82fccab850e8b85e9248bb055a940a9c8e23a9a6554a9b640dc25ecd53"
                   }
               ]
 }
