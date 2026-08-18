@@ -69,16 +69,18 @@ for (const rawLine of output.split(/\r?\n/)) {
 
 const apiUrl = values.get("API_URL");
 const browserKey = values.get("PUBLISHABLE_KEY") ?? values.get("ANON_KEY");
+const serviceRoleKey = values.get("SERVICE_ROLE_KEY");
 
-if (!apiUrl || !browserKey) {
+if (!apiUrl || !browserKey || !serviceRoleKey) {
   throw new Error(
-    "Supabase status did not provide the local API URL and browser-safe key.",
+    "Supabase status did not provide the local API URL, browser-safe key, and server-only service role key.",
   );
 }
 
 const contents = [
   `NEXT_PUBLIC_SUPABASE_URL=${apiUrl}`,
   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${browserKey}`,
+  `SUPABASE_SERVICE_ROLE_KEY=${serviceRoleKey}`,
   "NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000",
   "",
 ].join("\n");

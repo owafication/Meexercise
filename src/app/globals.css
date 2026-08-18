@@ -503,3 +503,13 @@ p {
 .choice-option span {
   line-height: 1.45;
 }
+/* PH-02 destructive account control */
+.button-danger {
+  border-color: #8a281f;
+  background: #8a281f;
+}
+
+.button-danger:hover {
+  border-color: #641b16;
+  background: #641b16;
+}

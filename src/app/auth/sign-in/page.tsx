@@ -10,10 +10,14 @@ export const metadata = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callback?: string }>;
+  searchParams: Promise<{
+    callback?: string;
+    accountDeleted?: string;
+  }>;
 }) {
   const params = await searchParams;
   const callbackProblem = params.callback;
+  const accountDeleted = params.accountDeleted === "1";
 
   return (
     <>
@@ -30,6 +34,13 @@ export default async function SignInPage({
         {callbackProblem ? (
           <p className="form-message form-message-error" role="alert">
             That account link is invalid, expired, or could not be completed.
+          </p>
+        ) : null}
+
+        {accountDeleted ? (
+          <p className="form-message" role="status">
+            Your MeExercise account and its current stored account data were
+            deleted.
           </p>
         ) : null}
 

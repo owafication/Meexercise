@@ -3,6 +3,11 @@ export type SupabasePublicConfig = {
   publishableKey: string;
 };
 
+export type SupabaseAdminConfig = {
+  url: string;
+  serviceRoleKey: string;
+};
+
 export function getSupabasePublicConfig(): SupabasePublicConfig | null {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const publishableKey =
@@ -23,6 +28,30 @@ export function getRequiredSupabasePublicConfig(): SupabasePublicConfig {
 
   if (!config) {
     throw new Error("Supabase public configuration is unavailable.");
+  }
+
+  return config;
+}
+
+export function getSupabaseAdminConfig(): SupabaseAdminConfig | null {
+  const publicConfig = getSupabasePublicConfig();
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+  if (!publicConfig || !serviceRoleKey) {
+    return null;
+  }
+
+  return {
+    url: publicConfig.url,
+    serviceRoleKey,
+  };
+}
+
+export function getRequiredSupabaseAdminConfig(): SupabaseAdminConfig {
+  const config = getSupabaseAdminConfig();
+
+  if (!config) {
+    throw new Error("Supabase server administration is unavailable.");
   }
 
   return config;

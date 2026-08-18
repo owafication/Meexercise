@@ -80,6 +80,18 @@ export default async function ProfilePage() {
             </Link>
           </section>
 
+          <section className="card" aria-labelledby="data-account-title">
+            <p className="status-label">Data and privacy</p>
+            <h2 id="data-account-title">Export or delete account data</h2>
+            <p>
+              Download the current account data MeExercise stores for you or
+              review the permanent account-deletion controls.
+            </p>
+            <Link className="button button-secondary" href="/profile/account">
+              Open data and account controls
+            </Link>
+          </section>
+
           <section className="card" aria-labelledby="account-controls-title">
             <p className="status-label">Account</p>
             <h2 id="account-controls-title">Session controls</h2>
