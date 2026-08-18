@@ -243,6 +243,11 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# Password recovery uses a server-readable token-hash callback so SSR can
+# establish the recovery session in cookies before rendering the update page.
+[auth.email.template.recovery]
+subject = "Reset your MeExercise password"
+content_path = "./supabase/templates/recovery.html"
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"

@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 database, Auth/private-profile, readiness-assessment and data-lifecycle slices implemented/locally verified; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 database, Auth/private-profile, readiness-assessment, data-lifecycle and password-recovery slices implemented/locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -26,7 +26,12 @@ Completion derives immutable server-side safety flags from the stored response. 
 
 Permanent account deletion requires a verified session, current-password re-authentication and an exact typed destructive confirmation before a server-only Supabase administration client deletes the Auth user. Current MeExercise profile, assessment-session and assessment-safety-flag records cascade from that Auth-user deletion. The privileged `SUPABASE_SERVICE_ROLE_KEY` is server-only configuration and is never exposed through a `NEXT_PUBLIC_*` variable or browser client.
 
-Password-recovery/update delivery, broader negative application-layer authorisation, generic correction beyond the currently editable profile fields, production retention obligations/exceptions, remote Supabase and production deployment remain unproven.
+## Implemented PH-02 password-recovery slice
+Password-reset requests remain privacy-preserving and do not disclose whether an email address has an account. The local Supabase Auth recovery email uses a version-controlled recovery template that carries the Supabase recovery `TokenHash` to `/auth/callback`. The callback verifies a `recovery` OTP on the trusted server boundary, writes session cookie mutations onto the outgoing response, and redirects through the configured canonical site URL so the recovery session stays on one browser origin before `/auth/update-password` renders.
+
+The authenticated password-update action reuses the existing server-side identity boundary and updates the current user's password only after the recovery session is established. Local browser integration captures the real local Auth email in Mailpit, follows its recovery link, verifies the recovery session reaches the update form, changes the password, signs out, rejects the old password and accepts the replacement password.
+
+Broader negative application-layer authorisation, generic correction beyond the currently editable profile fields, production retention obligations/exceptions, production SMTP/deliverability, remote Supabase and production deployment remain unproven.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.
