@@ -1,8 +1,8 @@
 # Project Index
 
 **Status:** Canonical router v0.2.0  
-**Mode of latest record:** PH-02 Auth/private-profile local runtime verification
-**Repository state:** PH-00/PH-01 verified; PH-02 database foundation plus the Auth/private-profile slice are locally verified. Signup/sign-in/sign-out, private-profile persistence and stale concurrent-edit rejection passed against isolated local Supabase; assessment, account-deletion, export/deletion lifecycle and remaining PH-02 behaviour are still in progress (`BR-20260818-01`, `BR-20260818-02`).
+**Mode of latest record:** Governance maintenance — merged PH-02 evidence + non-canonical development-reference integration
+**Repository state:** PH-00/PH-01 verified; PH-02 database foundation and Auth/private-profile slice are merged to `main` with successful local and GitHub Actions verification. Assessment, account-deletion, export/deletion lifecycle and remaining PH-02 behaviour are still in progress (`BR-20260818-01`, `BR-20260818-02`, `BR-20260818-03`).
 
 ## Frozen terminology
 - **MeExercise:** product/repository name.
@@ -66,6 +66,7 @@
 - `BR-20260817-05`: PH-02 Supabase identity/persistence selection and production hosting/data-region deferral decision.
 - `BR-20260818-01`: PH-02 database-foundation implementation, isolated local migration/pgTAP verification and database-CI record.
 - `BR-20260818-02`: PH-02 Auth/private-profile implementation, runtime-concurrency verification and Supabase-internal lint/Git-boundary record.
+- `BR-20260818-03`: PR #6 remote-CI/merge evidence plus non-canonical development-cheatsheet integration and governance-routing record.
 
 ## Traceability rule
 For non-trivial implementation: `REQ → scope → architecture/contract → PH/slice → files/surfaces → AC → VAL → status`.
@@ -80,3 +81,6 @@ This revision consolidates the prior proposed owners:
 - `DECISIONS.md` + `CHANGELOG.md` → `DECISIONS_AND_HISTORY.md`.
 
 Do not keep both old and new canonical owners after repository integration unless the old files are retained only as clearly marked historical redirects.
+
+## Operational reference (non-canonical)
+- `project_docs/DEVELOPMENT_CHEATSHEET.md` preserves historical ChatGPT/PowerShell/Git/Supabase troubleshooting, failure chronology and resumption notes. It is not a canonical owner of requirements, contracts, phases, status or decisions and is intentionally excluded from `PACK_MANIFEST.json`. Read it only after `AGENTS.md` and this index; current local evidence, current GitHub state and canonical governance override stale handoff snapshots.

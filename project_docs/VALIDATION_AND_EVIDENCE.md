@@ -76,6 +76,14 @@ Prior `VAL-001`–`VAL-020` are legacy-reserved because their original definitio
 - **Regression evidence:** V6 `npm run lint` passed and `npm run verify` passed, covering lint, TypeScript, Vitest, production build and the ordinary Chromium Playwright suite (`12 passed`). The Auth/profile test was not rerun in V6 because V6 changed only Git/lint discovery; its V5 pass remains the runtime evidence for that flow.
 - **Still unproven:** password-recovery delivery/end-to-end update, account deletion, assessment save/resume/safety UI, export/correction/deletion lifecycle, complete negative cross-user application-authorisation coverage, remote Supabase, production region/hosting, remote GitHub Actions for this branch and release/runtime behaviour.
 
+### `BR-20260818-03`
+- **Mode/scope:** governance maintenance after PH-02 Auth/private-profile publication; no new application behaviour.
+- **Remote PH-02 evidence:** GitHub Actions CI run #7 (`32109163956`) completed successfully for tested head `a14ba185795b8880973d800b3b43e15ca7b3099e`; both `Verify` and `Database and auth integration` completed successfully, including clean install, lint, typecheck, unit/component tests, production build, Chromium installation, local Supabase startup, environment generation, migration/seed replay, pgTAP and Auth/profile browser integration.
+- **Merge evidence:** PR #6 was merged by exact-head match from `agent/ph02-auth-profile` into `main`; resulting merge commit `c5970dcb992ef385d57376e5fc5f5e30c118fb1f` was fetched and local `main` was fast-forwarded to the same SHA.
+- **Operational-reference integration:** supplied `MEEXERCISE_FUTURE_INSTANCE_CHEATSHEET.md` was copied byte-for-byte to `project_docs/DEVELOPMENT_CHEATSHEET.md` (SHA-256 `2ecaf5f24527f7407e2918ebde2dece9f7f9a8674dd5053f0168e9f33c5419ad`) and routed from `AGENTS.md`, `PROJECT_INDEX.md` and `REPOSITORY_AND_RELEASE.md` as non-canonical history.
+- **Integrity boundary:** the reference is intentionally excluded from `PACK_MANIFEST.json` and intentionally preserves the supplied source bytes, including inherited Markdown whitespace. Canonical changed governance/manifest files must pass diff-hygiene checks; reference integrity is verified by exact source/destination SHA-256 equality. `PROJECT_SETTINGS.md` is unchanged and remains below 8000 characters.
+- **Evidence boundary:** this record proves PR #6 remote CI/merge publication and documentation integration only. PH-02 remains in progress; password recovery end-to-end, account deletion, assessment save/resume/safety, export/correction/deletion lifecycle, complete negative cross-user application-authorisation coverage, remote Supabase production configuration and release behaviour remain unproven.
+
 ## Requirement mapping
 | Requirement group | Primary validations |
 |---|---|
