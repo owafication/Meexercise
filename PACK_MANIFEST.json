@@ -1,6 +1,6 @@
 {
     "packVersion":  "0.2.0",
-    "record":  "BR-20260818-02",
+    "record":  "BR-20260818-03",
     "files":  [
                   {
                       "path":  ".gitattributes",
@@ -9,8 +9,8 @@
                   },
                   {
                       "path":  "AGENTS.md",
-                      "bytes":  2882,
-                      "sha256":  "88734825210911a42d2986cca4542226d8905c598c380af40791996a86f90369"
+                      "bytes":  3200,
+                      "sha256":  "72a6b3fdc37f910d4dae8a2e6d644ba587a92ef5e33c401f2a9782cd8a8c4526"
                   },
                   {
                       "path":  "PROJECT_SETTINGS.md",
@@ -54,13 +54,13 @@
                   },
                   {
                       "path":  "project_docs/PROJECT_INDEX.md",
-                      "bytes":  7688,
-                      "sha256":  "fbde587d70bd07e4024fea5fa0d7679cbc043f328859d55c05944b43856f47a9"
+                      "bytes":  8295,
+                      "sha256":  "81141fe5a89a2c66b29dca9997e1ad7d881ebffd8056721756038c67fab25cf6"
                   },
                   {
                       "path":  "project_docs/REPOSITORY_AND_RELEASE.md",
-                      "bytes":  7521,
-                      "sha256":  "c2688e02433a6e43ef51f0e29e134baa03ae9fba641b42d14d253500162b5f30"
+                      "bytes":  8074,
+                      "sha256":  "c32d0edbf6ff16ebd3f7a21c1c43492a68c1a09f8705f44197506fe0c5791f9f"
                   },
                   {
                       "path":  "project_docs/SECURITY_PRIVACY_AND_RISK.md",
@@ -74,8 +74,8 @@
                   },
                   {
                       "path":  "project_docs/VALIDATION_AND_EVIDENCE.md",
-                      "bytes":  11055,
-                      "sha256":  "b654e226589b6201f378518b6e102fc90dd81f0748f44ab93b7b95c73b64f4c0"
+                      "bytes":  13034,
+                      "sha256":  "c2dbaaf554bf03cf98d86dd9226ced001090b0746fa1693db2d22a9dc86b2dbd"
                   }
               ]
 }

@@ -75,3 +75,6 @@ Replication is not a substitute for recovery from logically valid deletion/corru
 
 ## Release gate
 A release is accepted only from cumulative evidence for its declared scope. Failed mandatory checks block only the claims they govern; unavailable checks leave those claims `Unproven`. Rollback/recovery must preserve user-owned data and historical semantic versions.
+
+## Tracked non-canonical operational references
+A tracked operational reference may live under `project_docs/` only when its non-canonical status is explicit. `project_docs/DEVELOPMENT_CHEATSHEET.md` owns no requirement, architecture/contract, phase/status, decision or validation result. It preserves troubleshooting and handoff history only; stale snapshots in it never override current local evidence, current GitHub state, `PROJECT_INDEX.md` routing or the applicable canonical owner. It is intentionally excluded from the canonical pack manifest.

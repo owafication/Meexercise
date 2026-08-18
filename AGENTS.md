@@ -36,3 +36,6 @@ Use the lowest-cost check that faithfully observes the failure. Unit tests do no
 
 ## Stop conditions
 Stop before mutation if proceeding would require invented authority or create material risk of data loss, privacy/security failure, unsafe wellness behaviour, incompatible public behaviour, destructive migration, unauthorised billing/professional access, or invalid evidence. Planning may continue around a blocked decision.
+
+## Operational reference
+When resuming interrupted work or diagnosing recurring Windows/Git/Supabase tooling failures, `project_docs/DEVELOPMENT_CHEATSHEET.md` may be consulted after the canonical reading route. It is non-canonical operational history: current local/GitHub evidence and canonical owners override it.
