@@ -1,8 +1,8 @@
 # Project Index
 
 **Status:** Canonical router v0.2.0  
-**Mode of latest record:** PH-02 readiness-assessment local runtime verification
-**Repository state:** PH-00/PH-01 verified; PH-02 database foundation and Auth/private-profile are merged to `main`, and the readiness-assessment save/resume/safety slice is locally runtime-verified on `agent/ph02-assessment-flow`. Password recovery, account deletion, export/deletion lifecycle, broader negative application authorisation and remaining PH-02 behaviour are still in progress (`BR-20260818-01`–`BR-20260818-04`).
+**Mode of latest record:** PH-02 data export/account-deletion local runtime verification
+**Repository state:** PH-00/PH-01 verified; PH-02 database, Auth/private-profile and readiness-assessment slices are merged to `main`; the data-export/account-deletion slice is locally runtime-verified on `agent/ph02-data-lifecycle`. Password recovery, broader negative application authorisation, remaining correction/retention obligations and other PH-02 behaviour are still in progress (`BR-20260818-01`–`BR-20260818-05`).
 
 ## Frozen terminology
 - **MeExercise:** product/repository name.
@@ -47,7 +47,7 @@
 ## Current phase/status
 - `PH-00` — **Passed / Verified**: repository baseline established at `C:\Apps\Meexercise`; canonical v0.2.0 governance integrated and manifest-verified; initial commit `0f3db2b5abda7f4fea6315baa01218dade562caa` published; local `main` and GitHub `main` independently verified at the same commit (`BR-20260817-02`; `VAL-021`, `VAL-022`).
 - `PH-01` — **Passed / Verified (shell scope)**: Next.js App Router application shell implemented with Today, Plans, Create, Progress and Profile navigation; lint, typecheck, unit/component tests, production build and automated Chromium accessibility/keyboard/reflow/reduced-motion checks passed locally (`BR-20260817-04`; `VAL-023`, `VAL-034`). Release support-matrix and manual assistive-technology claims remain unproven.
-- `PH-02` - **In progress / database + Auth/private-profile + readiness-assessment slices locally verified**: pinned Supabase CLI, version-controlled persistence/RLS/concurrency foundations, local Supabase Auth integration, signup/sign-in/sign-out, private-profile persistence, user-visible stale-write conflict handling, versioned readiness-assessment save/resume/completion and conservative safety-flag derivation are implemented and locally verified. Password-recovery delivery/end-to-end recovery, account deletion, export/deletion lifecycle, broader negative application-authorisation coverage and remote deployment remain unproven. Production hosting/data region is not a PH-02 prerequisite.
+- `PH-02` - **In progress / database + Auth/private-profile + readiness-assessment + data-lifecycle slices locally verified**: pinned Supabase CLI, persistence/RLS/concurrency foundations, Auth signup/sign-in/sign-out, private-profile persistence/conflict handling, versioned readiness-assessment save/resume/completion, conservative safety flags, readable current-data export and re-authenticated permanent account deletion are implemented and locally verified. Password-recovery delivery/end-to-end recovery, broader negative application-authorisation coverage, generic correction/production-retention obligations and remote deployment remain unproven. Production hosting/data region is not a PH-02 prerequisite.
 - `PH-03` through `PH-10` - **Proposed**.
 
 ## ID registry
@@ -68,6 +68,7 @@
 - `BR-20260818-02`: PH-02 Auth/private-profile implementation, runtime-concurrency verification and Supabase-internal lint/Git-boundary record.
 - `BR-20260818-03`: PR #6 remote-CI/merge evidence plus non-canonical development-cheatsheet integration and governance-routing record.
 - `BR-20260818-04`: PH-02 readiness-assessment save/resume/safety implementation and isolated local runtime-verification record.
+- `BR-20260818-05`: PH-02 readable data-export/account-deletion implementation and isolated local runtime-verification record.
 
 ## Traceability rule
 For non-trivial implementation: `REQ → scope → architecture/contract → PH/slice → files/surfaces → AC → VAL → status`.

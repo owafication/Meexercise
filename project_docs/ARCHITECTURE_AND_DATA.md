@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 database, Auth/private-profile and readiness-assessment slices implemented/locally verified; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 database, Auth/private-profile, readiness-assessment and data-lifecycle slices implemented/locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -21,7 +21,12 @@ The local browser integration now exercises account signup, sign-in, sign-out, a
 
 Completion derives immutable server-side safety flags from the stored response. Recorded movement limitations produce `restrict_generation`; an answer other than an explicit independent-exercise `yes` or professional-restriction `no` produces `block_generation`, so missing/uncertain readiness fails closed. These outcomes are conservative planning controls only: they do not diagnose, treat, certify medical safety or provide medical clearance. Actual consumption of these flags by later routine generation remains a PH-04 responsibility.
 
-Password-recovery/update delivery, account deletion, export/deletion lifecycle, broader negative application-layer authorisation, remote Supabase and production deployment remain unproven.
+## Implemented PH-02 data-lifecycle slice
+`/profile/account` now exposes authenticated data-export and permanent account-deletion controls. The current readable JSON export contains the authenticated account identifier/email, private profile, assessment responses, derived safety flags, and the referenced assessment-template/version definition needed to interpret historical assessment data. Export responses are private/no-store and are produced only through the authenticated user's server-side data boundary.
+
+Permanent account deletion requires a verified session, current-password re-authentication and an exact typed destructive confirmation before a server-only Supabase administration client deletes the Auth user. Current MeExercise profile, assessment-session and assessment-safety-flag records cascade from that Auth-user deletion. The privileged `SUPABASE_SERVICE_ROLE_KEY` is server-only configuration and is never exposed through a `NEXT_PUBLIC_*` variable or browser client.
+
+Password-recovery/update delivery, broader negative application-layer authorisation, generic correction beyond the currently editable profile fields, production retention obligations/exceptions, remote Supabase and production deployment remain unproven.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.

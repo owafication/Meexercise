@@ -1,6 +1,6 @@
 # Repository and Release
 
-**Status:** Repository/PH-01 verified; PH-02 database and local Auth/private-profile slices verified; production hosting/region unresolved by design
+**Status:** Repository/PH-01 verified; PH-02 database/Auth/profile/assessment/data-lifecycle slices locally verified; production hosting/region unresolved by design
 **Intended repository:** `owafication/Meexercise`
 
 ## Repository baseline
@@ -41,6 +41,8 @@ Do not reimplement specialist security/protocol/standards-heavy functionality me
 ## Configuration/secrets
 Hard-code invariants. Use build/runtime config for demonstrated environment variation. Store user preferences as user state. Use feature flags only for a real rollout/kill-switch/experiment variant, with owner/removal trigger. Secrets never enter source control or public build artefacts.
 
+The PH-02 account-deletion path requires Supabase administrative authority only on the trusted server boundary. Local verification obtains the CLI-provided `SERVICE_ROLE_KEY` and writes it to ignored `.env.local` as `SUPABASE_SERVICE_ROLE_KEY`; it must never be renamed/exposed as `NEXT_PUBLIC_*`, sent to browser code, printed in ordinary verification output or committed. A deployed environment must supply the corresponding privileged secret through its server-side secret/config mechanism before account deletion can operate.
+
 ## CI
 Minimal CI becomes justified after a reproducible scaffold exists and remote validation reduces real risk. Start with clean dependency install/restore, build/type/static checks, and fast deterministic tests actually owned by the repository. Add browser/integration/security/release jobs only when their failure boundary exists. No CI infrastructure is required for this documentation-only pack.
 
@@ -60,7 +62,7 @@ Local Supabase development remains synthetic/non-sensitive until persistent host
 
 Supabase CLI internal/generated state under `supabase/.temp/` and `supabase/.branches/` is excluded from both Git tracking and ESLint discovery. Local-stack startup may generate bundled runtime source under `.temp`; that output is not application source and must not be edited or committed to satisfy lint. This rule prevents generated CLI state from contaminating repository verification.
 
-The PH-02 Auth/profile slice has a dedicated local Playwright integration path in addition to the ordinary application browser suite. Its remote CI execution remains unproven until the branch is pushed and GitHub Actions completes.
+The PH-02 Auth/profile, readiness-assessment and data-lifecycle flows share the dedicated authenticated Playwright integration path in addition to the ordinary application browser suite. The data-lifecycle flow verifies readable export, rejected incorrect-password deletion, successful re-authenticated account deletion and rejected post-deletion sign-in against local Supabase. Remote CI for the current data-lifecycle branch remains unproven until the branch is pushed and GitHub Actions completes.
 
 ## Data operations before real users
 Before irreplaceable shared data becomes production-dependent:

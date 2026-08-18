@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Risk baseline active; PH-02 local private-account/profile/readiness-assessment boundaries partially verified; legal applicability and production exposure unproven
+**Status:** Risk baseline active; PH-02 local private-account/profile/readiness-assessment/data-lifecycle boundaries partially verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule
@@ -27,11 +27,11 @@ Production hosting and physical data region are intentionally deferred until rel
 - **Sensitive data crosses network:** TLS through supported hosting/platform controls.
 - **Untrusted input exists:** validate structure/type/range/size at the trusted boundary; use safe framework/query APIs.
 - **User content renders into executable contexts:** rely on framework escaping/safe rendering; avoid raw injection escapes.
-- **Destructive account/data action:** authorisation plus appropriate review/undo/recovery.
+- **Destructive account/data action:** authorisation plus appropriate review/undo/recovery. Current account deletion requires current-password re-authentication and exact typed confirmation; users are directed to export first because Auth-user deletion and current cascading records are intentionally permanent.
 - **Irreplaceable persisted data:** backup/recovery objective and restore evidence before release dependency.
 
 ## PH-02 local private-data evidence
-Local browser integration verifies signup, sign-in, sign-out, access to the authenticated user's private profile, profile persistence, rejection of a stale concurrent profile write, and the authenticated readiness-assessment save/resume/completion flow. The assessment database slice persists immutable derived safety flags: movement limitations restrict later generation, while uncertain/non-independent readiness or a current professional restriction blocks unrestricted generation and recommends professional input without diagnosis or medical-clearance claims. Database tests cover ownership/RLS, versioning/immutability, assessment start-state enforcement and derived-flag isolation. These checks reduce `RISK-019`, `RISK-027` and part of the safety exposure for the tested paths, but do not prove future routine-generator consumption of flags, all application-layer negative cross-user access, password recovery, account deletion, production transport/configuration, remote exposure or legal/privacy compliance.
+Local browser integration verifies signup/sign-in/sign-out, private-profile persistence and stale-write rejection, readiness-assessment save/resume/completion, readable authenticated JSON export, rejected deletion with an incorrect current password, permanent account deletion after re-authentication plus exact typed confirmation, and rejected sign-in after deletion. Database tests cover ownership/RLS, versioning/immutability, assessment start-state/safety derivation and Auth-user cascade deletion of the current private profile, assessment sessions and assessment safety flags. The account-deletion administrator uses a server-only service-role secret; the browser receives no privileged key. These checks reduce `RISK-019`, `RISK-027` and part of data-lifecycle risk for the tested paths, but do not prove future routine-generator consumption of safety flags, all negative cross-user application access, password recovery, generic correction/retention obligations, production secret handling/transport, remote exposure or legal/privacy compliance.
 
 No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system or complex RBAC is assumed before its threat/contract/exposure requires it.
 
