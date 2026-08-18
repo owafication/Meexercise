@@ -11,7 +11,12 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "test:e2e": "playwright test",
-        "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run test:e2e"
+        "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run test:e2e",
+        "supabase:start": "supabase start",
+        "supabase:stop": "supabase stop",
+        "supabase:status": "supabase status",
+        "db:reset": "supabase db reset",
+        "test:db": "supabase test db"
     },
     "dependencies": {
         "next": "16.3.1",
@@ -30,6 +35,7 @@
         "eslint": "^9",
         "eslint-config-next": "16.3.1",
         "jsdom": "^30.0.1",
+        "supabase": "2.114.0",
         "typescript": "^5",
         "vitest": "^4.1.10"
     }
