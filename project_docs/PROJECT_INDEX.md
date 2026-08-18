@@ -1,8 +1,8 @@
 # Project Index
 
 **Status:** Canonical router v0.2.0  
-**Mode of latest record:** PH-02 identity/persistence database-foundation verification
-**Repository state:** PH-00/PH-01 verified; PH-02 database foundation locally verified with reproducible migration/seed replay and 21 pgTAP assertions; account/profile/assessment UI and remaining PH-02 behaviour are still in progress (`BR-20260818-01`)
+**Mode of latest record:** PH-02 Auth/private-profile local runtime verification
+**Repository state:** PH-00/PH-01 verified; PH-02 database foundation plus the Auth/private-profile slice are locally verified. Signup/sign-in/sign-out, private-profile persistence and stale concurrent-edit rejection passed against isolated local Supabase; assessment, account-deletion, export/deletion lifecycle and remaining PH-02 behaviour are still in progress (`BR-20260818-01`, `BR-20260818-02`).
 
 ## Frozen terminology
 - **MeExercise:** product/repository name.
@@ -47,7 +47,7 @@
 ## Current phase/status
 - `PH-00` — **Passed / Verified**: repository baseline established at `C:\Apps\Meexercise`; canonical v0.2.0 governance integrated and manifest-verified; initial commit `0f3db2b5abda7f4fea6315baa01218dade562caa` published; local `main` and GitHub `main` independently verified at the same commit (`BR-20260817-02`; `VAL-021`, `VAL-022`).
 - `PH-01` — **Passed / Verified (shell scope)**: Next.js App Router application shell implemented with Today, Plans, Create, Progress and Profile navigation; lint, typecheck, unit/component tests, production build and automated Chromium accessibility/keyboard/reflow/reduced-motion checks passed locally (`BR-20260817-04`; `VAL-023`, `VAL-034`). Release support-matrix and manual assistive-technology claims remain unproven.
-- `PH-02` - **In progress / database foundation verified locally**: pinned Supabase CLI, version-controlled schema migration, synthetic seed, RLS ownership policies, optimistic row-version concurrency and published/completed-history immutability are implemented and locally verified. Account lifecycle, profile UI, assessment save/resume/safety flows, export/deletion behaviour, client/server integration and remote deployment remain unproven. Production hosting/data region is not a PH-02 prerequisite.
+- `PH-02` - **In progress / database + Auth/private-profile slices locally verified**: pinned Supabase CLI, version-controlled persistence/RLS/concurrency foundations, local Supabase Auth integration, signup/sign-in/sign-out, private-profile persistence and user-visible stale-write conflict handling are implemented and locally verified. Password-recovery delivery/end-to-end recovery, account deletion, assessment save/resume/safety flows, export/deletion lifecycle, broader negative application-authorisation coverage and remote deployment remain unproven. Production hosting/data region is not a PH-02 prerequisite.
 - `PH-03` through `PH-10` - **Proposed**.
 
 ## ID registry
@@ -65,6 +65,7 @@
 - `BR-20260817-04`: PH-01 application-shell implementation and local validation record.
 - `BR-20260817-05`: PH-02 Supabase identity/persistence selection and production hosting/data-region deferral decision.
 - `BR-20260818-01`: PH-02 database-foundation implementation, isolated local migration/pgTAP verification and database-CI record.
+- `BR-20260818-02`: PH-02 Auth/private-profile implementation, runtime-concurrency verification and Supabase-internal lint/Git-boundary record.
 
 ## Traceability rule
 For non-trivial implementation: `REQ → scope → architecture/contract → PH/slice → files/surfaces → AC → VAL → status`.

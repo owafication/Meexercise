@@ -1,6 +1,6 @@
 # Repository and Release
 
-**Status:** Repository/PH-01 verified; PH-02 Supabase database foundation locally verified; production hosting/region unresolved by design
+**Status:** Repository/PH-01 verified; PH-02 database and local Auth/private-profile slices verified; production hosting/region unresolved by design
 **Intended repository:** `owafication/Meexercise`
 
 ## Repository baseline
@@ -57,6 +57,10 @@ Production web hosting and the production Supabase project/data region are selec
 A Docker-compatible runtime used solely to run Supabase's documented local development stack is a development-tool dependency, not an application deployment architecture decision. Application containers, orchestration, multi-region deployment, autoscaling and permanent staging remain premature until independently justified.
 
 Local Supabase development remains synthetic/non-sensitive until persistent host exposure is explicitly verified. The PH-02 database-foundation verification did not rely on Docker host-port binding: the host default-route adapter was disabled before the local stack was started and Supabase was stopped before external routing was restored. Standard repository Supabase commands remain portable; developers must not interpret them as proof that a normally routed local stack is externally isolated.
+
+Supabase CLI internal/generated state under `supabase/.temp/` and `supabase/.branches/` is excluded from both Git tracking and ESLint discovery. Local-stack startup may generate bundled runtime source under `.temp`; that output is not application source and must not be edited or committed to satisfy lint. This rule prevents generated CLI state from contaminating repository verification.
+
+The PH-02 Auth/profile slice has a dedicated local Playwright integration path in addition to the ordinary application browser suite. Its remote CI execution remains unproven until the branch is pushed and GitHub Actions completes.
 
 ## Data operations before real users
 Before irreplaceable shared data becomes production-dependent:

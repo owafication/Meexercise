@@ -16,9 +16,12 @@
         "supabase:stop": "supabase stop",
         "supabase:status": "supabase status",
         "db:reset": "supabase db reset",
-        "test:db": "supabase test db"
+        "test:db": "supabase test db",
+        "test:e2e:auth": "playwright test --config=playwright.auth.config.ts"
     },
     "dependencies": {
+        "@supabase/ssr": "0.12.4",
+        "@supabase/supabase-js": "2.111.0",
         "next": "16.3.1",
         "react": "19.2.8",
         "react-dom": "19.2.8"

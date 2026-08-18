@@ -44,12 +44,13 @@ jobs:
         run: npm run build
 
   database:
-    name: Database
+    name: Database and auth integration
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       SUPABASE_TELEMETRY_DISABLED: "1"
       DO_NOT_TRACK: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
       - name: Check out repository
@@ -65,11 +66,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Start local database
-        run: npx supabase db start
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start local Supabase
+        run: |
+          if ! npm run supabase:start >/tmp/meexercise-supabase-start.log 2>&1; then
+            echo "Supabase local stack failed to start."
+            exit 1
+          fi
+
+      - name: Write local application environment
+        run: node scripts/write-local-supabase-env.mjs
 
       - name: Replay migrations and synthetic seed
         run: npm run db:reset
 
       - name: Run pgTAP database tests
         run: npm run test:db
+
+      - name: Run auth and profile integration
+        run: npm run test:e2e:auth
+
+      - name: Stop local Supabase
+        if: always()
+        run: npm run supabase:stop
