@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell routes plus PH-02 Auth/private-profile/readiness-assessment/data-lifecycle routes implemented locally; later feature-route paths remain proposed
+**Status:** PH-01 shell routes plus PH-02 Auth/private-profile/readiness-assessment/data-lifecycle/password-recovery routes implemented locally; later feature-route paths remain proposed
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -59,7 +59,7 @@ PH-02 also establishes account-support URLs under the existing onboarding/accoun
 - data/account controls → `/profile/account`;
 - authenticated JSON data export → `/profile/export`.
 
-Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion and rejected post-deletion sign-in are locally browser-verified. Password-recovery delivery/update is not yet end-to-end verified. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation.
+Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in and captured-email password recovery/update are locally browser-verified. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery remains unproven.
 
 Unimplemented route URL syntax remains deferred until its owning capability exists. Route semantics and stable record IDs remain the contract.
 

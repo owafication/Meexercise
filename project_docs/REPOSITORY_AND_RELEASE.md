@@ -1,6 +1,6 @@
 # Repository and Release
 
-**Status:** Repository/PH-01 verified; PH-02 database/Auth/profile/assessment/data-lifecycle slices locally verified; production hosting/region unresolved by design
+**Status:** Repository/PH-01 verified; PH-02 database/Auth/profile/assessment/data-lifecycle/password-recovery slices locally verified; production hosting/region unresolved by design
 **Intended repository:** `owafication/Meexercise`
 
 ## Repository baseline
@@ -62,7 +62,7 @@ Local Supabase development remains synthetic/non-sensitive until persistent host
 
 Supabase CLI internal/generated state under `supabase/.temp/` and `supabase/.branches/` is excluded from both Git tracking and ESLint discovery. Local-stack startup may generate bundled runtime source under `.temp`; that output is not application source and must not be edited or committed to satisfy lint. This rule prevents generated CLI state from contaminating repository verification.
 
-The PH-02 Auth/profile, readiness-assessment and data-lifecycle flows share the dedicated authenticated Playwright integration path in addition to the ordinary application browser suite. The data-lifecycle flow verifies readable export, rejected incorrect-password deletion, successful re-authenticated account deletion and rejected post-deletion sign-in against local Supabase. Remote CI for the current data-lifecycle branch remains unproven until the branch is pushed and GitHub Actions completes.
+The PH-02 Auth/profile, readiness-assessment and data-lifecycle slices are merged to `main` at `8cb0719c030508a82d2eabd6c342c3966268a0c4`. Those flows and the current password-recovery slice share the dedicated authenticated Playwright integration path in addition to the ordinary application browser suite. Password-recovery verification uses the local Supabase Mailpit capture service and a version-controlled recovery template, follows the real recovery link on the canonical local application origin, changes the credential and verifies old-password rejection plus replacement-password acceptance. This proves the local Auth/recovery contract only; production SMTP/provider/domain delivery remains unproven. Remote CI for the current password-recovery branch remains unproven until the branch is pushed and GitHub Actions completes.
 
 ## Data operations before real users
 Before irreplaceable shared data becomes production-dependent:
