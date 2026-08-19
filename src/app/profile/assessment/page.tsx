@@ -100,7 +100,9 @@ export default async function ReadinessAssessmentPage() {
       {state.kind === "authenticated" &&
       state.session?.status === "in_progress" ? (
         <section className="card" aria-labelledby="assessment-form-title">
-          <p className="status-label">In progress</p>
+          <p className="status-label">
+            {state.session.correctsSessionId ? "Correction in progress" : "In progress"}
+          </p>
           <h2 id="assessment-form-title">{state.session.version.title}</h2>
           <p>
             Version {state.session.version.versionNumber}. Save at any point and
@@ -118,16 +120,28 @@ export default async function ReadinessAssessmentPage() {
       {completedSession ? (
         <div className="card-grid">
           <section className="card" aria-labelledby="assessment-complete-title">
-            <p className="status-label">Assessment completed</p>
+            <p className="status-label">
+              {completedSession.correctsSessionId
+                ? "Corrected assessment completed"
+                : "Assessment completed"}
+            </p>
             <h2 id="assessment-complete-title">
               {completedSession.version.title}
             </h2>
             <p>
               Version {completedSession.version.versionNumber}, completed{" "}
-              {completedDate(completedSession.completedAt)}. This completed
-              response is retained as historical context.
+              {completedDate(completedSession.completedAt)}.{" "}
+              {completedSession.correctsSessionId
+                ? "This corrected record is now the latest completed assessment; the earlier completed record remains in your history."
+                : "This completed response is retained as historical context."}
             </p>
-            <AssessmentStartForm label="Start another assessment" />
+            <div className="action-row">
+              <AssessmentStartForm
+                label="Correct this assessment"
+                correctsSessionId={completedSession.id}
+              />
+              <AssessmentStartForm label="Start another assessment" />
+            </div>
           </section>
 
           <section

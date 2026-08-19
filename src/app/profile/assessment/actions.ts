@@ -113,6 +113,78 @@ export async function startAssessmentAction(
   redirect("/profile/assessment");
 }
 
+export async function startAssessmentCorrectionAction(
+  _previousState: AssessmentStartState,
+  formData: FormData,
+): Promise<AssessmentStartState> {
+  const sourceSessionId = validUuid(formData.get("correctsSessionId"));
+
+  if (!sourceSessionId) {
+    return {
+      status: "error",
+      message: "The completed assessment to correct is invalid. Reload and try again.",
+    };
+  }
+
+  let supabase;
+
+  try {
+    supabase = await createClient();
+  } catch {
+    return {
+      status: "error",
+      message: "Assessment services are not available right now.",
+    };
+  }
+
+  const userId = await getVerifiedUserId(supabase);
+
+  if (!userId) {
+    return {
+      status: "error",
+      message: "Your session has expired. Sign in again to correct an assessment.",
+    };
+  }
+
+  const { data: source, error: sourceError } = await supabase
+    .from("assessment_sessions")
+    .select("id,template_version_id,responses")
+    .eq("id", sourceSessionId)
+    .eq("user_id", userId)
+    .eq("status", "completed")
+    .maybeSingle();
+
+  if (sourceError || !source) {
+    return {
+      status: "error",
+      message: "The completed assessment to correct is not available.",
+    };
+  }
+
+  const { error } = await supabase.from("assessment_sessions").insert({
+    user_id: userId,
+    template_version_id: source.template_version_id,
+    responses: source.responses,
+    corrects_session_id: source.id,
+  });
+
+  if (error) {
+    if (error.code === "23505") {
+      return {
+        status: "error",
+        message: "Another assessment is already in progress. Reload before starting a correction.",
+      };
+    }
+
+    return {
+      status: "error",
+      message: "The assessment correction could not be started right now.",
+    };
+  }
+
+  revalidatePath("/profile/assessment");
+  redirect("/profile/assessment");
+}
 export async function saveAssessmentAction(
   previousState: AssessmentActionState,
   formData: FormData,

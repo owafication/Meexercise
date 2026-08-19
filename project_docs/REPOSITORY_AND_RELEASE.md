@@ -1,6 +1,6 @@
 # Repository and Release
 
-**Status:** Repository/PH-01 verified; PH-02 database/Auth/profile/assessment/data-lifecycle/password-recovery plus current negative cross-user application boundary locally verified; production hosting/region unresolved by design
+**Status:** Repository/PH-01 verified; PH-02 implementation locally complete through data correction/primary deletion; final correction branch remote CI/merge pending; production hosting/region unresolved by design
 **Intended repository:** `owafication/Meexercise`
 
 ## Repository baseline
@@ -62,7 +62,7 @@ Local Supabase development remains synthetic/non-sensitive until persistent host
 
 Supabase CLI internal/generated state under `supabase/.temp/` and `supabase/.branches/` is excluded from both Git tracking and ESLint discovery. Local-stack startup may generate bundled runtime source under `.temp`; that output is not application source and must not be edited or committed to satisfy lint. This rule prevents generated CLI state from contaminating repository verification.
 
-PH-02 Auth/profile, readiness-assessment, data-lifecycle and password-recovery are merged to `main` at `0328cb86af067384dc02de95b2ac201820b215a2`. PR #10 remote CI run #15 (`32198071648`) passed both `Verify` and `Database and auth integration` for exact head `e6c7828237f6cb371ef2d1e3e89d26afee9dd2eb` before that merge. The dedicated authenticated Playwright path now also includes a test-only two-user negative-authorisation scenario for current private profile, assessment mutation and export surfaces. Password-recovery local verification uses Supabase Mailpit and a version-controlled recovery template; production SMTP/provider/domain delivery remains unproven. Remote CI for the current authorization-boundary branch remains unproven until this test-only branch is pushed and GitHub Actions completes.
+PH-02 Auth/profile, readiness-assessment, data-lifecycle, password-recovery and negative cross-user authorisation are merged to `main` at `bb4279fd4c6ddbc2c6ba47b3f610cfc7a25fc9c8`. PR #11 exact-head CI run #17 (`32210117707`) passed both `Verify` and `Database and auth integration` for `092caac07d4bd9ccb9fc3a9d666dc704b1e1f408` before merge. The final data-correction slice is locally verified on `agent/ph02-data-correction`: export schema v2, linked completed-assessment correction, current-password/new-address-confirmed account email correction, correction-chain cascade deletion, migration replay, complete pgTAP and six authenticated browser flows all passed under the established local network-isolation harness. Password recovery and email-change delivery use local Mailpit only; production SMTP/provider/domain delivery and production backup-retention behaviour remain unproven. Remote CI for `agent/ph02-data-correction` remains unproven until this exact source/governance head is pushed and GitHub Actions completes.
 
 ## Data operations before real users
 Before irreplaceable shared data becomes production-dependent:

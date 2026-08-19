@@ -35,6 +35,7 @@ export type AssessmentSessionSnapshot = {
   answers: ReadinessAssessmentAnswers;
   updatedAt: string;
   completedAt: string | null;
+  correctsSessionId: string | null;
   safetyFlags: AssessmentSafetyFlag[];
 };
 
@@ -117,7 +118,7 @@ export async function getReadinessAssessmentPageState(): Promise<ReadinessAssess
     const { data: inProgress, error: inProgressError } = await supabase
       .from("assessment_sessions")
       .select(
-        "id,template_version_id,status,responses,row_version,updated_at,completed_at",
+        "id,template_version_id,status,responses,row_version,updated_at,completed_at,corrects_session_id",
       )
       .eq("user_id", userId)
       .eq("status", "in_progress")
@@ -151,6 +152,9 @@ export async function getReadinessAssessmentPageState(): Promise<ReadinessAssess
           answers: parseStoredReadinessAnswers(inProgress.responses),
           updatedAt: String(inProgress.updated_at),
           completedAt: null,
+          correctsSessionId: inProgress.corrects_session_id
+            ? String(inProgress.corrects_session_id)
+            : null,
           safetyFlags: [],
         },
       };
@@ -159,7 +163,7 @@ export async function getReadinessAssessmentPageState(): Promise<ReadinessAssess
     const { data: completed, error: completedError } = await supabase
       .from("assessment_sessions")
       .select(
-        "id,template_version_id,status,responses,row_version,updated_at,completed_at",
+        "id,template_version_id,status,responses,row_version,updated_at,completed_at,corrects_session_id",
       )
       .eq("user_id", userId)
       .eq("status", "completed")
@@ -212,6 +216,9 @@ export async function getReadinessAssessmentPageState(): Promise<ReadinessAssess
         updatedAt: String(completed.updated_at),
         completedAt: completed.completed_at
           ? String(completed.completed_at)
+          : null,
+        correctsSessionId: completed.corrects_session_id
+          ? String(completed.corrects_session_id)
           : null,
         safetyFlags: (safetyFlags ?? []).map((flag) => ({
           flagCode: flag.flag_code as AssessmentSafetyFlag["flagCode"],
