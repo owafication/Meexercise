@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 implementation locally complete through data correction/primary deletion; final correction publication/remote CI pending; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 current identity/private-data foundation Passed / Verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 

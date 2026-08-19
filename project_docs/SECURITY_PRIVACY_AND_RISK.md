@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Risk baseline active; PH-02 implemented private-account/profile/readiness-assessment/data-lifecycle/password-recovery/correction and negative cross-user application boundaries locally verified; final correction publication pending; legal applicability and production exposure unproven
+**Status:** Risk baseline active; PH-02 current private-account/profile/readiness-assessment/data-lifecycle/password-recovery/correction and negative cross-user boundaries Passed / Verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule

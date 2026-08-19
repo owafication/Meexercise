@@ -51,6 +51,7 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 | `BR-20260817-04` | 2026-08-17 | Application implementation | PH-01 shell implemented on `agent/ph01-shell`; selected toolchain and shell routes recorded; local lint/typecheck/unit/build/Chromium accessibility validation passed. Remote CI/publication remains separately observable through the PR. |
 | `BR-20260817-05` | 2026-08-17 | PH-02 architecture decision | Accepted Supabase Auth/PostgreSQL for identity/persistence and changed the deployment gate so production hosting/data region is selected at release readiness rather than blocking application construction. No PH-02 runtime implementation or production infrastructure is claimed by this governance change. |
 | `BR-20260819-03` | 2026-08-19 | PH-02 data-correction implementation | Locally verified linked immutable-history correction, export v2 correction linkage, current-password/new-address-confirmed account-email correction and primary-record cascade deletion. Final remote CI/merge and canonical phase closure remain separate evidence. |
+| `BR-20260819-04` | 2026-08-19 | PH-02 phase closure | Exact-head GitHub Actions run #19 completed successfully after an infrastructure-only Chromium-install cancellation/retry; PR #12 merged as `3a6c24c97f98df374f4b9ecd6ff59e826acecb07`; PH-02 current identity/private-data foundation is Passed / Verified while production/legal/release gates remain deferred. |
 
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
