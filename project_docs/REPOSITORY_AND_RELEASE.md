@@ -1,6 +1,6 @@
 # Repository and Release
 
-**Status:** Repository/PH-01 verified; PH-02 implementation locally complete through data correction/primary deletion; final correction branch remote CI/merge pending; production hosting/region unresolved by design
+**Status:** Repository/PH-01/PH-02 verified for current scope; production hosting/region unresolved by design
 **Intended repository:** `owafication/Meexercise`
 
 ## Repository baseline
@@ -62,7 +62,7 @@ Local Supabase development remains synthetic/non-sensitive until persistent host
 
 Supabase CLI internal/generated state under `supabase/.temp/` and `supabase/.branches/` is excluded from both Git tracking and ESLint discovery. Local-stack startup may generate bundled runtime source under `.temp`; that output is not application source and must not be edited or committed to satisfy lint. This rule prevents generated CLI state from contaminating repository verification.
 
-PH-02 Auth/profile, readiness-assessment, data-lifecycle, password-recovery and negative cross-user authorisation are merged to `main` at `bb4279fd4c6ddbc2c6ba47b3f610cfc7a25fc9c8`. PR #11 exact-head CI run #17 (`32210117707`) passed both `Verify` and `Database and auth integration` for `092caac07d4bd9ccb9fc3a9d666dc704b1e1f408` before merge. The final data-correction slice is locally verified on `agent/ph02-data-correction`: export schema v2, linked completed-assessment correction, current-password/new-address-confirmed account email correction, correction-chain cascade deletion, migration replay, complete pgTAP and six authenticated browser flows all passed under the established local network-isolation harness. Password recovery and email-change delivery use local Mailpit only; production SMTP/provider/domain delivery and production backup-retention behaviour remain unproven. Remote CI for `agent/ph02-data-correction` remains unproven until this exact source/governance head is pushed and GitHub Actions completes.
+PH-02 Auth/profile, readiness-assessment, data-lifecycle, password-recovery, negative cross-user authorisation and data-correction/primary-retention slices are merged to `main` at `3a6c24c97f98df374f4b9ecd6ff59e826acecb07`. PR #12 exact feature head `10b5841bb9ea82e274c98a13e1bbf9ca0553249d` retained the verified 24-file publication scope. GitHub Actions CI run #19 (`32227451589`) initially suffered a runner/package-mirror cancellation while installing Chromium dependencies, then the current rerun attempt completed successfully on the same exact feature head with both `Verify` and `Database and auth integration` passed, including local Supabase startup, migration/seed replay, pgTAP and authenticated browser integration. PR #12 was marked ready and merged with an exact-head guard; merge parents were verified as base `bb4279fd4c6ddbc2c6ba47b3f610cfc7a25fc9c8` plus feature `10b5841bb9ea82e274c98a13e1bbf9ca0553249d`, and local/remote `main` were synchronized to the merge. Password recovery and email-change delivery remain locally verified through Mailpit only; production SMTP/provider/domain delivery and production backup-retention behaviour remain unproven.
 
 ## Data operations before real users
 Before irreplaceable shared data becomes production-dependent:
