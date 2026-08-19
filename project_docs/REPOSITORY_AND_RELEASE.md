@@ -1,6 +1,6 @@
 # Repository and Release
 
-**Status:** Repository/PH-01 verified; PH-02 database/Auth/profile/assessment/data-lifecycle/password-recovery slices locally verified; production hosting/region unresolved by design
+**Status:** Repository/PH-01 verified; PH-02 database/Auth/profile/assessment/data-lifecycle/password-recovery plus current negative cross-user application boundary locally verified; production hosting/region unresolved by design
 **Intended repository:** `owafication/Meexercise`
 
 ## Repository baseline
@@ -62,7 +62,7 @@ Local Supabase development remains synthetic/non-sensitive until persistent host
 
 Supabase CLI internal/generated state under `supabase/.temp/` and `supabase/.branches/` is excluded from both Git tracking and ESLint discovery. Local-stack startup may generate bundled runtime source under `.temp`; that output is not application source and must not be edited or committed to satisfy lint. This rule prevents generated CLI state from contaminating repository verification.
 
-The PH-02 Auth/profile, readiness-assessment and data-lifecycle slices are merged to `main` at `8cb0719c030508a82d2eabd6c342c3966268a0c4`. Those flows and the current password-recovery slice share the dedicated authenticated Playwright integration path in addition to the ordinary application browser suite. Password-recovery verification uses the local Supabase Mailpit capture service and a version-controlled recovery template, follows the real recovery link on the canonical local application origin, changes the credential and verifies old-password rejection plus replacement-password acceptance. This proves the local Auth/recovery contract only; production SMTP/provider/domain delivery remains unproven. Remote CI for the current password-recovery branch remains unproven until the branch is pushed and GitHub Actions completes.
+PH-02 Auth/profile, readiness-assessment, data-lifecycle and password-recovery are merged to `main` at `0328cb86af067384dc02de95b2ac201820b215a2`. PR #10 remote CI run #15 (`32198071648`) passed both `Verify` and `Database and auth integration` for exact head `e6c7828237f6cb371ef2d1e3e89d26afee9dd2eb` before that merge. The dedicated authenticated Playwright path now also includes a test-only two-user negative-authorisation scenario for current private profile, assessment mutation and export surfaces. Password-recovery local verification uses Supabase Mailpit and a version-controlled recovery template; production SMTP/provider/domain delivery remains unproven. Remote CI for the current authorization-boundary branch remains unproven until this test-only branch is pushed and GitHub Actions completes.
 
 ## Data operations before real users
 Before irreplaceable shared data becomes production-dependent:

@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 database, Auth/private-profile, readiness-assessment, data-lifecycle and password-recovery slices implemented/locally verified; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 database, Auth/private-profile, readiness-assessment, data-lifecycle and password-recovery slices implemented/locally verified; current private application authorisation boundary adversarially verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -31,7 +31,12 @@ Password-reset requests remain privacy-preserving and do not disclose whether an
 
 The authenticated password-update action reuses the existing server-side identity boundary and updates the current user's password only after the recovery session is established. Local browser integration captures the real local Auth email in Mailpit, follows its recovery link, verifies the recovery session reaches the update form, changes the password, signs out, rejects the old password and accepts the replacement password.
 
-Broader negative application-layer authorisation, generic correction beyond the currently editable profile fields, production retention obligations/exceptions, production SMTP/deliverability, remote Supabase and production deployment remain unproven.
+## Verified PH-02 application authorisation boundary
+Two independent authenticated browser contexts now exercise the currently implemented private surfaces adversarially. User B receives User A's real in-progress assessment session UUID and row version, tampers its own submitted hidden identifiers to target that record, and the server mutation returns the existing conflict/fail-closed result because the write also requires the authenticated User B ownership predicate. User A's assessment remains unchanged. Separate profile and export assertions verify each authenticated user sees/exports only their own current profile and assessment content.
+
+This adds no new authorisation abstraction or product code: it verifies the existing trusted-user derivation, explicit application ownership predicates and database RLS defence-in-depth for the implemented PH-02 surfaces. Future modules require their own mapped ownership tests when introduced.
+
+Generic correction beyond the currently editable profile fields and the retention contract under `REQ-038` remain unresolved. Production SMTP/deliverability, remote Supabase and production deployment remain outside this local PH-02 evidence.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.
