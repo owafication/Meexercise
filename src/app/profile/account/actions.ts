@@ -9,8 +9,16 @@ import {
   hasAccountDeletionFieldErrors,
   parseAccountDeletionForm,
 } from "@/modules/identity/account-lifecycle";
+import {
+  isValidEmail,
+  normalizeEmail,
+  readText,
+} from "@/modules/identity/validation";
 
-import type { AccountDeletionActionState } from "./state";
+import type {
+  AccountDeletionActionState,
+  AccountEmailChangeActionState,
+} from "./state";
 
 function deletionUnavailable(
   fieldErrors?: AccountDeletionActionState["fieldErrors"],
@@ -20,6 +28,107 @@ function deletionUnavailable(
     message:
       "Account deletion could not be completed right now. Your account has not been deleted.",
     fieldErrors,
+  };
+}
+
+export async function requestAccountEmailChangeAction(
+  _previousState: AccountEmailChangeActionState,
+  formData: FormData,
+): Promise<AccountEmailChangeActionState> {
+  const newEmail = normalizeEmail(formData.get("newEmail"));
+  const currentPassword = readText(formData.get("currentPassword"));
+  const fieldErrors: NonNullable<
+    AccountEmailChangeActionState["fieldErrors"]
+  > = {};
+
+  if (!isValidEmail(newEmail)) {
+    fieldErrors.newEmail = "Enter a valid new email address.";
+  }
+
+  if (!currentPassword) {
+    fieldErrors.currentPassword =
+      "Enter your current password to confirm this account change.";
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return {
+      status: "error",
+      message: "Check the highlighted fields.",
+      fieldErrors,
+    };
+  }
+
+  let supabase;
+
+  try {
+    supabase = await createClient();
+  } catch {
+    return {
+      status: "error",
+      message: "Account email could not be changed right now.",
+    };
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user?.email) {
+    return {
+      status: "error",
+      message: "Your session has expired. Sign in again before changing email.",
+    };
+  }
+
+  const currentEmail = normalizeEmail(user.email);
+
+  if (newEmail === currentEmail) {
+    return {
+      status: "error",
+      message: "Check the highlighted field.",
+      fieldErrors: {
+        newEmail: "Enter a different email address.",
+      },
+    };
+  }
+
+  const { data: reauthenticated, error: passwordError } =
+    await supabase.auth.signInWithPassword({
+      email: currentEmail,
+      password: currentPassword,
+    });
+
+  if (
+    passwordError ||
+    !reauthenticated.user ||
+    reauthenticated.user.id !== user.id
+  ) {
+    return {
+      status: "error",
+      message: "Password was not accepted.",
+      fieldErrors: {
+        currentPassword: "Enter the current password for this account.",
+      },
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    email: newEmail,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message:
+        "Email change could not be requested. Check the address and try again.",
+    };
+  }
+
+  return {
+    status: "success",
+    message:
+      "Check your new email address and confirm the change from that message.",
   };
 }
 

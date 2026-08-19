@@ -6,7 +6,11 @@ import {
   getRequiredSupabasePublicConfig,
 } from "@/lib/supabase/config";
 
-const allowedNextPaths = new Set(["/profile", "/auth/update-password"]);
+const allowedNextPaths = new Set([
+  "/profile",
+  "/profile/account",
+  "/auth/update-password",
+]);
 
 function redirectResponse(url: URL) {
   const response = NextResponse.redirect(url);
@@ -62,6 +66,9 @@ export async function GET(request: NextRequest) {
       ? requestedNext
       : "/profile";
 
+  const emailOtpType =
+    type === "recovery" || type === "email_change" ? type : null;
+
   let siteUrl: string;
 
   try {
@@ -70,7 +77,7 @@ export async function GET(request: NextRequest) {
     return callbackFailure(request, "unavailable");
   }
 
-  if (!code && !(tokenHash && type === "recovery")) {
+  if (!code && !(tokenHash && emailOtpType)) {
     return callbackFailure(request, "invalid", siteUrl);
   }
 
@@ -79,10 +86,10 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createCallbackClient(request, response);
 
-    if (tokenHash && type === "recovery") {
+    if (tokenHash && emailOtpType) {
       const { error } = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
-        type: "recovery",
+        type: emailOtpType,
       });
 
       if (error) {

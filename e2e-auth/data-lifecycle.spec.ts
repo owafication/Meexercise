@@ -71,7 +71,7 @@ test("user can export current data and permanently delete the account", async ({
   const exportText = await readDownloadText(download);
   const exported = JSON.parse(exportText);
 
-  expect(exported.exportVersion).toBe(1);
+  expect(exported.exportVersion).toBe(2);
   expect(exported.account.email).toBe(email);
   expect(exported.profile.displayName).toBe("Lifecycle Test User");
   expect(exported.assessments).toHaveLength(1);
@@ -90,7 +90,7 @@ test("user can export current data and permanently delete the account", async ({
     ),
   ).toBe(true);
 
-  await page.getByLabel("Current password").fill("WrongLifecycle!1234");
+  await page.getByLabel("Current password", { exact: true }).fill("WrongLifecycle!1234");
   await page
     .getByLabel("Type DELETE MY ACCOUNT to confirm")
     .fill("DELETE MY ACCOUNT");
@@ -102,7 +102,7 @@ test("user can export current data and permanently delete the account", async ({
     page.getByRole("alert").filter({ hasText: "Password was not accepted." }),
   ).toHaveText("Password was not accepted.");
 
-  await page.getByLabel("Current password").fill(password);
+  await page.getByLabel("Current password", { exact: true }).fill(password);
   await page
     .getByLabel("Type DELETE MY ACCOUNT to confirm")
     .fill("DELETE MY ACCOUNT");

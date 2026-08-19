@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 database, Auth/private-profile, readiness-assessment, data-lifecycle and password-recovery slices implemented/locally verified; current private application authorisation boundary adversarially verified; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 implementation locally complete through data correction/primary deletion; final correction publication/remote CI pending; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -36,7 +36,14 @@ Two independent authenticated browser contexts now exercise the currently implem
 
 This adds no new authorisation abstraction or product code: it verifies the existing trusted-user derivation, explicit application ownership predicates and database RLS defence-in-depth for the implemented PH-02 surfaces. Future modules require their own mapped ownership tests when introduced.
 
-Generic correction beyond the currently editable profile fields and the retention contract under `REQ-038` remain unresolved. Production SMTP/deliverability, remote Supabase and production deployment remain outside this local PH-02 evidence.
+## Implemented PH-02 correction and primary-retention boundary
+`REQ-038` is implemented for the user-owned record types that exist in PH-02 without weakening historical immutability. Current profile data and in-progress assessment answers remain ordinary editable records. A completed assessment is never rewritten: correction starts a new assessment session linked by `corrects_session_id` to the completed predecessor, copies the predecessor answers, preserves the exact template version, and allows the user to edit/complete the successor. The predecessor remains immutable historical context and export version 2 includes the correction relationship.
+
+The current account email can be corrected through the authenticated account boundary. The user re-enters the current password, Supabase Auth accepts the requested new address, and the new address must confirm ownership before the account email changes. The local provider configuration uses new-address confirmation; a production deployment may adopt stricter confirmation settings if required by its accepted security/privacy contract.
+
+Current PH-02 primary records have no speculative time-based retention rule. Permanent account deletion removes the Auth user and cascades through the profile, original/corrected assessment sessions and derived safety flags. This is the implemented primary-datastore deletion contract, not a claim about production backups or legal retention exceptions. Backup retention, statutory exceptions, jurisdiction applicability, remote Supabase and production deployment remain PH-10 release gates.
+
+Future PH-03+ domains must extend export/correction/deletion coverage for their own user-owned records rather than treating this PH-02 evidence as automatic coverage.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.

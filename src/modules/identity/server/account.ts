@@ -16,7 +16,7 @@ export type UserDataExportResult =
   | {
       kind: "ok";
       data: {
-        exportVersion: 1;
+        exportVersion: 2;
         generatedAt: string;
         account: {
           id: string;
@@ -37,6 +37,7 @@ export type UserDataExportResult =
           startedAt: string;
           updatedAt: string;
           completedAt: string | null;
+          correctsSessionId: string | null;
           responses: unknown;
           templateVersion: {
             id: string;
@@ -115,7 +116,7 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
     const { data: sessions, error: sessionsError } = await supabase
       .from("assessment_sessions")
       .select(
-        "id,template_version_id,status,responses,row_version,started_at,updated_at,completed_at",
+        "id,template_version_id,status,responses,row_version,started_at,updated_at,completed_at,corrects_session_id",
       )
       .eq("user_id", userId)
       .order("started_at", { ascending: true });
@@ -232,6 +233,9 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
         completedAt: session.completed_at
           ? String(session.completed_at)
           : null,
+        correctsSessionId: session.corrects_session_id
+          ? String(session.corrects_session_id)
+          : null,
         responses: session.responses,
         templateVersion: {
           id: String(version.id),
@@ -252,7 +256,7 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
     return {
       kind: "ok",
       data: {
-        exportVersion: 1,
+        exportVersion: 2,
         generatedAt: new Date().toISOString(),
         account: {
           id: user.id,
