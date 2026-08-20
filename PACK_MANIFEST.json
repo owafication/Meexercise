@@ -1,6 +1,6 @@
 {
     "packVersion":  "0.2.0",
-    "record":  "BR-20260820-02",
+    "record":  "BR-20260820-03",
     "files":  [
                   {
                       "path":  ".gitattributes",
@@ -29,8 +29,8 @@
                   },
                   {
                       "path":  "project_docs/ARCHITECTURE_AND_DATA.md",
-                      "bytes":  15970,
-                      "sha256":  "973ba73137fb56947f21cd488d043eaadda46c42303c053dbd59ebd275fed116"
+                      "bytes":  15948,
+                      "sha256":  "cac3fdef86747e314483edae2fcdd2756000887a39aca1f51321d494935aceef"
                   },
                   {
                       "path":  "project_docs/DEBUGGING_AND_MAINTENANCE.md",
@@ -39,8 +39,8 @@
                   },
                   {
                       "path":  "project_docs/DECISIONS_AND_HISTORY.md",
-                      "bytes":  9837,
-                      "sha256":  "727c29add222cc4e218b2a8357bd7e4f92f7c4186ab33e8dabd420562b664192"
+                      "bytes":  10241,
+                      "sha256":  "e2f78eb8c76907386c957386230068653a62fff5baf2763633f647718bef15aa"
                   },
                   {
                       "path":  "project_docs/IMPLEMENTATION_PLAN.md",
@@ -54,8 +54,8 @@
                   },
                   {
                       "path":  "project_docs/PROJECT_INDEX.md",
-                      "bytes":  11203,
-                      "sha256":  "9c3699059c875074ff7023448fce8ca1fa735c4bb117356ae46ef2858a2b9716"
+                      "bytes":  11328,
+                      "sha256":  "ba80591ee0f741b34c6d3e86e0c2434a03066d7504c9194765f656c142f88ba3"
                   },
                   {
                       "path":  "project_docs/REPOSITORY_AND_RELEASE.md",
@@ -74,8 +74,8 @@
                   },
                   {
                       "path":  "project_docs/VALIDATION_AND_EVIDENCE.md",
-                      "bytes":  38659,
-                      "sha256":  "731adef6077f392d3279b0d2df4856e8d83d99fa6630424d2756aad1870470fd"
+                      "bytes":  42016,
+                      "sha256":  "66764b182e57c042e9a4b07a849c6ce548d3fb9b8c4c4ba8dbffcfee9986a4c6"
                   }
               ]
 }
