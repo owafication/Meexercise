@@ -1,8 +1,8 @@
 # Project Index
 
 **Status:** Canonical router v0.2.0  
-**Mode of latest record:** PH-02 exact-head CI/merge and phase closure verification
-**Repository state:** PH-00/PH-01/PH-02 verified. PR #12 published the final PH-02 data-correction/primary-retention slice from exact head `10b5841bb9ea82e274c98a13e1bbf9ca0553249d`; GitHub Actions CI run #19 (`32227451589`) completed successfully on its current attempt with both `Verify` and `Database and auth integration` passed; PR #12 merged as `3a6c24c97f98df374f4b9ecd6ff59e826acecb07`, and local/remote `main` were verified synchronized to that merge. Production legal applicability, backup retention/exceptions, hosting/data region and release behaviour remain PH-10 gates (`BR-20260818-01`–`BR-20260819-04`).
+**Mode of latest record:** PH-03 exercise-content first-slice implementation and local runtime verification
+**Repository state:** PH-00/PH-01/PH-02 are verified on merged `main`; the PH-02 governance-closure PR #13 merged as `22f0c923c46ae3be8cdd4c7b405afcc94314dfeb`. The first PH-03 exercise-content slice is locally runtime-verified on `agent/ph03-exercise-library` from that exact base: stable/versioned exercise content, publication visibility, immutable finalised instruction semantics, source-version relationships and read-only `/exercises` library/detail routes. Exact-head remote CI/merge for PH-03 remains unproven; synthetic local exercise records are test/development content only and are not claimed as a production-reviewed catalogue. Production legal/privacy/recovery/release gates remain PH-10 (`BR-20260820-01`).
 
 ## Frozen terminology
 - **MeExercise:** product/repository name.
@@ -48,7 +48,8 @@
 - `PH-00` — **Passed / Verified**: repository baseline established at `C:\Apps\Meexercise`; canonical v0.2.0 governance integrated and manifest-verified; initial commit `0f3db2b5abda7f4fea6315baa01218dade562caa` published; local `main` and GitHub `main` independently verified at the same commit (`BR-20260817-02`; `VAL-021`, `VAL-022`).
 - `PH-01` — **Passed / Verified (shell scope)**: Next.js App Router application shell implemented with Today, Plans, Create, Progress and Profile navigation; lint, typecheck, unit/component tests, production build and automated Chromium accessibility/keyboard/reflow/reduced-motion checks passed locally (`BR-20260817-04`; `VAL-023`, `VAL-034`). Release support-matrix and manual assistive-technology claims remain unproven.
 - `PH-02` - **Passed / Verified (current identity/private-data foundation scope)**: identity/private-profile, server-authoritative persistence/RLS/concurrency, versioned readiness assessment, conservative safety flags, password recovery, negative cross-user authorisation, readable export, correction and permanent primary-record deletion are implemented and verified through local isolated runtime evidence plus exact-head GitHub CI/merge evidence. Current profile/in-progress assessment data can be corrected in place; completed assessments are corrected through linked successors on the same immutable template version; account email correction requires current-password re-authentication and confirmation at the new address; export v2 preserves correction linkage; account deletion cascades through source/correction records. This phase result does not prove production legal applicability, backup retention/exceptions, hosted production Supabase, production hosting/data region, release smoke/rollback, or future PH-03+ data-lifecycle coverage; those remain owned by their later phases/gates.
-- `PH-03` through `PH-10` - **Proposed**.
+- `PH-03` — **In progress / first slice locally Passed / Verified**: stable exercise identities, versioned structured instructions, governed publication states, immutable finalised instructional semantics, version-owned substitution/regression/progression/equipment-alternative relationships and read-only `/exercises` browse/detail surfaces are implemented and locally verified. Synthetic seed records prove mechanics only. `REQ-012` historic routine exact-version retention remains a PH-04 consumer contract; exact-head remote CI/merge and broader PH-03 content/editorial completion remain unproven.
+- `PH-04` through `PH-10` - **Proposed**.
 
 ## ID registry
 - `REQ-001`–`REQ-052`: retained from prior MeExercise foundation; canonical in PRODUCT_FOUNDATION.
@@ -73,6 +74,7 @@
 - `BR-20260819-02`: PH-02 two-user negative cross-user application-authorisation verification record; test-only, no product authorisation change.
 - `BR-20260819-03`: PH-02 data-correction, export-v2 and primary-retention/deletion local runtime-verification record.
 - `BR-20260819-04`: PH-02 exact-head remote-CI/merge verification and canonical phase-closure record.
+- `BR-20260820-01`: PH-03 exercise-content first-slice implementation and isolated local runtime-verification record.
 
 ## Traceability rule
 For non-trivial implementation: `REQ → scope → architecture/contract → PH/slice → files/surfaces → AC → VAL → status`.
