@@ -513,3 +513,44 @@ p {
   border-color: #641b16;
   background: #641b16;
 }
+/* PH-03 exercise library */
+.field select {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.7rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.exercise-filter-grid {
+  display: grid;
+  grid-template-columns: minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.exercise-filter-grid .action-row { grid-column: 1 / -1; }
+
+.library-result-count {
+  margin-block: 1.5rem 1rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.instruction-list,
+.relation-list {
+  max-width: 68ch;
+  color: var(--muted);
+}
+
+.instruction-list li + li,
+.relation-list li + li { margin-top: 0.55rem; }
+
+.card + .card { margin-top: 1rem; }
+
+@media (max-width: 48rem) {
+  .exercise-filter-grid { grid-template-columns: 1fr; }
+  .exercise-filter-grid .action-row { grid-column: auto; }
+}

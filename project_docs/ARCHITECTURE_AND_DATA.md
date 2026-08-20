@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 current identity/private-data foundation Passed / Verified; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 current identity/private-data foundation Passed / Verified; PH-03 exercise-content first slice locally Passed / Verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -45,6 +45,14 @@ Current PH-02 primary records have no speculative time-based retention rule. Per
 
 Future PH-03+ domains must extend export/correction/deletion coverage for their own user-owned records rather than treating this PH-02 evidence as automatic coverage.
 
+## Implemented PH-03 exercise-content first slice
+`BR-20260820-01` introduces the first real `exercise-content` module without adding a CMS, provider abstraction or separate service. `public.exercises` owns stable exercise identity; `public.exercise_versions` owns versioned structured instruction snapshots; and `public.exercise_version_relations` owns source-version-specific substitution, regression, progression and equipment-alternative relationships.
+
+Exercise versions distinguish `draft`, `general`, `professionally_authored`, `reviewed`, `withdrawn` and `restricted` status. Normal anonymous/authenticated library readers can select only `general` and `reviewed` versions. Finalised instructional fields are immutable; permitted publication-state transitions can withdraw/restrict content without rewriting its historical instructional meaning. Relationship rows are editable only while their source version is draft, so a finalised source version retains the relationship semantics that were reviewed with it.
+
+The server-side library reader exposes the latest visible version per stable exercise identity through read-only `/exercises` and `/exercises/[exerciseKey]` surfaces. Structured steps, purpose, target areas, equipment, setup, cues, dosage guidance, common errors, safety notes, bilateral/side rule and plain-language accessible text are stored on the version. The local seed supplies four visible plus one draft synthetic exercise solely to prove schema/query/UI mechanics; it is not evidence of a production editorial or professional review process.
+
+`REQ-012` is not completed by this slice because no routine snapshot exists yet. PH-04 must persist/reference the exact exercise-version IDs used by routines so later content publication changes cannot alter historical routine meaning.
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.
 
