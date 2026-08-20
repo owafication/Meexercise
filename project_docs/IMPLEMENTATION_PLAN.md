@@ -33,6 +33,7 @@ Each phase is implemented in small verifiable slices. A walking skeleton is used
 **Objective:** Structured, versioned, accessible exercise content with publication status and substitutions.  
 **Prerequisites:** PH-02 persistence/versioning primitives.  
 **Validation:** `VAL-026`, `VAL-034`.  
+**Completion boundary:** PH-03 owns the exercise-content mechanics and read-only library contract: stable identities, immutable versions, structured instructions, publication visibility, substitutions/regressions/progressions/equipment alternatives, side rules, exact-version relationship semantics and withdrawal behaviour. Populating/reviewing the real production exercise catalogue is a later activation/release content gate, not an implementation prerequisite for PH-03 closure. Synthetic fixtures may prove mechanics but may not be presented as production-approved content. Before production routine generation or public release, the consumed exercise versions must be approved under the applicable content-review/provenance boundary. `REQ-012` remains a PH-04 consumer requirement because routine snapshots must retain exact exercise versions.
 **Rollback:** content version rollback without rewriting historical routines.  
 **Stop:** inaccessible instruction design or unreviewed safety taxonomy used as authoritative.
 

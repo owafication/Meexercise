@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 current identity/private-data foundation Passed / Verified; PH-03 exercise-content first slice locally Passed / Verified; production hosting/data region deferred
+**Status:** PH-01 shell implemented; PH-02 current identity/private-data foundation Passed / Verified; PH-03 implementation locally complete with final publication/closure pending; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -50,7 +50,7 @@ Future PH-03+ domains must extend export/correction/deletion coverage for their 
 
 Exercise versions distinguish `draft`, `general`, `professionally_authored`, `reviewed`, `withdrawn` and `restricted` status. Normal anonymous/authenticated library readers can select only `general` and `reviewed` versions. Finalised instructional fields are immutable; permitted publication-state transitions can withdraw/restrict content without rewriting its historical instructional meaning. Relationship rows are editable only while their source version is draft, so a finalised source version retains the relationship semantics that were reviewed with it.
 
-The server-side library reader exposes the latest visible version per stable exercise identity through read-only `/exercises` and `/exercises/[exerciseKey]` surfaces. Structured steps, purpose, target areas, equipment, setup, cues, dosage guidance, common errors, safety notes, bilateral/side rule and plain-language accessible text are stored on the version. The local seed supplies four visible plus one draft synthetic exercise solely to prove schema/query/UI mechanics; it is not evidence of a production editorial or professional review process.
+The server-side library reader exposes the latest visible version per stable exercise identity through read-only `/exercises` and `/exercises/[exerciseKey]` surfaces. It can also resolve one exact visible version when a version-owned relation targets historical content. Relationship links carry the exact target version so adding a newer visible version cannot silently redirect an existing relation to different instructional meaning. Structured steps, purpose, target areas, equipment, setup, cues, dosage guidance, common errors, safety notes, bilateral/side rule and plain-language accessible text are stored on the version. The expanded local seed proves multiple visible versions under one stable identity, all four relationship types and withdrawal fallback using six visible synthetic identities; it remains development/test data and is not evidence of a production editorial or professional review process.
 
 `REQ-012` is not completed by this slice because no routine snapshot exists yet. PH-04 must persist/reference the exact exercise-version IDs used by routines so later content publication changes cannot alter historical routine meaning.
 ## Proposed topology

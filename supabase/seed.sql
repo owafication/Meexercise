@@ -111,7 +111,9 @@ values
   ('d2222222-2222-4222-8222-222222222222','supported_bodyweight_squat'),
   ('d3333333-3333-4333-8333-333333333333','wall_push_up'),
   ('d4444444-4444-4444-8444-444444444444','incline_push_up'),
-  ('d5555555-5555-4555-8555-555555555555','internal_draft_example');
+  ('d5555555-5555-4555-8555-555555555555','internal_draft_example'),
+  ('d6666666-6666-4666-8666-666666666666','counter_push_up'),
+  ('d7777777-7777-4777-8777-777777777777','standing_resistance_band_press');
 
 insert into public.exercise_versions (
   id,exercise_id,version_number,status,title,summary,purpose,setup,steps,cues,
@@ -162,6 +164,20 @@ values
   array['Upper body'],array['Wall'],'bilateral',null
 ),
 (
+  'e3333333-3333-4333-8333-333333333334','d3333333-3333-4333-8333-333333333333',2,'draft',
+  'Wall push-up',
+  'Perform a controlled wall push-up with a stance that can be adjusted to keep the movement comfortable and repeatable.',
+  'General upper-body pushing strength with an upright setup and a clearly adjustable body angle.',
+  'Face a solid wall. Place both palms around chest height, then choose a foot position that lets the trunk remain controlled throughout the repetition.',
+  '["Begin with both hands secure on the wall and the body controlled.","Bend the elbows and move the chest toward the wall without letting the hips drift forward.","Pause at a comfortable endpoint before contact if needed.","Press through both hands to return to the starting position."]'::jsonb,
+  '["Keep the head, trunk, and hips moving together.","Move the feet closer to the wall if a more upright starting angle is needed."]'::jsonb,
+  'Use a stance and repetition count that allows the same controlled technique from the first repetition to the last.',
+  '["Changing the body angle by letting the hips move independently.","Using a hand or foot position that cannot be held comfortably."]'::jsonb,
+  '["Use a stable wall surface and stop if the movement causes concerning symptoms or cannot be controlled."]'::jsonb,
+  'Place both hands securely on a wall, keep the body aligned, bend the elbows to move toward the wall, then press back while maintaining the same body position.',
+  array['Upper body'],array['Wall'],'bilateral',null
+),
+(
   'e4444444-4444-4444-8444-444444444444','d4444444-4444-4444-8444-444444444444',1,'draft',
   'Incline push-up',
   'Perform a push-up with the hands on a stable elevated surface.',
@@ -181,6 +197,34 @@ values
   'Test-only content.','Test-only setup.','["Test-only step."]'::jsonb,'[]'::jsonb,
   'Test-only dosage.','[]'::jsonb,'[]'::jsonb,'Test-only accessible text.',
   array['Test'],'{}'::text[],'not_applicable',null
+),
+(
+  'e6666666-6666-4666-8666-666666666666','d6666666-6666-4666-8666-666666666666',1,'draft',
+  'Counter push-up',
+  'Perform a controlled push-up with both hands on a stable counter-height surface.',
+  'General upper-body pushing strength using a stable elevated surface with a different setup from a wall.',
+  'Use a fixed counter or similarly stable surface that will not slide or tip. Place both hands securely and step back until the body can remain controlled.',
+  '["Begin with both hands secure and the body stable.","Bend the elbows and lower the chest toward the counter under control.","Keep both feet planted and the support stable.","Press through both hands to return to the start."]'::jsonb,
+  '["Keep the trunk controlled throughout the movement.","Choose a foot position that allows a repeatable body angle."]'::jsonb,
+  'Choose a comfortable body angle and repetition count that allows consistent technique.',
+  '["Using a surface that can move.","Letting the hips sag as the elbows bend."]'::jsonb,
+  '["Only use a surface that is stable enough for the intended load.","Stop if the movement causes concerning symptoms or cannot be controlled."]'::jsonb,
+  'Place both hands on a stable counter-height surface, keep the body controlled, lower toward the support, then press back to the start.',
+  array['Upper body'],array['Stable counter'],'bilateral',null
+),
+(
+  'e7777777-7777-4777-8777-777777777777','d7777777-7777-4777-8777-777777777777',1,'draft',
+  'Standing resistance-band press',
+  'Press a resistance band forward from a stable standing position.',
+  'General upper-body pushing strength using a resistance band rather than body weight against a surface.',
+  'Use an undamaged resistance band. Hold one end in each hand with the middle of the band positioned securely across the upper back, below the neck. Stand in a stable stance.',
+  '["Begin with both hands near the sides of the chest and the band controlled.","Press both hands forward without letting the band ride toward the neck.","Pause with the arms comfortably extended.","Return both hands slowly to the starting position."]'::jsonb,
+  '["Keep the band flat and controlled across the upper back.","Use a resistance that allows a smooth return."]'::jsonb,
+  'Choose a band resistance and repetition count that allows controlled pressing and return without rushing.',
+  '["Allowing the band to snap back during the return.","Positioning the band across the neck."]'::jsonb,
+  '["Inspect the band before use and do not use it if damaged.","Keep the band away from the face and neck and stop if the movement causes concerning symptoms."]'::jsonb,
+  'Stand securely with a resistance band across the upper back, press both hands forward together, then return them slowly while keeping the band controlled.',
+  array['Upper body'],array['Resistance band'],'bilateral',null
 );
 
 insert into public.exercise_version_relations (
@@ -201,7 +245,19 @@ values
 ),
 (
   'e4444444-4444-4444-8444-444444444444','e3333333-3333-4333-8333-333333333333',
-  'regression','Move to the wall to reduce the body angle when the incline variation cannot be performed with consistent control.',10
+  'regression','Move to the earlier wall version to reduce the body angle when the incline variation cannot be performed with consistent control.',10
+),
+(
+  'e3333333-3333-4333-8333-333333333334','e4444444-4444-4444-8444-444444444444',
+  'progression','A stable elevated surface can provide a less upright progression when the reviewed wall version is controlled.',10
+),
+(
+  'e3333333-3333-4333-8333-333333333334','e6666666-6666-4666-8666-666666666666',
+  'equipment_alternative','Use a stable counter-height surface when a wall setup is unsuitable; recognise that the different body angle can change loading.',20
+),
+(
+  'e3333333-3333-4333-8333-333333333334','e7777777-7777-4777-8777-777777777777',
+  'substitution','Use the resistance-band press when a surface-based push is impractical and an undamaged band can be positioned and controlled safely.',30
 );
 
 update public.exercise_versions
@@ -210,5 +266,11 @@ where id in (
   'e1111111-1111-4111-8111-111111111111',
   'e2222222-2222-4222-8222-222222222222',
   'e3333333-3333-4333-8333-333333333333',
-  'e4444444-4444-4444-8444-444444444444'
+  'e4444444-4444-4444-8444-444444444444',
+  'e6666666-6666-4666-8666-666666666666',
+  'e7777777-7777-4777-8777-777777777777'
 );
+
+update public.exercise_versions
+set status='reviewed',published_at=now()
+where id='e3333333-3333-4333-8333-333333333334';
