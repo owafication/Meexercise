@@ -2,19 +2,60 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PageIntro } from "@/components/page-intro";
-import { getExerciseDetail } from "@/modules/exercise-content/server/library";
+import {
+  getExerciseDetail,
+  type ExerciseSideRule,
+} from "@/modules/exercise-content/server/library";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ exerciseKey: string }> };
+type Props = {
+  params: Promise<{ exerciseKey: string }>;
+  searchParams: Promise<{ version?: string | string[] }>;
+};
 
 function relationLabel(value: string) {
   return value.replaceAll("_", " ");
 }
 
-export default async function ExerciseDetailPage({ params }: Props) {
+function sideRuleLabel(value: ExerciseSideRule) {
+  switch (value) {
+    case "bilateral":
+      return "Both sides together";
+    case "unilateral":
+      return "One side at a time";
+    case "per_side":
+      return "Repeat per side";
+    case "alternating":
+      return "Alternate sides";
+    default:
+      return "Not applicable";
+  }
+}
+
+function parseRequestedVersion(value: string | string[] | undefined) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string" || !/^[1-9][0-9]*$/.test(value)) {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : null;
+}
+
+export default async function ExerciseDetailPage({ params, searchParams }: Props) {
   const { exerciseKey } = await params;
-  const exercise = await getExerciseDetail(exerciseKey);
+  const { version } = await searchParams;
+  const requestedVersion = parseRequestedVersion(version);
+
+  if (requestedVersion === null) {
+    notFound();
+  }
+
+  const exercise = await getExerciseDetail(exerciseKey, requestedVersion);
 
   if (!exercise) {
     notFound();
@@ -38,12 +79,13 @@ export default async function ExerciseDetailPage({ params }: Props) {
         <p>{exercise.setup}</p>
         <p><strong>Target:</strong> {exercise.targetAreas.join(", ")}</p>
         <p><strong>Equipment:</strong> {exercise.equipment.length ? exercise.equipment.join(", ") : "None"}</p>
+        <p><strong>Side rule:</strong> {sideRuleLabel(exercise.sideRule)}</p>
       </section>
 
       <section className="card" aria-labelledby="exercise-steps-title">
         <h2 id="exercise-steps-title">Steps</h2>
         <ol className="instruction-list">
-          {exercise.steps.map((step,index) => <li key={`${index}-${step}`}>{step}</li>)}
+          {exercise.steps.map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}
         </ol>
         {exercise.cues.length ? (
           <>
@@ -81,9 +123,11 @@ export default async function ExerciseDetailPage({ params }: Props) {
           <h2 id="exercise-variations-title">Related variations</h2>
           <ul className="relation-list">
             {exercise.relations.map((relation) => (
-              <li key={`${relation.relationType}-${relation.target.exerciseKey}`}>
+              <li key={`${relation.relationType}-${relation.target.exerciseKey}-${relation.target.versionNumber}`}>
                 <strong>{relationLabel(relation.relationType)}:</strong>{" "}
-                <Link href={`/exercises/${relation.target.exerciseKey}`}>{relation.target.title}</Link>{" "}
+                <Link href={`/exercises/${relation.target.exerciseKey}?version=${relation.target.versionNumber}`}>
+                  {relation.target.title}
+                </Link>{" "}
                 (version {relation.target.versionNumber}). {relation.guidance}
               </li>
             ))}

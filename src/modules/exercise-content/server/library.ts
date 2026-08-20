@@ -8,6 +8,13 @@ export type ExerciseRelationType =
   | "progression"
   | "equipment_alternative";
 
+export type ExerciseSideRule =
+  | "not_applicable"
+  | "bilateral"
+  | "unilateral"
+  | "per_side"
+  | "alternating";
+
 export type ExerciseLibraryItem = {
   id: string;
   exerciseKey: string;
@@ -28,7 +35,7 @@ export type ExerciseDetail = ExerciseLibraryItem & {
   commonErrors: string[];
   safetyNotes: string[];
   accessibleText: string;
-  sideRule: "not_applicable" | "bilateral" | "unilateral" | "per_side" | "alternating";
+  sideRule: ExerciseSideRule;
   relations: Array<{
     relationType: ExerciseRelationType;
     guidance: string;
@@ -131,16 +138,26 @@ export async function getExerciseLibrary(): Promise<ExerciseLibraryItem[]> {
     }
   }
 
-  return Array.from(latest.values()).sort((a,b) => a.title.localeCompare(b.title));
+  return Array.from(latest.values()).sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export async function getExerciseDetail(exerciseKey: string): Promise<ExerciseDetail | null> {
+export async function getExerciseDetail(
+  exerciseKey: string,
+  requestedVersion?: number,
+): Promise<ExerciseDetail | null> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const baseQuery = supabase
     .from("exercise_versions")
     .select("id,version_number,status,title,summary,purpose,setup,steps,cues,dosage_guidance,common_errors,safety_notes,accessible_text,target_areas,equipment,side_rule,exercises!inner(exercise_key)")
-    .eq("exercises.exercise_key", exerciseKey)
+    .eq("exercises.exercise_key", exerciseKey);
+
+  const versionQuery =
+    requestedVersion === undefined
+      ? baseQuery
+      : baseQuery.eq("version_number", requestedVersion);
+
+  const { data, error } = await versionQuery
     .order("version_number", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -159,7 +176,7 @@ export async function getExerciseDetail(exerciseKey: string): Promise<ExerciseDe
     typeof row.setup !== "string" ||
     typeof row.dosage_guidance !== "string" ||
     typeof row.accessible_text !== "string" ||
-    !["not_applicable","bilateral","unilateral","per_side","alternating"].includes(String(row.side_rule))
+    !["not_applicable", "bilateral", "unilateral", "per_side", "alternating"].includes(String(row.side_rule))
   ) {
     return null;
   }
@@ -181,7 +198,7 @@ export async function getExerciseDetail(exerciseKey: string): Promise<ExerciseDe
     const targetKey = keyFrom(target?.exercises ?? null);
 
     if (
-      !["substitution","regression","progression","equipment_alternative"].includes(String(relation.relation_type)) ||
+      !["substitution", "regression", "progression", "equipment_alternative"].includes(String(relation.relation_type)) ||
       typeof relation.guidance !== "string" ||
       typeof target?.version_number !== "number" ||
       typeof target?.title !== "string" ||
@@ -211,7 +228,7 @@ export async function getExerciseDetail(exerciseKey: string): Promise<ExerciseDe
     commonErrors: strings(row.common_errors),
     safetyNotes: strings(row.safety_notes),
     accessibleText: row.accessible_text,
-    sideRule: row.side_rule as ExerciseDetail["sideRule"],
+    sideRule: row.side_rule as ExerciseSideRule,
     relations,
   };
 }
