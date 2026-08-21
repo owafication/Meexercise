@@ -1,4 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  buildUserRoutineExport,
+  type RoutineExportRecord,
+} from "@/modules/planning/server/routines";
 
 export type AccountLifecyclePageState =
   | {
@@ -16,7 +20,7 @@ export type UserDataExportResult =
   | {
       kind: "ok";
       data: {
-        exportVersion: 2;
+        exportVersion: 3;
         generatedAt: string;
         account: {
           id: string;
@@ -55,6 +59,7 @@ export type UserDataExportResult =
             createdAt: string;
           }>;
         }>;
+        routines: RoutineExportRecord[];
       };
     }
   | {
@@ -253,10 +258,16 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
       });
     }
 
+    const exportedRoutines = await buildUserRoutineExport(supabase, userId);
+
+    if (exportedRoutines === null) {
+      return { kind: "unavailable" };
+    }
+
     return {
       kind: "ok",
       data: {
-        exportVersion: 2,
+        exportVersion: 3,
         generatedAt: new Date().toISOString(),
         account: {
           id: user.id,
@@ -273,6 +284,7 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
             }
           : null,
         assessments: exportedAssessments,
+        routines: exportedRoutines,
       },
     };
   } catch {

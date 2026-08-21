@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 
 const routes = [
   { path: "/", heading: "Your day, at a glance" },
-  { path: "/plans", heading: "Your plans and routines" },
-  { path: "/create", heading: "Build something that fits" },
+  { path: "/plans", heading: "Your saved routines" },
+  { path: "/create", heading: "Build a routine from approved exercise versions" },
   { path: "/progress", heading: "See what your history shows" },
   {
     path: "/profile",

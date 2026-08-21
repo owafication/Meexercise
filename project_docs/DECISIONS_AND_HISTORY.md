@@ -56,6 +56,8 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 | `BR-20260820-02` | 2026-08-20 | PH-03 acceptance-semantics implementation | First slice independently published/merged; second slice locally verifies multi-version latest/exact reads, all relation types, side rules and withdrawal fallback. PH-03 implementation is locally complete; final exact-head CI/merge and canonical closure remain separate. Production catalogue population/review is retained as an activation/release content gate. |
 | `BR-20260820-03` | 2026-08-20 | PH-03 phase closure | Exact-head GitHub Actions run #25 passed both required jobs for final feature head `a4ac5905dfc558707cdb3b36e3d4ca97ee2bd1fc`; PR #15 merged as `acf82f7cc0548aa064772f105b7c7037018ca543`; PH-03 exercise-content library scope is Passed / Verified while production catalogue review, `REQ-012` routine retention and release gates remain later work. |
 
+| `BR-20260821-01` | 2026-08-21 | PH-04 manual routine foundation | First PH-04 slice locally verifies private manual routine snapshots, exact exercise-version retention including owner historical reads after withdrawal, readiness/approved-content fail-closed creation, owner list/detail routes, export v3 and account-deletion cascade. PH-04 remains In progress; editing/version updates, deterministic restriction matching/substitutions, guided generation/explanation/review, templates and remote exact-head CI/merge remain later evidence. |
+
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
 2. Inspect current repository/evidence before changing implementation claims.

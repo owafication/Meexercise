@@ -230,3 +230,78 @@ export async function getReadinessAssessmentPageState(): Promise<ReadinessAssess
     return { kind: "unavailable" };
   }
 }
+
+export type PlanningReadinessGate =
+  | "ready"
+  | "assessment_required"
+  | "restricted"
+  | "blocked"
+  | "unavailable";
+
+export async function getPlanningReadinessGate(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<PlanningReadinessGate> {
+  const context = await getReadinessTemplateContext(supabase);
+
+  if (!context) {
+    return "unavailable";
+  }
+
+  const versionIds = context.versions.map((version) => version.id);
+
+  const { data: inProgress, error: inProgressError } = await supabase
+    .from("assessment_sessions")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("status", "in_progress")
+    .in("template_version_id", versionIds)
+    .limit(1);
+
+  if (inProgressError) {
+    return "unavailable";
+  }
+
+  if ((inProgress ?? []).length > 0) {
+    return "assessment_required";
+  }
+
+  const { data: completed, error: completedError } = await supabase
+    .from("assessment_sessions")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("status", "completed")
+    .in("template_version_id", versionIds)
+    .order("completed_at", { ascending: false })
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (completedError) {
+    return "unavailable";
+  }
+
+  if (!completed) {
+    return "assessment_required";
+  }
+
+  const { data: flags, error: flagsError } = await supabase
+    .from("assessment_safety_flags")
+    .select("outcome")
+    .eq("user_id", userId)
+    .eq("session_id", completed.id);
+
+  if (flagsError) {
+    return "unavailable";
+  }
+
+  if ((flags ?? []).some((flag) => flag.outcome === "block_generation")) {
+    return "blocked";
+  }
+
+  if ((flags ?? []).some((flag) => flag.outcome === "restrict_generation")) {
+    return "restricted";
+  }
+
+  return "ready";
+}
