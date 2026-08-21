@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell implemented; PH-02 current identity/private-data foundation Passed / Verified; PH-03 exercise-content library scope Passed / Verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual routine foundation first slice locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -53,6 +53,17 @@ Exercise versions distinguish `draft`, `general`, `professionally_authored`, `re
 The server-side library reader exposes the latest visible version per stable exercise identity through read-only `/exercises` and `/exercises/[exerciseKey]` surfaces. It can also resolve one exact visible version when a version-owned relation targets historical content. Relationship links carry the exact target version so adding a newer visible version cannot silently redirect an existing relation to different instructional meaning. Structured steps, purpose, target areas, equipment, setup, cues, dosage guidance, common errors, safety notes, bilateral/side rule and plain-language accessible text are stored on the version. The expanded local seed proves multiple visible versions under one stable identity, all four relationship types and withdrawal fallback using six visible synthetic identities; it remains development/test data and is not evidence of a production editorial or professional review process.
 
 `REQ-012` is not completed by this slice because no routine snapshot exists yet. PH-04 must persist/reference the exact exercise-version IDs used by routines so later content publication changes cannot alter historical routine meaning.
+## Implemented PH-04 manual routine foundation first slice
+`BR-20260821-01` introduces the first real `planning` persistence/route slice without adding a separate service, generic repository layer, runtime AI or speculative plan/schedule machinery. `public.routines` owns the authenticated user's stable routine identity; immutable `public.routine_versions` own versioned titles; `public.routine_sections` and `public.routine_items` preserve ordered structure and exact `exercise_version_id` references.
+
+Manual creation uses one database function so identity/version/section/item creation is atomic. The trusted boundary requires an authenticated user, a completed latest readiness assessment, no `restrict_generation`/`block_generation` flag, one to twelve unique exercise versions, and currently visible `general`/`reviewed` exercise content. The application rechecks the same planning/content state before invoking the database boundary. Recorded movement restrictions therefore remain fail-closed until PH-04 implements deterministic restriction matching instead of guessing from free text.
+
+Routine tables use owner RLS and server-side ownership predicates. The original PH-03 anonymous/authenticated `general`/`reviewed` exercise visibility policy remains unchanged. A separate authenticated-only historical policy calls a narrowly scoped private `SECURITY DEFINER` ownership predicate so a routine owner can still read an exact referenced exercise version after later withdrawal, while anonymous and unrelated authenticated users cannot gain that historical access. This closes the PH-04 consumer portion of `REQ-012` without copying exercise instructions into a second content authority.
+
+`/create` now provides the first manual builder and exposes signed-out, assessment-required, restricted, blocked, unavailable and ready states. `/plans` lists only the current user's saved routines; `/routines/[routineId]` renders the latest saved routine version with exact referenced exercise-version interpretation and returns a non-disclosing unavailable/not-owned state for another user. The first slice is read-only after save: routine editing/new versions, substitutions, guided generation/explanations/user review and templates remain later PH-04 work.
+
+The authenticated JSON lifecycle export is now version 3 and includes routine identities plus all stored routine versions/sections/items and the exact exercise-version interpretation data required to read history. Auth-user deletion cascades through routine identities, versions, sections and items. This extends the current `REQ-038` primary-record lifecycle to the PH-04 routine records introduced by this slice; production backup/legal-retention obligations remain PH-10 gates.
+
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.
 
