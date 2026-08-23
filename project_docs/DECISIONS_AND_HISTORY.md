@@ -58,6 +58,8 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 
 | `BR-20260821-01` | 2026-08-21 | PH-04 manual routine foundation | First PH-04 slice locally verifies private manual routine snapshots, exact exercise-version retention including owner historical reads after withdrawal, readiness/approved-content fail-closed creation, owner list/detail routes, export v3 and account-deletion cascade. PH-04 remains In progress; editing/version updates, deterministic restriction matching/substitutions, guided generation/explanation/review, templates and remote exact-head CI/merge remain later evidence. |
 
+| `BR-20260823-01` | 2026-08-23 | PH-04 ordered routine editing | First PH-04 slice is confirmed merged through PR #17/CI #29; second slice locally verifies explicit routine order, append-only routine version edits, stale-write rejection, correction-chain-leaf readiness authority, cross-user edit denial and export-v3 multi-version history. PH-04 remains In progress; deterministic restriction matching/substitution, guided generation/explanation/review, templates and second-slice remote exact-head CI/merge remain later evidence. |
+
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
 2. Inspect current repository/evidence before changing implementation claims.

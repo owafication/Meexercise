@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual routine first-slice routes locally verified; later feature-route paths remain proposed
+**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual foundation merged and ordered/edit-versioning routes locally verified; later feature-route paths remain proposed
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -70,6 +70,16 @@ PH-04 first slice establishes the first real planning destinations under the exi
 - `ROUTE-020` Routine detail → `/routines/[routineId]`: owner-only read-only routine snapshot showing exact exercise-version numbers and interpretation data. Another authenticated user receives the same not-available state as a missing/non-owned routine.
 
 This slice does not establish `ROUTE-018` plan detail, guided generation, editing/new routine versions, scheduling, progression, print/run or template-management URLs. Those remain owned by later PH-04+ capabilities.
+
+PH-04 second slice extends current routine UX:
+- `/create` uses explicit ordered exercise slots and rejects duplicate selections.
+- `/routines/[routineId]` links owners to `/routines/[routineId]/edit`.
+- `/routines/[routineId]/edit` starts from the latest owner snapshot and saves a new immutable version; stale edits show reload-before-save conflict feedback.
+- another authenticated user receives the same non-disclosing unavailable state for detail/edit;
+- approved historical exact versions may remain selected, while withdrawn/restricted historical versions require replacement;
+- a linked restrictive assessment correction blocks manual save/edit until deterministic restriction matching exists.
+
+Guided generation, deterministic substitution, scheduling, progression, print/run and template-management URLs remain later work.
 
 Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v3: assessment correction linkage remains present and PH-04 routine history is included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
 

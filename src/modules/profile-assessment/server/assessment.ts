@@ -98,6 +98,86 @@ function versionForSession(
   );
 }
 
+type CompletedAssessmentIdentity = {
+  id?: unknown;
+  template_version_id?: unknown;
+  corrects_session_id?: unknown;
+};
+
+type CurrentCompletedAssessment<T> =
+  | { kind: "none" }
+  | { kind: "current"; row: T }
+  | { kind: "ambiguous" };
+
+function resolveCurrentCompletedAssessment<T extends CompletedAssessmentIdentity>(
+  rows: T[],
+  context: ReadinessTemplateContext,
+): CurrentCompletedAssessment<T> {
+  if (rows.length === 0) {
+    return { kind: "none" };
+  }
+
+  const versionNumberById = new Map(
+    context.versions.map((version) => [version.id, version.versionNumber]),
+  );
+
+  const normalized: Array<{
+    row: T;
+    id: string;
+    versionNumber: number;
+    correctsSessionId: string | null;
+  }> = [];
+
+  for (const row of rows) {
+    if (
+      typeof row.id !== "string" ||
+      typeof row.template_version_id !== "string"
+    ) {
+      return { kind: "ambiguous" };
+    }
+
+    const versionNumber = versionNumberById.get(row.template_version_id);
+
+    if (versionNumber === undefined) {
+      return { kind: "ambiguous" };
+    }
+
+    normalized.push({
+      row,
+      id: row.id,
+      versionNumber,
+      correctsSessionId:
+        typeof row.corrects_session_id === "string"
+          ? row.corrects_session_id
+          : null,
+    });
+  }
+
+  const highestVersionNumber = Math.max(
+    ...normalized.map((item) => item.versionNumber),
+  );
+
+  const currentVersionRows = normalized.filter(
+    (item) => item.versionNumber === highestVersionNumber,
+  );
+
+  const correctedSessionIds = new Set(
+    currentVersionRows
+      .map((item) => item.correctsSessionId)
+      .filter((value): value is string => Boolean(value)),
+  );
+
+  const leaves = currentVersionRows.filter(
+    (item) => !correctedSessionIds.has(item.id),
+  );
+
+  if (leaves.length !== 1) {
+    return { kind: "ambiguous" };
+  }
+
+  return { kind: "current", row: leaves[0].row };
+}
+
 export async function getReadinessAssessmentPageState(): Promise<ReadinessAssessmentPageState> {
   try {
     const supabase = await createClient();
@@ -160,29 +240,37 @@ export async function getReadinessAssessmentPageState(): Promise<ReadinessAssess
       };
     }
 
-    const { data: completed, error: completedError } = await supabase
+    const { data: completedRows, error: completedError } = await supabase
       .from("assessment_sessions")
       .select(
         "id,template_version_id,status,responses,row_version,updated_at,completed_at,corrects_session_id",
       )
       .eq("user_id", userId)
       .eq("status", "completed")
-      .in("template_version_id", versionIds)
-      .order("completed_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .in("template_version_id", versionIds);
 
     if (completedError) {
       return { kind: "unavailable" };
     }
 
-    if (!completed) {
+    const currentCompleted = resolveCurrentCompletedAssessment(
+      completedRows ?? [],
+      context,
+    );
+
+    if (currentCompleted.kind === "ambiguous") {
+      return { kind: "unavailable" };
+    }
+
+    if (currentCompleted.kind === "none") {
       return {
         kind: "authenticated",
         latestVersion: context.latestVersion,
         session: null,
       };
     }
+
+    const completed = currentCompleted.row;
 
     const version = versionForSession(
       context,
@@ -266,24 +354,31 @@ export async function getPlanningReadinessGate(
     return "assessment_required";
   }
 
-  const { data: completed, error: completedError } = await supabase
+  const { data: completedRows, error: completedError } = await supabase
     .from("assessment_sessions")
-    .select("id")
+    .select("id,template_version_id,corrects_session_id")
     .eq("user_id", userId)
     .eq("status", "completed")
-    .in("template_version_id", versionIds)
-    .order("completed_at", { ascending: false })
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .in("template_version_id", versionIds);
 
   if (completedError) {
     return "unavailable";
   }
 
-  if (!completed) {
+  const currentCompleted = resolveCurrentCompletedAssessment(
+    completedRows ?? [],
+    context,
+  );
+
+  if (currentCompleted.kind === "ambiguous") {
+    return "unavailable";
+  }
+
+  if (currentCompleted.kind === "none") {
     return "assessment_required";
   }
+
+  const completed = currentCompleted.row;
 
   const { data: flags, error: flagsError } = await supabase
     .from("assessment_safety_flags")
