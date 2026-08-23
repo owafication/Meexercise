@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Risk baseline active; PH-02 private-data boundaries Passed / Verified; PH-03 exercise-content boundary Passed / Verified; PH-04 private manual-routine first slice locally verified; legal applicability and production exposure unproven
+**Status:** Risk baseline active; PH-02 private-data boundaries Passed / Verified; PH-03 exercise-content boundary Passed / Verified; PH-04 manual-routine foundation merged and ordered/edit-versioning second slice locally verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule
@@ -39,6 +39,13 @@ The first PH-04 slice extends the existing private-data boundary to user-owned r
 `RISK-016` is only partially closed in this slice. Routine creation accepts only currently visible approved exercise versions and fails closed unless the latest readiness assessment is completed without restriction/block flags. Free-text movement restrictions are deliberately not guessed into exercise compatibility: restricted generation remains blocked until deterministic matching/substitution rules are implemented later in PH-04.
 
 `RISK-018` is directly exercised by the first routine consumer. Routine items retain exact exercise-version IDs and immutable routine snapshot rows. Withdrawing a referenced exercise version does not rewrite the saved routine; the owner retains narrowly scoped historical read access to that exact version, while anonymous and unrelated authenticated readers remain excluded. The original PH-03 public visibility policy remains intact.
+
+## PH-04 routine-editing local risk evidence
+The second slice extends owner authorisation to the edit route and append-only mutation. Stable-routine ownership is rechecked server-side/database-side and browser evidence denies another authenticated user detail/edit access. Expected-version rejection prevents stale concurrent edits from silently overwriting newer routine state (`RISK-019`).
+
+Routine version N remains immutable when N+1 is saved, preserving `RISK-018` protection and export-v3 history. Withdrawn historical exercise versions remain owner-readable but cannot be copied into a new version.
+
+`RISK-016` remains partial. A restrictive correction is resolved through the correction-chain leaf and blocks create/edit; competing current leaves fail closed. Free-text restrictions are still not inferred into exercise compatibility, so deterministic restriction matching/substitution remains later PH-04 work.
 
 No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system or complex RBAC is assumed before its threat/contract/exposure requires it.
 

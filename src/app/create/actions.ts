@@ -14,11 +14,7 @@ function errorState(
   message: string,
   fieldErrors?: CreateRoutineActionState["fieldErrors"],
 ): CreateRoutineActionState {
-  return {
-    status: "error",
-    message,
-    fieldErrors,
-  };
+  return { status: "error", message, fieldErrors };
 }
 
 export async function createManualRoutineAction(
@@ -28,24 +24,30 @@ export async function createManualRoutineAction(
   void previousState;
 
   const rawTitle = formData.get("title");
-  const title = typeof rawTitle === "string" ? rawTitle.trim().replace(/\s+/g, " ") : "";
+  const title =
+    typeof rawTitle === "string" ? rawTitle.trim().replace(/\s+/g, " ") : "";
 
-  const exerciseVersionIds = Array.from(
-    new Set(
-      formData
-        .getAll("exerciseVersionId")
-        .filter((value): value is string => typeof value === "string" && value.length > 0),
-    ),
-  );
+  const submittedExerciseVersionIds = formData
+    .getAll("exerciseVersionId")
+    .filter(
+      (value): value is string =>
+        typeof value === "string" && value.length > 0,
+    );
 
+  const exerciseVersionIds = Array.from(new Set(submittedExerciseVersionIds));
   const fieldErrors: NonNullable<CreateRoutineActionState["fieldErrors"]> = {};
 
   if (title.length < 1 || title.length > 80) {
     fieldErrors.title = "Enter a routine title between 1 and 80 characters.";
   }
 
-  if (exerciseVersionIds.length < 1 || exerciseVersionIds.length > 12) {
+  if (
+    submittedExerciseVersionIds.length < 1 ||
+    submittedExerciseVersionIds.length > 12
+  ) {
     fieldErrors.exercises = "Choose between 1 and 12 exercises.";
+  } else if (exerciseVersionIds.length !== submittedExerciseVersionIds.length) {
+    fieldErrors.exercises = "Choose each exercise only once.";
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -53,15 +55,15 @@ export async function createManualRoutineAction(
   }
 
   let supabase;
-
   try {
     supabase = await createClient();
   } catch {
-    return errorState("Routine could not be saved right now. Your selections are unchanged.");
+    return errorState(
+      "Routine could not be saved right now. Your selections are unchanged.",
+    );
   }
 
   const userId = await getVerifiedUserId(supabase);
-
   if (!userId) {
     return errorState("Your session has expired. Sign in again before saving.");
   }
@@ -69,7 +71,9 @@ export async function createManualRoutineAction(
   const gate = await getPlanningReadinessGate(supabase, userId);
 
   if (gate === "assessment_required") {
-    return errorState("Complete your current readiness assessment before saving a routine.");
+    return errorState(
+      "Complete your current readiness assessment before saving a routine.",
+    );
   }
 
   if (gate === "restricted") {
@@ -89,11 +93,12 @@ export async function createManualRoutineAction(
   }
 
   let library;
-
   try {
     library = await getExerciseLibrary();
   } catch {
-    return errorState("Approved exercise content could not be verified. Try again later.");
+    return errorState(
+      "Approved exercise content could not be verified. Try again later.",
+    );
   }
 
   const allowedIds = new Set(library.map((exercise) => exercise.id));
@@ -111,7 +116,9 @@ export async function createManualRoutineAction(
   });
 
   if (error || typeof data !== "string") {
-    return errorState("Routine could not be saved. Reload the page and review the current planning state.");
+    return errorState(
+      "Routine could not be saved. Reload the page and review the current planning state.",
+    );
   }
 
   revalidatePath("/plans");

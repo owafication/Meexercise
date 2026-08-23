@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 
+import { RoutineExerciseSlots } from "@/modules/planning/routine-exercise-slots";
+
 import { createManualRoutineAction } from "./actions";
 import { initialCreateRoutineActionState } from "./state";
 
@@ -46,40 +48,11 @@ export function RoutineForm({ exercises }: { exercises: ExerciseOption[] }) {
         ) : null}
       </div>
 
-      <fieldset
-        className="choice-group"
-        aria-describedby={state.fieldErrors?.exercises ? "routine-exercises-error" : "routine-exercises-help"}
-      >
-        <legend>Exercises</legend>
-        <p className="field-help" id="routine-exercises-help">
-          Choose 1–12 currently approved exercise versions. This manual builder does not generate or infer exercises for you.
-        </p>
-
-        {exercises.map((exercise) => (
-          <label className="choice-option" key={exercise.id}>
-            <input
-              type="checkbox"
-              name="exerciseVersionId"
-              value={exercise.id}
-            />
-            <span>
-              <strong>{exercise.title}</strong> · version {exercise.versionNumber}
-              <br />
-              {exercise.summary}
-              <br />
-              Target: {exercise.targetAreas.join(", ")}
-              {" · "}
-              Equipment: {exercise.equipment.length ? exercise.equipment.join(", ") : "None"}
-            </span>
-          </label>
-        ))}
-
-        {state.fieldErrors?.exercises ? (
-          <p className="field-error" id="routine-exercises-error">
-            {state.fieldErrors.exercises}
-          </p>
-        ) : null}
-      </fieldset>
+      <RoutineExerciseSlots
+        idPrefix="create-routine"
+        options={exercises}
+        error={state.fieldErrors?.exercises}
+      />
 
       <button className="button" type="submit" disabled={pending}>
         {pending ? "Saving routine…" : "Save routine"}

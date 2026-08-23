@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual routine foundation first slice locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual routine foundation merged and ordered/edit-versioning second slice locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -63,6 +63,15 @@ Routine tables use owner RLS and server-side ownership predicates. The original 
 `/create` now provides the first manual builder and exposes signed-out, assessment-required, restricted, blocked, unavailable and ready states. `/plans` lists only the current user's saved routines; `/routines/[routineId]` renders the latest saved routine version with exact referenced exercise-version interpretation and returns a non-disclosing unavailable/not-owned state for another user. The first slice is read-only after save: routine editing/new versions, substitutions, guided generation/explanations/user review and templates remain later PH-04 work.
 
 The authenticated JSON lifecycle export is now version 3 and includes routine identities plus all stored routine versions/sections/items and the exact exercise-version interpretation data required to read history. Auth-user deletion cascades through routine identities, versions, sections and items. This extends the current `REQ-038` primary-record lifecycle to the PH-04 routine records introduced by this slice; production backup/legal-retention obligations remain PH-10 gates.
+
+## Implemented PH-04 ordered routine editing second slice
+`BR-20260823-01` extends the existing planning slice without a new service or speculative plan schema. Manual creation now uses explicit ordered exercise slots so stored item positions represent user-selected routine order.
+
+Edits never rewrite prior routine snapshots. The version-append mutation locks the stable routine, verifies ownership, compares the caller's expected current version with the stored latest version, rechecks readiness/content rules and atomically appends version N+1. Stale expected versions fail before insertion. This implements the current manual-edit scope of `REQ-013` and the routine-update portion of `REQ-019` while preserving `REQ-012`.
+
+Readiness selection no longer relies on completion timestamps. PH-02 corrections form immutable chains through `corrects_session_id`; same-transaction records can share timestamps. Application and database planning gates therefore resolve the highest published template version and require exactly one completed correction-chain leaf. Competing leaves fail closed. Safety flags are read only from that current leaf.
+
+The edit UI can retain currently approved exact historical versions already present in the snapshot even when a newer library version exists. Withdrawn/restricted historical versions remain readable as history but cannot be copied into a newly saved routine version. Export v3 already contains every routine version, so this slice needs no export-schema increment.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.
