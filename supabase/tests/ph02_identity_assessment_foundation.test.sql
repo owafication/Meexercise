@@ -64,9 +64,9 @@ insert into public.assessment_template_versions (
   published_at
 )
 values (
-  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2',
+  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb9',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-  2,
+  999,
   'Draft readiness baseline',
   'draft',
   '{"sections":[]}'::jsonb,
@@ -173,8 +173,8 @@ select results_eq(
 
 select results_eq(
   $$select count(*)::bigint from public.assessment_template_versions$$,
-  array[1::bigint],
-  'authenticated users can read published assessment versions but not drafts'
+  array[2::bigint],
+  'authenticated users can read both published assessment versions but not drafts'
 );
 
 select throws_ok(
@@ -188,7 +188,7 @@ select throws_ok(
     values (
       'cccccccc-cccc-4ccc-8ccc-ccccccccccd2',
       '11111111-1111-4111-8111-111111111111',
-      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2',
+      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb9',
       '{}'::jsonb
     )
   $$,

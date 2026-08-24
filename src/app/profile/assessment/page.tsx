@@ -113,6 +113,7 @@ export default async function ReadinessAssessmentPage() {
             sessionId={state.session.id}
             initialRowVersion={state.session.rowVersion}
             initialAnswers={state.session.answers}
+            templateVersionNumber={state.session.version.versionNumber}
           />
         </section>
       ) : null}
@@ -170,8 +171,11 @@ export default async function ReadinessAssessmentPage() {
                 </h2>
                 <p>
                   Future routine generation must respect the affected areas or
-                  movements you chose to avoid. This does not certify that other
-                  activity is medically safe.
+                  movements you chose to avoid. Version 2 can also record
+                  optional structured movement choices for deterministic
+                  matching; free-text notes are never interpreted
+                  automatically. This does not certify that other activity is
+                  medically safe.
                 </p>
               </>
             ) : (

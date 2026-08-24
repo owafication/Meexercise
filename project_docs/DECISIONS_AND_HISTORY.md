@@ -60,6 +60,8 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 
 | `BR-20260823-01` | 2026-08-23 | PH-04 ordered routine editing | First PH-04 slice is confirmed merged through PR #17/CI #29; second slice locally verifies explicit routine order, append-only routine version edits, stale-write rejection, correction-chain-leaf readiness authority, cross-user edit denial and export-v3 multi-version history. PH-04 remains In progress; deterministic restriction matching/substitution, guided generation/explanation/review, templates and second-slice remote exact-head CI/merge remain later evidence. |
 
+| `BR-20260824-01` | 2026-08-24 | PH-04 structured constraints prerequisite | PR #18/routine editing is confirmed merged as `2ccd6fa867224d12737be878fa79c9cfacf658da`; this slice locally verifies readiness-v2 structured movement choices, immutable exact-version constraint tags, deterministic compatibility and existing-relation substitution primitives, plus fail-closed legacy/missing/unclear handling. A stale PH-02 draft-version regression fixture was moved to test-only version 999. Restricted routine save/edit remains blocked; generator/review/templates and this slice remote CI/merge remain later evidence. |
+
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
 2. Inspect current repository/evidence before changing implementation claims.
