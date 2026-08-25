@@ -15,6 +15,10 @@ export type ExerciseSideRule =
   | "per_side"
   | "alternating";
 
+export type ExerciseConstraintTag =
+  | "surface_hand_loading"
+  | "knee_bending";
+
 export type ExerciseLibraryItem = {
   id: string;
   exerciseKey: string;
@@ -24,6 +28,8 @@ export type ExerciseLibraryItem = {
   summary: string;
   targetAreas: string[];
   equipment: string[];
+  constraintTags: ExerciseConstraintTag[];
+  constraintsClassified: boolean;
 };
 
 export type ExerciseDetail = ExerciseLibraryItem & {
@@ -47,7 +53,10 @@ export type ExerciseDetail = ExerciseLibraryItem & {
   }>;
 };
 
-type Identity = { exercise_key?: unknown } | Array<{ exercise_key?: unknown }> | null;
+type Identity =
+  | { exercise_key?: unknown }
+  | Array<{ exercise_key?: unknown }>
+  | null;
 
 type RawVersion = {
   id?: unknown;
@@ -66,6 +75,8 @@ type RawVersion = {
   target_areas?: unknown;
   equipment?: unknown;
   side_rule?: unknown;
+  constraint_tags?: unknown;
+  constraint_tags_complete?: unknown;
   exercises?: Identity;
 };
 
@@ -83,13 +94,22 @@ type RawRelation = {
 
 function keyFrom(value: Identity): string | null {
   const record = Array.isArray(value) ? value[0] : value;
-  return typeof record?.exercise_key === "string" ? record.exercise_key : null;
+  return typeof record?.exercise_key === "string"
+    ? record.exercise_key
+    : null;
 }
 
 function strings(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
+}
+
+function constraintTags(value: unknown): ExerciseConstraintTag[] {
+  return strings(value).filter(
+    (item): item is ExerciseConstraintTag =>
+      item === "surface_hand_loading" || item === "knee_bending",
+  );
 }
 
 function libraryItem(row: RawVersion): ExerciseLibraryItem | null {
@@ -101,6 +121,7 @@ function libraryItem(row: RawVersion): ExerciseLibraryItem | null {
     (row.status !== "general" && row.status !== "reviewed") ||
     typeof row.title !== "string" ||
     typeof row.summary !== "string" ||
+    typeof row.constraint_tags_complete !== "boolean" ||
     !exerciseKey
   ) {
     return null;
@@ -115,6 +136,8 @@ function libraryItem(row: RawVersion): ExerciseLibraryItem | null {
     summary: row.summary,
     targetAreas: strings(row.target_areas),
     equipment: strings(row.equipment),
+    constraintTags: constraintTags(row.constraint_tags),
+    constraintsClassified: row.constraint_tags_complete,
   };
 }
 
@@ -122,7 +145,9 @@ export async function getExerciseLibrary(): Promise<ExerciseLibraryItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("exercise_versions")
-    .select("id,version_number,status,title,summary,target_areas,equipment,exercises!inner(exercise_key)")
+    .select(
+      "id,version_number,status,title,summary,target_areas,equipment,constraint_tags,constraint_tags_complete,exercises!inner(exercise_key)",
+    )
     .order("version_number", { ascending: false });
 
   if (error) {
@@ -133,12 +158,15 @@ export async function getExerciseLibrary(): Promise<ExerciseLibraryItem[]> {
 
   for (const row of (data ?? []) as RawVersion[]) {
     const item = libraryItem(row);
+
     if (item && !latest.has(item.exerciseKey)) {
       latest.set(item.exerciseKey, item);
     }
   }
 
-  return Array.from(latest.values()).sort((a, b) => a.title.localeCompare(b.title));
+  return Array.from(latest.values()).sort((a, b) =>
+    a.title.localeCompare(b.title),
+  );
 }
 
 export async function getExerciseDetail(
@@ -149,7 +177,9 @@ export async function getExerciseDetail(
 
   const baseQuery = supabase
     .from("exercise_versions")
-    .select("id,version_number,status,title,summary,purpose,setup,steps,cues,dosage_guidance,common_errors,safety_notes,accessible_text,target_areas,equipment,side_rule,exercises!inner(exercise_key)")
+    .select(
+      "id,version_number,status,title,summary,purpose,setup,steps,cues,dosage_guidance,common_errors,safety_notes,accessible_text,target_areas,equipment,side_rule,constraint_tags,constraint_tags_complete,exercises!inner(exercise_key)",
+    )
     .eq("exercises.exercise_key", exerciseKey);
 
   const versionQuery =
@@ -176,14 +206,22 @@ export async function getExerciseDetail(
     typeof row.setup !== "string" ||
     typeof row.dosage_guidance !== "string" ||
     typeof row.accessible_text !== "string" ||
-    !["not_applicable", "bilateral", "unilateral", "per_side", "alternating"].includes(String(row.side_rule))
+    ![
+      "not_applicable",
+      "bilateral",
+      "unilateral",
+      "per_side",
+      "alternating",
+    ].includes(String(row.side_rule))
   ) {
     return null;
   }
 
   const { data: relationData, error: relationError } = await supabase
     .from("exercise_version_relations")
-    .select("relation_type,guidance,target:exercise_versions!exercise_version_relations_target_version_id_fkey(version_number,title,exercises!inner(exercise_key))")
+    .select(
+      "relation_type,guidance,target:exercise_versions!exercise_version_relations_target_version_id_fkey(version_number,title,exercises!inner(exercise_key))",
+    )
     .eq("source_version_id", item.id)
     .order("sort_order", { ascending: true });
 
@@ -194,11 +232,18 @@ export async function getExerciseDetail(
   const relations: ExerciseDetail["relations"] = [];
 
   for (const relation of (relationData ?? []) as RawRelation[]) {
-    const target = Array.isArray(relation.target) ? relation.target[0] : relation.target;
+    const target = Array.isArray(relation.target)
+      ? relation.target[0]
+      : relation.target;
     const targetKey = keyFrom(target?.exercises ?? null);
 
     if (
-      !["substitution", "regression", "progression", "equipment_alternative"].includes(String(relation.relation_type)) ||
+      ![
+        "substitution",
+        "regression",
+        "progression",
+        "equipment_alternative",
+      ].includes(String(relation.relation_type)) ||
       typeof relation.guidance !== "string" ||
       typeof target?.version_number !== "number" ||
       typeof target?.title !== "string" ||

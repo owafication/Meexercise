@@ -8,6 +8,7 @@ import { initialAssessmentActionState } from "@/app/profile/assessment/state";
 import {
   ACTIVITY_FREQUENCY_OPTIONS,
   INDEPENDENT_EXERCISE_OPTIONS,
+  MOVEMENT_CONSTRAINT_OPTIONS,
   PROFESSIONAL_RESTRICTION_OPTIONS,
   type ReadinessAssessmentAnswers,
 } from "@/modules/profile-assessment/readiness";
@@ -16,10 +17,12 @@ export function AssessmentForm({
   sessionId,
   initialRowVersion,
   initialAnswers,
+  templateVersionNumber,
 }: {
   sessionId: string;
   initialRowVersion: number;
   initialAnswers: ReadinessAssessmentAnswers;
+  templateVersionNumber: number;
 }) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(
@@ -177,6 +180,38 @@ export function AssessmentForm({
         <p className="field-error" id="limitation-details-error">
           {limitationDetailError}
         </p>
+      ) : null}
+
+      {templateVersionNumber >= 2 ? (
+        <fieldset
+          className="choice-group"
+          aria-describedby="movement-constraints-help"
+        >
+          <legend>
+            Which movement types should MeExercise avoid when planning?
+          </legend>
+          <p className="field-help" id="movement-constraints-help">
+            Optional. Choose only options that match what you already know you
+            want to avoid. MeExercise will not infer these categories from your
+            free-text notes. If none fit, choose “Something else or I am not
+            sure”; restricted planning will remain paused until the constraint
+            can be represented deterministically.
+          </p>
+
+          {MOVEMENT_CONSTRAINT_OPTIONS.map((option) => (
+            <label className="choice-option" key={option.value}>
+              <input
+                type="checkbox"
+                name="movementConstraint"
+                value={option.value}
+                defaultChecked={initialAnswers.limitations.movementConstraints.includes(
+                  option.value,
+                )}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </fieldset>
       ) : null}
 
       <fieldset

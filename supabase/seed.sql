@@ -101,6 +101,101 @@ values (
   }
   $definition$::jsonb,
   now()
+),
+(
+  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2',
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  2,
+  'Readiness baseline',
+  'published',
+  $definition$
+  {
+    "schemaVersion": 2,
+    "purpose": "Self-directed general-wellness readiness and movement context. This is not a medical assessment or safety clearance.",
+    "sections": [
+      {
+        "key": "activity",
+        "title": "Current activity",
+        "questions": [
+          {
+            "key": "frequency",
+            "type": "single_choice",
+            "required": true,
+            "prompt": "How often are you currently physically active in a typical week?"
+          }
+        ]
+      },
+      {
+        "key": "limitations",
+        "title": "Movement context",
+        "questions": [
+          {
+            "key": "hasLimitations",
+            "type": "boolean",
+            "required": true,
+            "prompt": "Do you currently have areas or movements you want MeExercise to account for?"
+          },
+          {
+            "key": "affectedAreas",
+            "type": "text",
+            "required": false,
+            "maxLength": 300,
+            "prompt": "Affected areas"
+          },
+          {
+            "key": "avoidedMovements",
+            "type": "text",
+            "required": false,
+            "maxLength": 300,
+            "prompt": "Movements you avoid"
+          },
+          {
+            "key": "movementConstraints",
+            "type": "multi_choice",
+            "required": false,
+            "prompt": "Which movement types should MeExercise avoid when planning?",
+            "options": [
+              "surface_hand_loading",
+              "knee_bending",
+              "other_or_unclear"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "readiness",
+        "title": "Independent exercise readiness",
+        "questions": [
+          {
+            "key": "independentExercise",
+            "type": "single_choice",
+            "required": true,
+            "prompt": "Are you currently comfortable exercising independently without individual professional supervision?"
+          },
+          {
+            "key": "professionalRestriction",
+            "type": "single_choice",
+            "required": true,
+            "prompt": "Has a qualified health professional told you to avoid or modify exercise right now?"
+          }
+        ]
+      }
+    ],
+    "safetyRules": [
+      {
+        "code": "movement_restrictions_present",
+        "outcome": "restrict_generation",
+        "meaning": "Later routine generation must respect recorded movement limitations."
+      },
+      {
+        "code": "professional_review_recommended",
+        "outcome": "block_generation",
+        "meaning": "Unrestricted routine generation is blocked and professional input is recommended."
+      }
+    ]
+  }
+  $definition$::jsonb,
+  now()
 );
 -- PH-03 synthetic exercise content.
 -- Development/test mechanics only; not a claim of production editorial review.
@@ -226,6 +321,36 @@ values
   'Stand securely with a resistance band across the upper back, press both hands forward together, then return them slowly while keeping the band controlled.',
   array['Upper body'],array['Resistance band'],'bilateral',null
 );
+
+update public.exercise_versions
+set
+  constraint_tags = array[
+    'knee_bending'::public.exercise_constraint_tag
+  ],
+  constraint_tags_complete = true
+where id in (
+  'e1111111-1111-4111-8111-111111111111'::uuid,
+  'e2222222-2222-4222-8222-222222222222'::uuid
+);
+
+update public.exercise_versions
+set
+  constraint_tags = array[
+    'surface_hand_loading'::public.exercise_constraint_tag
+  ],
+  constraint_tags_complete = true
+where id in (
+  'e3333333-3333-4333-8333-333333333333'::uuid,
+  'e3333333-3333-4333-8333-333333333334'::uuid,
+  'e4444444-4444-4444-8444-444444444444'::uuid,
+  'e6666666-6666-4666-8666-666666666666'::uuid
+);
+
+update public.exercise_versions
+set
+  constraint_tags = '{}'::public.exercise_constraint_tag[],
+  constraint_tags_complete = true
+where id = 'e7777777-7777-4777-8777-777777777777'::uuid;
 
 insert into public.exercise_version_relations (
   source_version_id,target_version_id,relation_type,guidance,sort_order

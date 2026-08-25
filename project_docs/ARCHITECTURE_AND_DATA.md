@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual routine foundation merged and ordered/edit-versioning second slice locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning merged and structured-constraint prerequisite locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -72,6 +72,17 @@ Edits never rewrite prior routine snapshots. The version-append mutation locks t
 Readiness selection no longer relies on completion timestamps. PH-02 corrections form immutable chains through `corrects_session_id`; same-transaction records can share timestamps. Application and database planning gates therefore resolve the highest published template version and require exactly one completed correction-chain leaf. Competing leaves fail closed. Safety flags are read only from that current leaf.
 
 The edit UI can retain currently approved exact historical versions already present in the snapshot even when a newer library version exists. Withdrawn/restricted historical versions remain readable as history but cannot be copied into a newly saved routine version. Export v3 already contains every routine version, so this slice needs no export-schema increment.
+
+## Implemented PH-04 structured-constraint prerequisite
+`BR-20260824-01` adds only the deterministic planning primitives required before restricted routine generation can be consumed. It does not unlock restricted routine save/edit and does not parse free-text wellness notes.
+
+The readiness baseline has a published version 2 that can record optional user-selected movement-avoidance categories. The first bounded synthetic vocabulary is `surface_hand_loading`, `knee_bending` and `other_or_unclear`; only the first two are deterministic planning tags. Version 1 remains preserved for historical assessment interpretation and linked corrections on older completed records. A restricted current assessment without a supported structured choice, a legacy version-1 restriction, or `other_or_unclear` remains unresolved and fails closed rather than being inferred from `affectedAreas` or `avoidedMovements`.
+
+`exercise_versions` now owns exact-version `constraint_tags` plus an explicit classification-complete marker. Finalised exercise constraint metadata is immutable with the rest of the version's reviewed content. Draft content cannot finalise until the classification-complete marker is true; an explicitly classified empty tag set is distinct from an unclassified version. The current synthetic fixtures demonstrate mechanics only and do not establish a production taxonomy/editorial review.
+
+Private deterministic database primitives can resolve the current readiness correction-chain leaf, extract its supported structured constraint set, test whether one approved exact exercise version conflicts with that set, and select the first compatible target from the existing exact-version `substitution` relations. These primitives extend the existing exercise-content/planning contracts rather than adding a second relationship authority or runtime AI.
+
+The application exercise-content reader exposes this exact-version planning metadata to server consumers. The next PH-04 consumer slice must apply these primitives to routine create/edit or guided proposals before any restricted save is permitted. `private.require_current_planning_readiness` therefore remains conservative for current manual persistence.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.

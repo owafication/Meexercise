@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Risk baseline active; PH-02 private-data boundaries Passed / Verified; PH-03 exercise-content boundary Passed / Verified; PH-04 manual-routine foundation merged and ordered/edit-versioning second slice locally verified; legal applicability and production exposure unproven
+**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; PH-04 manual create/edit/versioning merged and structured-constraint prerequisite locally verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule
@@ -46,6 +46,15 @@ The second slice extends owner authorisation to the edit route and append-only m
 Routine version N remains immutable when N+1 is saved, preserving `RISK-018` protection and export-v3 history. Withdrawn historical exercise versions remain owner-readable but cannot be copied into a new version.
 
 `RISK-016` remains partial. A restrictive correction is resolved through the correction-chain leaf and blocks create/edit; competing current leaves fail closed. Free-text restrictions are still not inferred into exercise compatibility, so deterministic restriction matching/substitution remains later PH-04 work.
+
+## PH-04 structured-constraint prerequisite risk evidence
+The third PH-04 slice advances `RISK-016` without weakening the existing stop boundary. Structured movement constraints originate only from explicit user choices in the versioned readiness response. Free-text affected areas and avoided-movement notes remain sensitive user context and are not converted into planning tags by keyword, model or heuristic.
+
+Exact exercise-version planning tags are version-owned reviewed metadata and are immutable after finalisation. Deterministic compatibility requires currently approved content; an unclassified exercise version cannot be treated as compatible when constraints are present. Compatible substitution lookup uses only existing source-version-owned `substitution` relations and their exact target versions.
+
+Restricted planning is still fail-closed in this prerequisite slice. Legacy version-1 restrictions, missing structured choices, `other_or_unclear`, block-generation outcomes and ambiguous current readiness history do not produce a permissive constraint set. Manual routine create/edit therefore remains blocked until the later consumer slice validates the entire selected/proposed routine through these primitives.
+
+Synthetic tags and the two-category deterministic vocabulary prove mechanism only. Production taxonomy breadth, editorial classification of a real catalogue and any claim that a category is medically sufficient remain Unproven and cannot be inferred from these fixtures.
 
 No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system or complex RBAC is assumed before its threat/contract/exposure requires it.
 

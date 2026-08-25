@@ -34,6 +34,9 @@ test("readiness assessment saves, resumes, and completes conservatively", async 
     .check();
   await page.getByLabel("Affected areas").fill("Left shoulder");
   await page.getByLabel("Movements you avoid").fill("Overhead pressing");
+  await page
+    .getByLabel("Body weight supported through the hands")
+    .check();
   await page.getByLabel("Yes, I can exercise independently").check();
   await page
     .getByLabel("No professional restriction has been given")
@@ -54,6 +57,9 @@ test("readiness assessment saves, resumes, and completes conservatively", async 
   await expect(page.getByLabel("Movements you avoid")).toHaveValue(
     "Overhead pressing",
   );
+  await expect(
+    page.getByLabel("Body weight supported through the hands"),
+  ).toBeChecked();
   await expect(
     page.getByLabel("Yes, I can exercise independently"),
   ).toBeChecked();

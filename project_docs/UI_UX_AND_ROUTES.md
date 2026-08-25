@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual foundation merged and ordered/edit-versioning routes locally verified; later feature-route paths remain proposed
+**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual create/edit/versioning merged and structured readiness-input prerequisite locally verified; later feature-route paths remain proposed
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -80,6 +80,15 @@ PH-04 second slice extends current routine UX:
 - a linked restrictive assessment correction blocks manual save/edit until deterministic restriction matching exists.
 
 Guided generation, deterministic substitution, scheduling, progression, print/run and template-management URLs remain later work.
+
+PH-04 structured-constraint prerequisite extends the existing `/profile/assessment` flow without creating a new route:
+- readiness template v2 can show optional native checkbox choices for supported movement categories;
+- the user is explicitly told that MeExercise does not infer these categories from free-text notes;
+- `Something else or I am not sure` records unresolved structured context and does not unlock restricted planning;
+- corrections of completed readiness assessments continue on the source assessment's immutable template version, so a version-1 historical correction does not silently adopt version-2 fields;
+- browser save/resume evidence verifies a version-2 structured movement choice persists through the existing assessment flow.
+
+`/create` and `/routines/[routineId]/edit` deliberately keep their current restricted state in this prerequisite slice. No user is told that deterministic substitution is available until the later consumer flow actually validates/replaces routine selections.
 
 Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v3: assessment correction linkage remains present and PH-04 routine history is included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
 
