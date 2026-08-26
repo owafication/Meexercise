@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { getExercisePlanningCompatibility } from "@/modules/exercise-content/server/library";
 import { getVerifiedUserId } from "@/modules/identity/server/auth";
-import { getPlanningReadinessGate } from "@/modules/profile-assessment/server/assessment";
+import { getPlanningConstraintContext } from "@/modules/profile-assessment/server/assessment";
 
 import type { EditRoutineActionState } from "./state";
 
@@ -91,48 +92,47 @@ export async function editManualRoutineAction(
     return errorState("Your session has expired. Sign in again before saving.");
   }
 
-  const gate = await getPlanningReadinessGate(supabase, userId);
+  const planning = await getPlanningConstraintContext(supabase, userId);
 
-  if (gate === "assessment_required") {
+  if (planning.kind === "assessment_required") {
     return errorState(
       "Complete your current readiness assessment before saving a new routine version.",
     );
   }
 
-  if (gate === "restricted") {
+  if (planning.kind === "restricted_unresolved") {
     return errorState(
-      "Your assessment records movement restrictions. Routine editing is paused until deterministic restriction matching is available.",
+      "Your assessment records movement restrictions that are not represented by supported structured choices. Review the assessment before editing.",
     );
   }
 
-  if (gate === "blocked") {
+  if (planning.kind === "blocked") {
     return errorState(
-      "Your latest readiness assessment blocks unrestricted self-directed routine editing. Review the assessment outcome before planning.",
+      "Your latest readiness assessment blocks self-directed routine editing. Review the assessment outcome before planning.",
     );
   }
 
-  if (gate !== "ready") {
+  if (planning.kind === "unavailable") {
     return errorState("Routine readiness could not be verified. Try again later.");
   }
 
-  const { data: selectedRows, error: selectedError } = await supabase
-    .from("exercise_versions")
-    .select("id,status")
-    .in("id", exerciseVersionIds);
+  const compatibility = await getExercisePlanningCompatibility(
+    exerciseVersionIds,
+    planning.constraints,
+  );
 
-  if (
-    selectedError ||
-    !selectedRows ||
-    selectedRows.length !== exerciseVersionIds.length ||
-    selectedRows.some(
-      (row) => row.status !== "general" && row.status !== "reviewed",
-    )
-  ) {
+  if (!compatibility || compatibility.length !== exerciseVersionIds.length) {
     return errorState(
-      "One or more selected exercise versions cannot be carried into a new routine version. Reload and choose currently approved content.",
+      "Selected exercise versions could not be verified. Reload and review the current routine.",
+    );
+  }
+
+  if (compatibility.some((exercise) => !exercise.compatible)) {
+    return errorState(
+      "One or more selected exercise versions conflict with the current structured planning constraints.",
       {
         exercises:
-          "Use only exercise versions that are still general or reviewed.",
+          "Choose only currently approved exercise versions that pass the current structured constraints.",
       },
     );
   }
@@ -152,6 +152,22 @@ export async function editManualRoutineAction(
 
   if (error?.code === "42501") {
     return errorState("Routine not available.");
+  }
+
+  if (error?.code === "23514") {
+    return errorState(
+      "One or more selected exercise versions are no longer approved or compatible. Reload and review the current choices.",
+      {
+        exercises:
+          "Use only exercise versions that remain approved and compatible with the current structured constraints.",
+      },
+    );
+  }
+
+  if (error?.code === "55000") {
+    return errorState(
+      "Current readiness constraints could not be satisfied. Review the readiness assessment and reload before saving.",
+    );
   }
 
   if (error || typeof data !== "number") {

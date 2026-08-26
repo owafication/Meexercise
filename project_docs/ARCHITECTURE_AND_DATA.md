@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning merged and structured-constraint prerequisite locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning and structured-constraint prerequisite merged; manual constraint-consumer locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -83,6 +83,17 @@ The readiness baseline has a published version 2 that can record optional user-s
 Private deterministic database primitives can resolve the current readiness correction-chain leaf, extract its supported structured constraint set, test whether one approved exact exercise version conflicts with that set, and select the first compatible target from the existing exact-version `substitution` relations. These primitives extend the existing exercise-content/planning contracts rather than adding a second relationship authority or runtime AI.
 
 The application exercise-content reader exposes this exact-version planning metadata to server consumers. The next PH-04 consumer slice must apply these primitives to routine create/edit or guided proposals before any restricted save is permitted. `private.require_current_planning_readiness` therefore remains conservative for current manual persistence.
+
+## Implemented PH-04 manual structured-constraint consumer
+`BR-20260825-01` consumes the previously merged structured-constraint primitives in the existing manual routine create/edit flow without introducing a parallel safety engine or runtime AI.
+
+Application planning state now distinguishes unrestricted readiness, supported structured restriction, unresolved restriction, assessment-required, blocked and unavailable states. For a supported structured restriction, the builder filters the currently approved exact exercise-version choices through version-owned immutable constraint tags. Existing compatible `substitution` relations can be presented with their reviewed guidance, but the application never silently swaps an exercise; the user must explicitly select the replacement.
+
+The trusted mutation boundary independently validates the complete submitted exact-version array. `private.require_routine_exercise_constraints` resolves the current correction-chain readiness leaf through the existing structured-constraint authority, rejects non-visible/non-approved selections, and rejects any exact exercise version that conflicts with the current structured constraint set before routine identity/version/items are inserted. Create and append-only edit therefore share the same database safety invariant.
+
+Historical routine versions remain unchanged when later readiness restrictions change. A new routine version may omit/replace now-incompatible content while older snapshots continue to reference their exact historical exercise versions. Stale edit detection, owner authorisation and export-v3 history remain unchanged.
+
+Legacy version-1 restrictions, missing structured choices, `other_or_unclear`, block-generation outcomes and ambiguous/unavailable readiness still fail closed. Free-text `affectedAreas`/`avoidedMovements` are not parsed into constraint tags. This slice proves manual constraint consumption only; deterministic guided proposal construction, explanation and per-item review/replacement remain later PH-04 work.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.

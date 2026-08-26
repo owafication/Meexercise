@@ -3,8 +3,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getVerifiedUserId } from "@/modules/identity/server/auth";
 import {
+  deterministicMovementConstraints,
   parseStoredReadinessAnswers,
   READINESS_TEMPLATE_KEY,
+  type DeterministicMovementConstraint,
   type ReadinessAssessmentAnswers,
 } from "@/modules/profile-assessment/readiness";
 
@@ -399,4 +401,94 @@ export async function getPlanningReadinessGate(
   }
 
   return "ready";
+}
+export type PlanningConstraintContext =
+  | { kind: "ready"; constraints: DeterministicMovementConstraint[] }
+  | { kind: "restricted"; constraints: DeterministicMovementConstraint[] }
+  | { kind: "restricted_unresolved" }
+  | { kind: "assessment_required" }
+  | { kind: "blocked" }
+  | { kind: "unavailable" };
+
+export async function getPlanningConstraintContext(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<PlanningConstraintContext> {
+  const context = await getReadinessTemplateContext(supabase);
+
+  if (!context) {
+    return { kind: "unavailable" };
+  }
+
+  const versionIds = context.versions.map((version) => version.id);
+
+  const { data: inProgress, error: inProgressError } = await supabase
+    .from("assessment_sessions")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("status", "in_progress")
+    .in("template_version_id", versionIds)
+    .limit(1);
+
+  if (inProgressError) {
+    return { kind: "unavailable" };
+  }
+
+  if ((inProgress ?? []).length > 0) {
+    return { kind: "assessment_required" };
+  }
+
+  const { data: completedRows, error: completedError } = await supabase
+    .from("assessment_sessions")
+    .select("id,template_version_id,corrects_session_id,responses")
+    .eq("user_id", userId)
+    .eq("status", "completed")
+    .in("template_version_id", versionIds);
+
+  if (completedError) {
+    return { kind: "unavailable" };
+  }
+
+  const currentCompleted = resolveCurrentCompletedAssessment(
+    completedRows ?? [],
+    context,
+  );
+
+  if (currentCompleted.kind === "ambiguous") {
+    return { kind: "unavailable" };
+  }
+
+  if (currentCompleted.kind === "none") {
+    return { kind: "assessment_required" };
+  }
+
+  const completed = currentCompleted.row;
+
+  const { data: flags, error: flagsError } = await supabase
+    .from("assessment_safety_flags")
+    .select("outcome")
+    .eq("user_id", userId)
+    .eq("session_id", completed.id);
+
+  if (flagsError) {
+    return { kind: "unavailable" };
+  }
+
+  if ((flags ?? []).some((flag) => flag.outcome === "block_generation")) {
+    return { kind: "blocked" };
+  }
+
+  if ((flags ?? []).some((flag) => flag.outcome === "restrict_generation")) {
+    const constraints = deterministicMovementConstraints(
+      parseStoredReadinessAnswers(completed.responses),
+    );
+
+    if (!constraints || constraints.length === 0) {
+      return { kind: "restricted_unresolved" };
+    }
+
+    return { kind: "restricted", constraints };
+  }
+
+  return { kind: "ready", constraints: [] };
 }
