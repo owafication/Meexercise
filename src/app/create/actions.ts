@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import { getExerciseLibrary } from "@/modules/exercise-content/server/library";
+import { getExercisePlanningCompatibility } from "@/modules/exercise-content/server/library";
 import { getVerifiedUserId } from "@/modules/identity/server/auth";
-import { getPlanningReadinessGate } from "@/modules/profile-assessment/server/assessment";
+import { getPlanningConstraintContext } from "@/modules/profile-assessment/server/assessment";
 
 import type { CreateRoutineActionState } from "./state";
 
@@ -68,45 +68,48 @@ export async function createManualRoutineAction(
     return errorState("Your session has expired. Sign in again before saving.");
   }
 
-  const gate = await getPlanningReadinessGate(supabase, userId);
+  const planning = await getPlanningConstraintContext(supabase, userId);
 
-  if (gate === "assessment_required") {
+  if (planning.kind === "assessment_required") {
     return errorState(
       "Complete your current readiness assessment before saving a routine.",
     );
   }
 
-  if (gate === "restricted") {
+  if (planning.kind === "restricted_unresolved") {
     return errorState(
-      "Your assessment records movement restrictions. Routine saving is paused until deterministic restriction matching is available.",
+      "Your assessment records movement restrictions that are not represented by supported structured choices. Review the assessment before saving.",
     );
   }
 
-  if (gate === "blocked") {
+  if (planning.kind === "blocked") {
     return errorState(
-      "Your latest readiness assessment blocks unrestricted self-directed routine creation. Review the assessment outcome before planning.",
+      "Your latest readiness assessment blocks self-directed routine creation. Review the assessment outcome before planning.",
     );
   }
 
-  if (gate !== "ready") {
+  if (planning.kind === "unavailable") {
     return errorState("Routine readiness could not be verified. Try again later.");
   }
 
-  let library;
-  try {
-    library = await getExerciseLibrary();
-  } catch {
+  const compatibility = await getExercisePlanningCompatibility(
+    exerciseVersionIds,
+    planning.constraints,
+  );
+
+  if (!compatibility || compatibility.length !== exerciseVersionIds.length) {
     return errorState(
-      "Approved exercise content could not be verified. Try again later.",
+      "Approved exercise content could not be verified. Reload and review your selections.",
     );
   }
 
-  const allowedIds = new Set(library.map((exercise) => exercise.id));
-
-  if (exerciseVersionIds.some((id) => !allowedIds.has(id))) {
+  if (compatibility.some((exercise) => !exercise.compatible)) {
     return errorState(
-      "One or more selected exercises are no longer available for a new routine. Reload and review your selections.",
-      { exercises: "Reload the current approved exercise list before saving." },
+      "One or more selected exercises conflict with the current structured planning constraints.",
+      {
+        exercises:
+          "Choose only the compatible exercise versions shown by the current builder.",
+      },
     );
   }
 
@@ -114,6 +117,22 @@ export async function createManualRoutineAction(
     p_title: title,
     p_exercise_version_ids: exerciseVersionIds,
   });
+
+  if (error?.code === "23514") {
+    return errorState(
+      "One or more selected exercises are no longer approved or compatible. Reload and review the current choices.",
+      {
+        exercises:
+          "Reload the current approved and compatible exercise list before saving.",
+      },
+    );
+  }
+
+  if (error?.code === "55000") {
+    return errorState(
+      "Current readiness constraints could not be satisfied. Review the readiness assessment and reload before saving.",
+    );
+  }
 
   if (error || typeof data !== "string") {
     return errorState(

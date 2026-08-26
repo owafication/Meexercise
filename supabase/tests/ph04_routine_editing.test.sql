@@ -277,8 +277,8 @@ select throws_ok(
     (select routine_id from ph04_edit_routine)
   ),
   '55000',
-  'planning restrictions require deterministic constraint handling before saving a routine',
-  'newly recorded movement restriction blocks routine editing'
+  'structured movement constraints are required before restricted planning',
+  'legacy version-one movement restriction remains fail closed during routine editing'
 );
 
 select is(

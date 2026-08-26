@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual create/edit/versioning merged and structured readiness-input prerequisite locally verified; later feature-route paths remain proposed
+**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual create/edit/versioning and structured readiness prerequisite merged; manual constraint-consumer locally verified; later feature-route paths remain proposed
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -89,6 +89,16 @@ PH-04 structured-constraint prerequisite extends the existing `/profile/assessme
 - browser save/resume evidence verifies a version-2 structured movement choice persists through the existing assessment flow.
 
 `/create` and `/routines/[routineId]/edit` deliberately keep their current restricted state in this prerequisite slice. No user is told that deterministic substitution is available until the later consumer flow actually validates/replaces routine selections.
+
+PH-04 manual constraint consumption extends existing `ROUTE-019` and `ROUTE-020` edit behaviour without adding a new route:
+- `/create` distinguishes supported structured restrictions from unresolved/blocked readiness. Supported restricted users see only currently approved exact exercise versions that pass the current structured constraints.
+- `/create` can show compatible existing substitution relationships with version numbers and reviewed guidance. The suggestion is explanatory only; the user selects any replacement in the normal routine slots.
+- `/routines/[routineId]/edit` re-evaluates the latest owner snapshot against current readiness. Incompatible current items are removed from editable choices and described with a compatible reviewed substitution when one exists.
+- saving a constrained edit still creates an immutable version N+1; older routine versions remain readable and unchanged.
+- unresolved legacy/missing/unclear structured restrictions continue to direct the user back to assessment rather than interpreting free-text notes.
+- blocked or unavailable readiness still prevents manual persistence.
+
+Authenticated browser evidence covers both unrestricted manual create/edit/history and supported structured restricted creation plus a later constrained edit that replaces incompatible content by explicit user choice. Guided proposal/review/explanation UI remains unimplemented.
 
 Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v3: assessment correction linkage remains present and PH-04 routine history is included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
 

@@ -277,3 +277,162 @@ export async function getExerciseDetail(
     relations,
   };
 }
+export type ExercisePlanningSubstitution = {
+  id: string;
+  title: string;
+  versionNumber: number;
+  guidance: string;
+};
+
+export type ExercisePlanningCompatibility = {
+  id: string;
+  title: string;
+  versionNumber: number;
+  status: string;
+  compatible: boolean;
+  substitution: ExercisePlanningSubstitution | null;
+};
+
+type RawPlanningVersion = {
+  id?: unknown;
+  version_number?: unknown;
+  status?: unknown;
+  title?: unknown;
+  constraint_tags?: unknown;
+  constraint_tags_complete?: unknown;
+};
+
+type RawPlanningRelation = {
+  source_version_id?: unknown;
+  guidance?: unknown;
+  target?: RawPlanningVersion | RawPlanningVersion[] | null;
+};
+
+function planningVersionCompatible(
+  row: RawPlanningVersion,
+  constraints: ExerciseConstraintTag[],
+): boolean {
+  if (row.status !== "general" && row.status !== "reviewed") {
+    return false;
+  }
+
+  if (constraints.length === 0) {
+    return true;
+  }
+
+  if (row.constraint_tags_complete !== true) {
+    return false;
+  }
+
+  const tags = constraintTags(row.constraint_tags);
+
+  return !tags.some((tag) => constraints.includes(tag));
+}
+
+export async function getExercisePlanningCompatibility(
+  exerciseVersionIds: string[],
+  constraints: ExerciseConstraintTag[],
+): Promise<ExercisePlanningCompatibility[] | null> {
+  const uniqueIds = Array.from(new Set(exerciseVersionIds));
+
+  if (uniqueIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("exercise_versions")
+    .select(
+      "id,version_number,status,title,constraint_tags,constraint_tags_complete",
+    )
+    .in("id", uniqueIds);
+
+  if (error || !data || data.length !== uniqueIds.length) {
+    return null;
+  }
+
+  const mapped = new Map<string, ExercisePlanningCompatibility>();
+
+  for (const row of data as RawPlanningVersion[]) {
+    if (
+      typeof row.id !== "string" ||
+      typeof row.version_number !== "number" ||
+      typeof row.status !== "string" ||
+      typeof row.title !== "string"
+    ) {
+      return null;
+    }
+
+    mapped.set(row.id, {
+      id: row.id,
+      title: row.title,
+      versionNumber: row.version_number,
+      status: row.status,
+      compatible: planningVersionCompatible(row, constraints),
+      substitution: null,
+    });
+  }
+
+  const incompatibleApprovedIds = Array.from(mapped.values())
+    .filter(
+      (item) =>
+        !item.compatible &&
+        (item.status === "general" || item.status === "reviewed"),
+    )
+    .map((item) => item.id);
+
+  if (constraints.length > 0 && incompatibleApprovedIds.length > 0) {
+    const { data: relations, error: relationError } = await supabase
+      .from("exercise_version_relations")
+      .select(
+        "source_version_id,guidance,target:exercise_versions!exercise_version_relations_target_version_id_fkey(id,version_number,status,title,constraint_tags,constraint_tags_complete)",
+      )
+      .eq("relation_type", "substitution")
+      .in("source_version_id", incompatibleApprovedIds)
+      .order("sort_order", { ascending: true });
+
+    if (relationError) {
+      return null;
+    }
+
+    for (const relation of (relations ?? []) as RawPlanningRelation[]) {
+      if (
+        typeof relation.source_version_id !== "string" ||
+        typeof relation.guidance !== "string"
+      ) {
+        continue;
+      }
+
+      const source = mapped.get(relation.source_version_id);
+
+      if (!source || source.substitution) {
+        continue;
+      }
+
+      const target = Array.isArray(relation.target)
+        ? relation.target[0]
+        : relation.target;
+
+      if (
+        !target ||
+        typeof target.id !== "string" ||
+        typeof target.version_number !== "number" ||
+        typeof target.title !== "string" ||
+        !planningVersionCompatible(target, constraints)
+      ) {
+        continue;
+      }
+
+      source.substitution = {
+        id: target.id,
+        title: target.title,
+        versionNumber: target.version_number,
+        guidance: relation.guidance,
+      };
+    }
+  }
+
+  return uniqueIds.map((id) => mapped.get(id)).filter(
+    (item): item is ExercisePlanningCompatibility => Boolean(item),
+  );
+}

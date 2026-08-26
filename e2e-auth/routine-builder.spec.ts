@@ -32,6 +32,30 @@ async function completeUnrestrictedReadiness(page: Page) {
   ).toBeVisible();
 }
 
+async function completeStructuredRestrictedReadiness(page: Page) {
+  await page.goto("/profile/assessment");
+  await page.getByRole("button", { name: "Start readiness assessment" }).click();
+  await page.getByLabel("1–2 days per week").check();
+  await page
+    .getByLabel("Yes, I have areas or movements to account for")
+    .check();
+  await page.getByLabel("Affected areas").fill("Wrist");
+  await page.getByLabel("Movements you avoid").fill("Weight through hands");
+  await page
+    .getByLabel("Body weight supported through the hands")
+    .check();
+  await page.getByLabel("Yes, I can exercise independently").check();
+  await page.getByLabel("No professional restriction has been given").check();
+  await page.getByRole("button", { name: "Complete assessment" }).click();
+
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: "Movement restrictions recorded",
+    }),
+  ).toBeVisible();
+}
+
 async function readDownloadText(download: Download) {
   const stream = await download.createReadStream();
   if (!stream) {
@@ -202,8 +226,11 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   await page
     .getByLabel("Yes, I have areas or movements to account for")
     .check();
-  await page.getByLabel("Affected areas").fill("Shoulder");
-  await page.getByLabel("Movements you avoid").fill("Overhead press");
+  await page.getByLabel("Affected areas").fill("Wrist");
+  await page.getByLabel("Movements you avoid").fill("Weight through hands");
+  await page
+    .getByLabel("Body weight supported through the hands")
+    .check();
   await page.getByRole("button", { name: "Complete assessment" }).click();
 
   await expect(
@@ -214,15 +241,33 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   ).toBeVisible();
 
   await page.goto(`${routineUrl}/edit`);
-  await page.getByRole("button", { name: "Save new version" }).click();
 
   await expect(
-    page
-      .getByRole("alert")
-      .filter({ hasText: "Your assessment records movement restrictions." }),
-  ).toContainText(
-    "Routine editing is paused until deterministic restriction matching is available.",
-  );
+    page.getByRole("heading", {
+      level: 2,
+      name: "Current movement constraints",
+    }),
+  ).toBeVisible();
+  await expect(page.getByText(/Incline push-up — version 1 conflicts/)).toBeVisible();
+  await expect(page.getByText(/Counter push-up — version 1 conflicts/)).toBeVisible();
+
+  await page
+    .getByLabel("Exercise 1", { exact: true })
+    .selectOption({ label: "Standing resistance-band press — version 1" });
+  await page.getByLabel("Exercise 2", { exact: true }).selectOption("");
+  await page.getByRole("button", { name: "Save new version" }).click();
+
+  await expect(page).toHaveURL(routineUrl);
+  await expect(page.getByText("Routine · version 3")).toBeVisible();
+
+  const constrainedItems = page
+    .locator('section[aria-labelledby^="routine-section-"]')
+    .getByRole("listitem");
+
+  await expect(
+    constrainedItems.nth(0).getByRole("heading", { level: 3 }),
+  ).toHaveText("Standing resistance-band press");
+  await expect(constrainedItems).toHaveCount(1);
 
   const otherContext = await browser.newContext();
 
@@ -248,4 +293,65 @@ test("manual routine creation and editing preserve ordered immutable versions", 
     await otherContext.close();
     await stalePage.close();
   }
+});
+
+test("structured restriction filters manual creation and exposes a compatible substitution", async ({
+  page,
+}: {
+  page: Page;
+}) => {
+  await signUp(page, "routine-restricted-create");
+  await completeStructuredRestrictedReadiness(page);
+
+  await page.goto("/create");
+
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: "Structured movement constraints applied",
+    }),
+  ).toBeVisible();
+
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: "Build a constrained manual routine",
+    }),
+  ).toBeVisible();
+
+  const exerciseOne = page.getByLabel("Exercise 1", { exact: true });
+  const optionText = await exerciseOne.locator("option").allTextContents();
+
+  expect(optionText).toContain("Standing resistance-band press — version 1");
+  expect(optionText).not.toContain("Wall push-up — version 2");
+
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Compatible substitutions" }),
+  ).toBeVisible();
+
+  await expect(
+    page.getByText(
+      /Wall push-up — version 2.*Standing resistance-band press — version 1/,
+    ),
+  ).toBeVisible();
+
+  await page.getByLabel("Routine title").fill("Structured restricted routine");
+  await exerciseOne.selectOption({
+    label: "Standing resistance-band press — version 1",
+  });
+  await page.getByRole("button", { name: "Save routine" }).click();
+
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Structured restricted routine",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      level: 3,
+      name: "Standing resistance-band press",
+    }),
+  ).toBeVisible();
 });

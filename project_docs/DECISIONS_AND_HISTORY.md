@@ -62,6 +62,8 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 
 | `BR-20260824-01` | 2026-08-24 | PH-04 structured constraints prerequisite | PR #18/routine editing is confirmed merged as `2ccd6fa867224d12737be878fa79c9cfacf658da`; this slice locally verifies readiness-v2 structured movement choices, immutable exact-version constraint tags, deterministic compatibility and existing-relation substitution primitives, plus fail-closed legacy/missing/unclear handling. A stale PH-02 draft-version regression fixture was moved to test-only version 999. Restricted routine save/edit remains blocked; generator/review/templates and this slice remote CI/merge remain later evidence. |
 
+| `BR-20260825-01` | 2026-08-25 | PH-04 manual constraint consumption | PR #19/structured-constraint prerequisite is confirmed merged as `a2075b7adeba8b07448e94dce881622e21cb0966`; this slice locally verifies supported structured restrictions in manual create/edit, full exact-version database validation, explicit user-selected compatible substitution suggestions and preservation of historical versions. The initial consumer pgTAP fixture violated the existing correction-insert contract and was corrected without product-code changes. Guided generation/explanation/review/templates and this slice remote CI/merge remain later evidence. |
+
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
 2. Inspect current repository/evidence before changing implementation claims.
