@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual create/edit/versioning, structured constraint handling and manual consumer merged; guided proposal/review locally verified; later feature-route paths remain proposed
+**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual create/edit/versioning, structured constraint handling, manual consumer and guided proposal/review merged; structured planning profile locally verified; later feature-route paths remain proposed
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -114,7 +114,20 @@ Authenticated browser evidence covers an unrestricted balanced proposal where bo
 
 This slice does not yet implement the broader `REQ-003` goal/preference/equipment/time/frequency inputs or unlimited template management.
 
-Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v3: assessment correction linkage remains present and PH-04 routine history is included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
+PH-04 structured planning-profile prerequisite extends existing `ROUTE-025` `/profile` without adding a new route:
+- the private profile now captures primary and optional secondary general-wellness goals, with position representing priority;
+- preferred methods, equipment and facilities use native checkbox groups backed by bounded stable tokens;
+- available routine time and preferred weekly frequency use bounded native selects;
+- all planning fields remain optional for an ordinary partial profile save;
+- the profile surface states whether the structured planning context is complete, but it does not claim that the current guided generator already consumes it;
+- concurrent profile saves still use the existing row-version conflict path rather than silently overwriting a newer edit;
+- invalid server-stored planning values produce the existing unavailable/fail-closed profile state rather than being guessed or coerced.
+
+Authenticated browser evidence verifies persistence of a complete planning profile across reload/sign-out/sign-in, preservation of structured values through a stale two-session write conflict, readable export-v4 coverage and continued account deletion behaviour.
+
+The first public flow is still incomplete at phase level because deterministic guided generation does not yet consume this planning profile, and unlimited template management remains unimplemented.
+
+Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v4: assessment correction linkage and PH-04 routine history remain present, and the current private structured planning profile is now included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
 
 Unimplemented route URL syntax remains deferred until its owning capability exists. Route semantics and stable record IDs remain the contract.
 

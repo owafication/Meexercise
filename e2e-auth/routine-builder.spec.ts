@@ -201,7 +201,7 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   const exportDownload = await downloadPromise;
   const exported = JSON.parse(await readDownloadText(exportDownload));
 
-  expect(exported.exportVersion).toBe(3);
+  expect(exported.exportVersion).toBe(4);
   expect(exported.routines).toHaveLength(1);
   expect(exported.routines[0].versions).toHaveLength(2);
 

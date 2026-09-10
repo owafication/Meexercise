@@ -4,6 +4,13 @@ export type ProfileActionState = {
   rowVersion: number | null;
   fieldErrors?: {
     displayName?: string;
+    primaryGoal?: string;
+    secondaryGoal?: string;
+    preferredMethods?: string;
+    equipment?: string;
+    facilities?: string;
+    availableMinutes?: string;
+    routineFrequencyDays?: string;
   };
 };
 
