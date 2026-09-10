@@ -10,6 +10,7 @@ import {
 import { getVerifiedUserId } from "@/modules/identity/server/auth";
 import { getPlanningConstraintContext } from "@/modules/profile-assessment/server/assessment";
 
+import { GuidedRoutineForm } from "./guided-routine-form";
 import { RoutineForm } from "./routine-form";
 
 export const metadata = { title: "Create" };
@@ -268,6 +269,19 @@ export default async function CreatePage() {
             These are reviewed relationship suggestions only. Choose the
             replacement yourself in the routine slots.
           </p>
+        </section>
+      ) : null}
+
+      {canBuild ? (
+        <section className="card" aria-labelledby="guided-routine-title">
+          <p className="status-label">Deterministic guided builder</p>
+          <h2 id="guided-routine-title">Generate and review a routine proposal</h2>
+          <p>
+            Choose a focus and routine size. MeExercise proposes an ordered
+            routine from approved compatible exact exercise versions, explains
+            the proposal, then requires review of every item before save.
+          </p>
+          <GuidedRoutineForm />
         </section>
       ) : null}
 

@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; PH-04 manual create/edit/versioning and structured-constraint prerequisite merged; manual constraint-consumer locally verified; legal applicability and production exposure unproven
+**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; PH-04 manual create/edit/versioning, structured constraints and manual consumer merged; guided proposal/review locally verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule
@@ -66,6 +66,15 @@ Substitution is deliberately non-autonomous. Only an existing source-version-own
 Historical snapshots retain their original exact exercise versions when a later readiness correction makes those exercises incompatible. Only a newly saved version is constrained by the current readiness state, preserving `RISK-018`. Existing owner isolation and stale-write controls continue to cover `RISK-019`/`RISK-027`.
 
 `RISK-016` is still partial at the phase level because guided generation, whole-proposal explanation/review and production catalogue/taxonomy evidence remain Unproven. Synthetic movement categories demonstrate deterministic mechanics, not medical sufficiency or production editorial completeness.
+
+## PH-04 deterministic guided-proposal risk evidence
+The guided slice advances generated-routine `RISK-016` without a weaker authority. Candidate versions are drawn only after current readiness and exact-version structured constraints are resolved through existing planning boundaries. The generator receives only approved compatible candidates and cannot override blocked/unresolved readiness or infer compatibility from free text.
+
+The proposal is ephemeral and non-authoritative. Every proposed item is reviewable; replacement choices remain within the item's target-area structure and current approved compatible set. Existing substitution guidance is informational only and never silently applied.
+
+Final persistence remains defence-in-depth: the reviewed exact-version array is saved through the already-verified routine mutation, which rechecks current readiness, approval and structured compatibility. Runtime AI is not used and wellness free text is not interpreted heuristically.
+
+`RISK-016` remains partial at phase level because the generator does not yet consume full accepted profile-goal/equipment/time/frequency planning context, and production catalogue/taxonomy review remains a later activation/release gate. Unlimited templates also remain unimplemented.
 
 No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system or complex RBAC is assumed before its threat/contract/exposure requires it.
 

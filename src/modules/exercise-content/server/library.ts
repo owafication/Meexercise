@@ -26,6 +26,7 @@ export type ExerciseLibraryItem = {
   status: "general" | "reviewed";
   title: string;
   summary: string;
+  purpose: string;
   targetAreas: string[];
   equipment: string[];
   constraintTags: ExerciseConstraintTag[];
@@ -121,6 +122,7 @@ function libraryItem(row: RawVersion): ExerciseLibraryItem | null {
     (row.status !== "general" && row.status !== "reviewed") ||
     typeof row.title !== "string" ||
     typeof row.summary !== "string" ||
+    typeof row.purpose !== "string" ||
     typeof row.constraint_tags_complete !== "boolean" ||
     !exerciseKey
   ) {
@@ -134,6 +136,7 @@ function libraryItem(row: RawVersion): ExerciseLibraryItem | null {
     status: row.status,
     title: row.title,
     summary: row.summary,
+    purpose: row.purpose,
     targetAreas: strings(row.target_areas),
     equipment: strings(row.equipment),
     constraintTags: constraintTags(row.constraint_tags),
@@ -146,7 +149,7 @@ export async function getExerciseLibrary(): Promise<ExerciseLibraryItem[]> {
   const { data, error } = await supabase
     .from("exercise_versions")
     .select(
-      "id,version_number,status,title,summary,target_areas,equipment,constraint_tags,constraint_tags_complete,exercises!inner(exercise_key)",
+      "id,version_number,status,title,summary,purpose,target_areas,equipment,constraint_tags,constraint_tags_complete,exercises!inner(exercise_key)",
     )
     .order("version_number", { ascending: false });
 

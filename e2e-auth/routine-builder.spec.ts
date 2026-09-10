@@ -355,3 +355,141 @@ test("structured restriction filters manual creation and exposes a compatible su
     }),
   ).toBeVisible();
 });
+test("guided proposal explains and permits replacement of every item before save", async ({
+  page,
+}: {
+  page: Page;
+}) => {
+  await signUp(page, "guided-review");
+  await completeUnrestrictedReadiness(page);
+
+  await page.goto("/create");
+
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: "Generate and review a routine proposal",
+    }),
+  ).toBeVisible();
+
+  await page.getByLabel("Routine focus").selectOption("balanced");
+  await page.getByLabel("Number of exercises").selectOption("2");
+  await page
+    .getByRole("button", { name: "Generate routine proposal" })
+    .click();
+
+  await expect(
+    page.getByRole("heading", {
+      level: 3,
+      name: "Review the proposal before saving",
+    }),
+  ).toBeVisible();
+
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Purpose" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Balance" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Constraints" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      level: 3,
+      name: "Substitutions and review",
+    }),
+  ).toBeVisible();
+
+  const reviewOne = page.getByLabel("Exercise 1 review choice");
+  const reviewTwo = page.getByLabel("Exercise 2 review choice");
+
+  await expect(reviewOne).toHaveValue(
+    "e1111111-1111-4111-8111-111111111111",
+  );
+  await expect(reviewTwo).toHaveValue(
+    "e6666666-6666-4666-8666-666666666666",
+  );
+
+  await reviewOne.selectOption({
+    label: "Supported bodyweight squat — version 1",
+  });
+  await reviewTwo.selectOption({
+    label: "Standing resistance-band press — version 1",
+  });
+
+  await page.locator("#guided-review-routine-title").fill("Reviewed guided routine");
+  await page
+    .getByRole("button", { name: "Save reviewed routine" })
+    .click();
+
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Reviewed guided routine",
+    }),
+  ).toBeVisible();
+
+  const items = page
+    .locator('section[aria-labelledby^="routine-section-"]')
+    .getByRole("listitem");
+
+  await expect(items).toHaveCount(2);
+  await expect(items.nth(0).getByRole("heading", { level: 3 })).toHaveText(
+    "Supported bodyweight squat",
+  );
+  await expect(items.nth(1).getByRole("heading", { level: 3 })).toHaveText(
+    "Standing resistance-band press",
+  );
+});
+
+test("guided proposal respects supported structured restrictions", async ({
+  page,
+}: {
+  page: Page;
+}) => {
+  await signUp(page, "guided-restricted");
+  await completeStructuredRestrictedReadiness(page);
+
+  await page.goto("/create");
+
+  await page.getByLabel("Routine focus").selectOption("upper_body");
+  await page.getByLabel("Number of exercises").selectOption("1");
+  await page
+    .getByRole("button", { name: "Generate routine proposal" })
+    .click();
+
+  await expect(
+    page.getByRole("heading", {
+      level: 3,
+      name: "Standing resistance-band press — version 1",
+    }),
+  ).toBeVisible();
+
+  const review = page.getByLabel("Exercise 1 review choice");
+  const optionText = await review.locator("option").allTextContents();
+
+  expect(optionText).toEqual([
+    "Standing resistance-band press — version 1",
+  ]);
+
+  await expect(
+    page.getByText(
+      /proposal excludes exact exercise versions that conflict with the current structured movement constraints: surface_hand_loading/i,
+    ),
+  ).toBeVisible();
+
+  await page.locator("#guided-review-routine-title").fill("Restricted guided routine");
+  await page
+    .getByRole("button", { name: "Save reviewed routine" })
+    .click();
+
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Restricted guided routine",
+    }),
+  ).toBeVisible();
+});
