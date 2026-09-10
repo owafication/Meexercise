@@ -64,6 +64,8 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 
 | `BR-20260825-01` | 2026-08-25 | PH-04 manual constraint consumption | PR #19/structured-constraint prerequisite is confirmed merged as `a2075b7adeba8b07448e94dce881622e21cb0966`; this slice locally verifies supported structured restrictions in manual create/edit, full exact-version database validation, explicit user-selected compatible substitution suggestions and preservation of historical versions. The initial consumer pgTAP fixture violated the existing correction-insert contract and was corrected without product-code changes. Guided generation/explanation/review/templates and this slice remote CI/merge remain later evidence. |
 
+| `BR-20260910-01` | 2026-09-10 | PH-04 deterministic guided proposal/review | PR #20/manual constraint-consumer is confirmed merged as `54ce10def372cdb63df3d25bbb5524d940a70511`; this slice locally verifies bounded deterministic guided generation, explanations and explicit per-item review/replacement before saving through the existing authoritative routine mutation. Browser verification exposed and corrected one duplicate HTML ID. After transfer to a fresh Windows PC, Supabase Docker images required one online cache warm-up before isolated verification; final offline Supabase start, DB reset, focused guided E2E and full authenticated E2E passed. Full profile-goal/equipment/time/frequency generation inputs, templates and this slice remote CI/merge remain later evidence. |
+
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
 2. Inspect current repository/evidence before changing implementation claims.

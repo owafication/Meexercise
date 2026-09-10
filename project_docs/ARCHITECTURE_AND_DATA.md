@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning and structured-constraint prerequisite merged; manual constraint-consumer locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning, structured constraints and manual constraint-consumer merged; guided proposal/review locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -94,6 +94,17 @@ The trusted mutation boundary independently validates the complete submitted exa
 Historical routine versions remain unchanged when later readiness restrictions change. A new routine version may omit/replace now-incompatible content while older snapshots continue to reference their exact historical exercise versions. Stale edit detection, owner authorisation and export-v3 history remain unchanged.
 
 Legacy version-1 restrictions, missing structured choices, `other_or_unclear`, block-generation outcomes and ambiguous/unavailable readiness still fail closed. Free-text `affectedAreas`/`avoidedMovements` are not parsed into constraint tags. This slice proves manual constraint consumption only; deterministic guided proposal construction, explanation and per-item review/replacement remain later PH-04 work.
+
+## Implemented PH-04 deterministic guided proposal/review slice
+`BR-20260910-01` adds a bounded guided routine proposal on top of the existing planning and exercise-content authorities. It adds no proposal persistence, second generator service, runtime AI or parallel routine-save path.
+
+The generator is a pure deterministic planning function. Current explicit inputs are routine focus (`balanced`, `upper_body`, `lower_body`) and requested item count (1–6). Candidate input comes only from current visible `general`/`reviewed` exact exercise versions that already pass the current structured readiness constraints. Balanced selection rotates across available target-area groups; focused selection is stable by title/version/identity ordering. Unsatisfiable requested structure fails closed.
+
+Generated proposals are transient application state. Each item retains exact exercise identity/version plus reviewed structured purpose, summary, target-area and equipment metadata. Proposal explanations cover purpose, balance/focus, active structured constraints and substitution/review behaviour. Existing exact-version substitution relationships are shown only when the target is also currently compatible.
+
+Every proposed item is explicitly reviewable before persistence. Replacement choices are constrained to the same primary target-area slot and are never automatic. The reviewed exact-version array then uses the existing `create_manual_routine` boundary, so current readiness, approval and compatibility are revalidated at save time.
+
+This slice advances but does not complete `REQ-014`: broader profile goals, preferences, equipment/facilities, available time and routine-frequency inputs remain unconsumed. Unlimited routine templates also remain later PH-04 work. Runtime AI remains unnecessary for this deterministic baseline.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.

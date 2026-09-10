@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual create/edit/versioning and structured readiness prerequisite merged; manual constraint-consumer locally verified; later feature-route paths remain proposed
+**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual create/edit/versioning, structured constraint handling and manual consumer merged; guided proposal/review locally verified; later feature-route paths remain proposed
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -99,6 +99,20 @@ PH-04 manual constraint consumption extends existing `ROUTE-019` and `ROUTE-020`
 - blocked or unavailable readiness still prevents manual persistence.
 
 Authenticated browser evidence covers both unrestricted manual create/edit/history and supported structured restricted creation plus a later constrained edit that replaces incompatible content by explicit user choice. Guided proposal/review/explanation UI remains unimplemented.
+
+PH-04 guided proposal/review extends `ROUTE-019` `/create` without a new route:
+- deterministic guided builder coexists with the manual builder;
+- the user selects balanced, upper-body or lower-body focus plus 1–6 exercises;
+- the proposal explains purpose, balance/focus, constraints and substitution/review behaviour before persistence;
+- every proposed item shows reviewed structured context and has its own replacement selector;
+- replacement options preserve that item's primary target-area structure and remain limited to approved compatible exact versions;
+- compatible reviewed substitution notes are informational only; no substitution is automatic;
+- final reviewed selections save through the existing authoritative routine mutation;
+- blocked, unresolved or unavailable readiness remains non-generatable.
+
+Authenticated browser evidence covers an unrestricted balanced proposal where both proposed items are explicitly replaced before save, plus a supported structured restriction where only compatible content is proposed. Focused browser verification exposed a duplicate HTML `id` shared by the guided section heading and review-title input; the input received its own unique ID before the final passing run.
+
+This slice does not yet implement the broader `REQ-003` goal/preference/equipment/time/frequency inputs or unlimited template management.
 
 Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v3: assessment correction linkage remains present and PH-04 routine history is included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
 
