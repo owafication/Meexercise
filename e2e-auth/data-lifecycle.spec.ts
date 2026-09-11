@@ -32,6 +32,13 @@ test("user can export current data and permanently delete the account", async ({
   await expect(page).toHaveURL(/\/profile$/);
 
   await page.getByLabel("Display name").fill("Lifecycle Test User");
+  await page.getByLabel("Primary goal").selectOption("general_strength");
+  await page.getByLabel("Secondary goal").selectOption("mobility");
+  await page.getByLabel("Bodyweight exercise").check();
+  await page.getByLabel("Chair", { exact: true }).check();
+  await page.getByLabel("Home", { exact: true }).check();
+  await page.getByLabel("Available time per routine").selectOption("30");
+  await page.getByLabel("Preferred routine frequency").selectOption("3");
   await page.getByRole("button", { name: "Save profile" }).click();
   await expect(page.getByRole("status")).toHaveText("Profile saved.");
 
@@ -71,10 +78,19 @@ test("user can export current data and permanently delete the account", async ({
   const exportText = await readDownloadText(download);
   const exported = JSON.parse(exportText);
 
-  expect(exported.exportVersion).toBe(3);
+  expect(exported.exportVersion).toBe(4);
   expect(exported.routines).toEqual([]);
   expect(exported.account.email).toBe(email);
   expect(exported.profile.displayName).toBe("Lifecycle Test User");
+  expect(exported.profile.planning).toEqual({
+    primaryGoal: "general_strength",
+    secondaryGoal: "mobility",
+    preferredMethods: ["bodyweight"],
+    equipment: ["chair"],
+    facilities: ["home"],
+    availableMinutes: 30,
+    routineFrequencyDays: 3,
+  });
   expect(exported.assessments).toHaveLength(1);
   expect(exported.assessments[0].templateVersion.templateKey).toBe(
     "readiness_baseline",

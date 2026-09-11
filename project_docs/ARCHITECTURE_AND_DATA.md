@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning, structured constraints and manual constraint-consumer merged; guided proposal/review locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning, structured constraints, manual constraint consumption and guided proposal/review merged; structured planning-profile prerequisite locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -105,6 +105,17 @@ Generated proposals are transient application state. Each item retains exact exe
 Every proposed item is explicitly reviewable before persistence. Replacement choices are constrained to the same primary target-area slot and are never automatic. The reviewed exact-version array then uses the existing `create_manual_routine` boundary, so current readiness, approval and compatibility are revalidated at save time.
 
 This slice advances but does not complete `REQ-014`: broader profile goals, preferences, equipment/facilities, available time and routine-frequency inputs remain unconsumed. Unlimited routine templates also remain later PH-04 work. Runtime AI remains unnecessary for this deterministic baseline.
+
+## Implemented PH-04 structured planning-profile prerequisite
+`BR-20260910-02` adds the private structured planning inputs required by `REQ-003` before the deterministic generator can truthfully consume them. The implementation extends the existing owner-only `public.profiles` row instead of creating a second preferences service/table or introducing runtime AI.
+
+Current structured fields are primary and optional secondary general-wellness goal, preferred method tokens, equipment tokens, facility tokens, available minutes per routine and preferred routine days per week. Primary/secondary positions encode priority. The vocabulary is bounded in application validation and database `CHECK` constraints; malformed/unsupported persisted values fail closed when the server profile snapshot is reconstructed. Partial profiles remain valid current state, so a user may save a display name or some planning choices without being forced to complete unrelated inputs. A pure application completeness predicate identifies when all required planning categories exist for the later generator consumer.
+
+The existing profile data authority is preserved. RLS continues to restrict the row to its authenticated owner, and the existing `row_version` trigger/expected-version update path protects concurrent edits. The first migration draft used a private helper function inside array-uniqueness `CHECK` constraints while revoking execute permission from the authenticated writer; local pgTAP verification exposed that inappropriate dependency. The final migration removes the helper and enforces uniqueness directly inside the finite-vocabulary constraints, so the row check requires no extra callable authority.
+
+Readable account export advances from v3 to v4 and includes the structured planning fields. The profile row remains a current editable record rather than immutable history, and permanent Auth-user deletion continues to cascade through it. This slice does not alter existing assessment or routine historical snapshots.
+
+The guided generator is intentionally unchanged in this prerequisite. The next PH-04 consumer must add only the immutable version-owned exercise planning metadata actually needed to honour these fields and then consume a complete planning profile deterministically. Until that consumer exists, collection is not presented as generator enforcement.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.

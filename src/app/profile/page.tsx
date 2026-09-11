@@ -1,8 +1,11 @@
 import Link from "next/link";
 
 import { signOutAction } from "@/app/auth/actions";
-import { ProfileForm } from "@/components/profile-form";
 import { PageIntro } from "@/components/page-intro";
+import { ProfileForm } from "@/components/profile-form";
+import {
+  EMPTY_PLANNING_PROFILE,
+} from "@/modules/profile-assessment/planning-profile";
 import { getProfilePageState } from "@/modules/profile-assessment/server/profile";
 
 export const metadata = {
@@ -45,8 +48,8 @@ export default async function ProfilePage() {
           <p className="status-label">Account unavailable</p>
           <h2 id="profile-unavailable-title">Profile services are not available</h2>
           <p>
-            No private profile data is shown when account configuration or
-            authentication cannot be verified.
+            No private profile data is shown when account configuration,
+            authentication, or stored planning values cannot be verified.
           </p>
         </section>
       ) : null}
@@ -57,13 +60,21 @@ export default async function ProfilePage() {
             <p className="status-label">Private profile</p>
             <h2 id="private-profile-title">Your profile</h2>
             <p>
-              This slice stores an optional private display name. Assessment
-              answers are kept separately against their own versioned
-              general-wellness assessment.
+              Record optional account identity plus structured general-wellness
+              goals, priorities, preferred methods, equipment, facilities,
+              available routine time and preferred weekly frequency.
+            </p>
+            <p>
+              {state.profile?.planningComplete
+                ? "Planning profile complete. A later PH-04 consumer slice can use these structured values in deterministic generation."
+                : "Planning profile incomplete. You can save partial values now; deterministic generation will not guess missing planning context."}
             </p>
 
             <ProfileForm
               initialDisplayName={state.profile?.displayName ?? null}
+              initialPlanningProfile={
+                state.profile?.planning ?? EMPTY_PLANNING_PROFILE
+              }
               initialRowVersion={state.profile?.rowVersion ?? null}
             />
           </section>

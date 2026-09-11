@@ -20,7 +20,7 @@ export type UserDataExportResult =
   | {
       kind: "ok";
       data: {
-        exportVersion: 3;
+        exportVersion: 4;
         generatedAt: string;
         account: {
           id: string;
@@ -30,6 +30,15 @@ export type UserDataExportResult =
         };
         profile: {
           displayName: string | null;
+          planning: {
+            primaryGoal: string | null;
+            secondaryGoal: string | null;
+            preferredMethods: string[];
+            equipment: string[];
+            facilities: string[];
+            availableMinutes: number | null;
+            routineFrequencyDays: number | null;
+          };
           rowVersion: number;
           createdAt: string;
           updatedAt: string;
@@ -110,7 +119,9 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("display_name,row_version,created_at,updated_at")
+      .select(
+        "display_name,primary_goal,secondary_goal,preferred_methods,available_equipment,available_facilities,available_minutes,routine_frequency_days,row_version,created_at,updated_at",
+      )
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -267,7 +278,7 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
     return {
       kind: "ok",
       data: {
-        exportVersion: 3,
+        exportVersion: 4,
         generatedAt: new Date().toISOString(),
         account: {
           id: user.id,
@@ -278,6 +289,21 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
         profile: profile
           ? {
               displayName: profile.display_name,
+              planning: {
+                primaryGoal: profile.primary_goal,
+                secondaryGoal: profile.secondary_goal,
+                preferredMethods: profile.preferred_methods ?? [],
+                equipment: profile.available_equipment ?? [],
+                facilities: profile.available_facilities ?? [],
+                availableMinutes:
+                  profile.available_minutes === null
+                    ? null
+                    : Number(profile.available_minutes),
+                routineFrequencyDays:
+                  profile.routine_frequency_days === null
+                    ? null
+                    : Number(profile.routine_frequency_days),
+              },
               rowVersion: Number(profile.row_version),
               createdAt: String(profile.created_at),
               updatedAt: String(profile.updated_at),

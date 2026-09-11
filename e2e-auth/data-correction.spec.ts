@@ -135,7 +135,7 @@ test("user can correct completed assessment history and account email", async ({
 
   const beforeData = await beforeCorrection.json();
 
-  expect(beforeData.exportVersion).toBe(3);
+  expect(beforeData.exportVersion).toBe(4);
   expect(beforeData.routines).toEqual([]);
   expect(beforeData.assessments).toHaveLength(1);
 
@@ -170,7 +170,7 @@ test("user can correct completed assessment history and account email", async ({
 
   const afterData = await afterCorrection.json();
 
-  expect(afterData.exportVersion).toBe(3);
+  expect(afterData.exportVersion).toBe(4);
   expect(afterData.routines).toEqual([]);
   expect(afterData.assessments).toHaveLength(2);
 
@@ -246,7 +246,7 @@ test("user can correct completed assessment history and account email", async ({
 
   const correctedExportData = await correctedExport.json();
 
-  expect(correctedExportData.exportVersion).toBe(3);
+  expect(correctedExportData.exportVersion).toBe(4);
   expect(correctedExportData.routines).toEqual([]);
   expect(correctedExportData.account.email).toBe(replacementEmail);
   expect(correctedExportData.assessments).toHaveLength(2);

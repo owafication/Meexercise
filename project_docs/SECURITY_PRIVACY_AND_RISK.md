@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; PH-04 manual create/edit/versioning, structured constraints and manual consumer merged; guided proposal/review locally verified; legal applicability and production exposure unproven
+**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; PH-04 manual create/edit/versioning, structured constraints, manual consumer and guided proposal/review merged; structured planning-profile prerequisite locally verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule
@@ -75,6 +75,17 @@ The proposal is ephemeral and non-authoritative. Every proposed item is reviewab
 Final persistence remains defence-in-depth: the reviewed exact-version array is saved through the already-verified routine mutation, which rechecks current readiness, approval and structured compatibility. Runtime AI is not used and wellness free text is not interpreted heuristically.
 
 `RISK-016` remains partial at phase level because the generator does not yet consume full accepted profile-goal/equipment/time/frequency planning context, and production catalogue/taxonomy review remains a later activation/release gate. Unlimited templates also remain unimplemented.
+
+## PH-04 structured planning-profile risk evidence
+The planning-profile prerequisite adds sensitive user-owned wellness/preferences context to the existing private `profiles` authority rather than creating another principal or datastore boundary. Authenticated owner RLS, server-derived user identity and optimistic `row_version` conflict handling therefore continue to protect the new fields.
+
+Planning vocabularies are explicitly bounded at both application and database boundaries. Unsupported goal/method/equipment/facility tokens, duplicate bounded selections, contradictory `none`-plus-equipment state, invalid goal priority, out-of-range routine minutes and out-of-range weekly frequency are rejected rather than normalised into an invented planning meaning. Server reconstruction of malformed stored values fails closed.
+
+The new values are current editable planning preferences, not diagnoses, treatment targets or medical prescriptions. Goal options remain within the accepted general-wellness scope. Partial profile saves are allowed so collection is proportional and users are not forced to provide planning data merely to maintain unrelated profile/account state.
+
+Data lifecycle coverage advances with export v4, which includes the structured planning fields in the authenticated readable export. Permanent account deletion still removes the owning profile row by the existing Auth-user cascade. No new logs, analytics payloads, third-party services or runtime AI receive these values.
+
+`RISK-016` remains partial: this slice deliberately does not claim that generation respects goals/preferences/equipment/time/frequency yet. The later deterministic generator consumer must use explicit exercise planning metadata and fail closed when required profile context or compatible content is unavailable.
 
 No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system or complex RBAC is assumed before its threat/contract/exposure requires it.
 

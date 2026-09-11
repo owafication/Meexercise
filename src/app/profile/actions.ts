@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { getVerifiedUserId } from "@/modules/identity/server/auth";
+import { parsePlanningProfileFormData } from "@/modules/profile-assessment/planning-profile";
 import {
   displayNameError,
   normalizeDisplayName,
@@ -15,7 +16,8 @@ import type { ProfileActionState } from "./state";
 function unavailable(rowVersion: number | null): ProfileActionState {
   return {
     status: "error",
-    message: "Profile could not be saved right now. Your entered value is unchanged.",
+    message:
+      "Profile could not be saved right now. Your entered values are unchanged.",
     rowVersion,
   };
 }
@@ -27,6 +29,7 @@ export async function saveProfileAction(
   const displayName = normalizeDisplayName(formData.get("displayName"));
   const parsedRowVersion = parseRowVersion(formData.get("rowVersion"));
   const currentRowVersion = previousState.rowVersion;
+  const planning = parsePlanningProfileFormData(formData);
 
   if (parsedRowVersion === undefined) {
     return {
@@ -37,15 +40,20 @@ export async function saveProfileAction(
   }
 
   const nameError = displayNameError(displayName);
+  const fieldErrors: NonNullable<ProfileActionState["fieldErrors"]> = {
+    ...planning.fieldErrors,
+  };
 
   if (nameError) {
+    fieldErrors.displayName = nameError;
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
     return {
       status: "error",
-      message: "Check the highlighted field.",
+      message: "Check the highlighted profile fields.",
       rowVersion: parsedRowVersion,
-      fieldErrors: {
-        displayName: nameError,
-      },
+      fieldErrors,
     };
   }
 
@@ -67,12 +75,23 @@ export async function saveProfileAction(
     };
   }
 
+  const values = {
+    display_name: displayName,
+    primary_goal: planning.value.primaryGoal,
+    secondary_goal: planning.value.secondaryGoal,
+    preferred_methods: planning.value.preferredMethods,
+    available_equipment: planning.value.equipment,
+    available_facilities: planning.value.facilities,
+    available_minutes: planning.value.availableMinutes,
+    routine_frequency_days: planning.value.routineFrequencyDays,
+  };
+
   if (parsedRowVersion === null) {
     const { data, error } = await supabase
       .from("profiles")
       .insert({
         user_id: userId,
-        display_name: displayName,
+        ...values,
       })
       .select("row_version")
       .single();
@@ -83,6 +102,15 @@ export async function saveProfileAction(
           status: "conflict",
           message:
             "Profile changed in another session. Reload before saving again.",
+          rowVersion: null,
+        };
+      }
+
+      if (error.code === "23514") {
+        return {
+          status: "error",
+          message:
+            "One or more planning choices are no longer accepted. Reload before saving.",
           rowVersion: null,
         };
       }
@@ -101,15 +129,22 @@ export async function saveProfileAction(
 
   const { data, error } = await supabase
     .from("profiles")
-    .update({
-      display_name: displayName,
-    })
+    .update(values)
     .eq("user_id", userId)
     .eq("row_version", parsedRowVersion)
     .select("row_version")
     .maybeSingle();
 
   if (error) {
+    if (error.code === "23514") {
+      return {
+        status: "error",
+        message:
+          "One or more planning choices are no longer accepted. Reload before saving.",
+        rowVersion: parsedRowVersion,
+      };
+    }
+
     return unavailable(parsedRowVersion);
   }
 
