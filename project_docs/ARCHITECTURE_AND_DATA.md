@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning, structured constraints, manual constraint consumption and guided proposal/review merged; structured planning-profile prerequisite locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning, structured constraints, manual constraint consumption, guided proposal/review and structured planning profile merged; exact-version exercise planning metadata locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -116,6 +116,17 @@ The existing profile data authority is preserved. RLS continues to restrict the 
 Readable account export advances from v3 to v4 and includes the structured planning fields. The profile row remains a current editable record rather than immutable history, and permanent Auth-user deletion continues to cascade through it. This slice does not alter existing assessment or routine historical snapshots.
 
 The guided generator is intentionally unchanged in this prerequisite. The next PH-04 consumer must add only the immutable version-owned exercise planning metadata actually needed to honour these fields and then consume a complete planning profile deterministically. Until that consumer exists, collection is not presented as generator enforcement.
+
+## Implemented PH-04 exact-version exercise planning-metadata prerequisite
+`BR-20260917-01` adds only the exercise-side structured metadata required before the merged private planning profile can be consumed deterministically. The existing `exercise_versions` authority remains the owner: no parallel taxonomy service, inference layer, runtime AI or proposal persistence is introduced.
+
+Each exact exercise version can now own bounded planning goal tags, method tags, equipment tokens, facility tokens, a deterministic estimated-minutes value and an explicit `planning_metadata_complete` marker. The accepted vocabularies match the structured profile contract rather than display strings. Database constraints reject unsupported/duplicate tags and out-of-range time estimates.
+
+Planning metadata follows the existing content-version lifecycle. Draft versions may be explicitly classified. A draft cannot finalise unless both the existing movement-constraint classification and the new planning metadata classification are complete. After finalisation, goal/method/equipment/facility/time metadata and the completeness marker are immutable with the rest of the exact version.
+
+The synthetic seed explicitly classifies the current visible fixture versions before finalisation. These rows prove deterministic mechanics only and are not evidence of a complete production exercise taxonomy, professional review or medical suitability. No planning value is inferred from title, instructions, target area or free text.
+
+The server exercise library now exposes exact-version planning metadata to server consumers. Guided selection behaviour is deliberately unchanged in this prerequisite. The next PH-04 slice must require a complete structured planning profile and consume these fields deterministically, while preserving current readiness/constraint/approval gates and fail-closed behaviour when compatible content is insufficient.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.

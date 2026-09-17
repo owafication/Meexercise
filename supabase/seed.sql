@@ -352,6 +352,91 @@ set
   constraint_tags_complete = true
 where id = 'e7777777-7777-4777-8777-777777777777'::uuid;
 
+-- Explicit PH-04 deterministic planning classification for synthetic fixtures.
+-- These values prove mechanics only; they are not inferred from exercise prose.
+
+update public.exercise_versions
+set
+  planning_goal_tags = array[
+    'general_strength',
+    'balance',
+    'activity_consistency'
+  ],
+  planning_method_tags = array['bodyweight'],
+  planning_equipment = array['chair'],
+  planning_facilities = array['home','gym'],
+  estimated_minutes = 6,
+  planning_metadata_complete = true
+where id = 'e1111111-1111-4111-8111-111111111111'::uuid;
+
+update public.exercise_versions
+set
+  planning_goal_tags = array[
+    'general_strength',
+    'balance',
+    'activity_consistency'
+  ],
+  planning_method_tags = array['bodyweight'],
+  planning_equipment = array['stable_support'],
+  planning_facilities = array['home','gym'],
+  estimated_minutes = 6,
+  planning_metadata_complete = true
+where id = 'e2222222-2222-4222-8222-222222222222'::uuid;
+
+update public.exercise_versions
+set
+  planning_goal_tags = array[
+    'general_strength',
+    'activity_consistency'
+  ],
+  planning_method_tags = array['bodyweight'],
+  planning_equipment = array['wall'],
+  planning_facilities = array['home','gym'],
+  estimated_minutes = 5,
+  planning_metadata_complete = true
+where id in (
+  'e3333333-3333-4333-8333-333333333333'::uuid,
+  'e3333333-3333-4333-8333-333333333334'::uuid
+);
+
+update public.exercise_versions
+set
+  planning_goal_tags = array[
+    'general_strength',
+    'activity_consistency'
+  ],
+  planning_method_tags = array['bodyweight'],
+  planning_equipment = array['stable_elevated_surface'],
+  planning_facilities = array['home','gym'],
+  estimated_minutes = 6,
+  planning_metadata_complete = true
+where id = 'e4444444-4444-4444-8444-444444444444'::uuid;
+
+update public.exercise_versions
+set
+  planning_goal_tags = array[
+    'general_strength',
+    'activity_consistency'
+  ],
+  planning_method_tags = array['bodyweight'],
+  planning_equipment = array['counter_height_surface'],
+  planning_facilities = array['home','gym'],
+  estimated_minutes = 6,
+  planning_metadata_complete = true
+where id = 'e6666666-6666-4666-8666-666666666666'::uuid;
+
+update public.exercise_versions
+set
+  planning_goal_tags = array[
+    'general_strength',
+    'activity_consistency'
+  ],
+  planning_method_tags = array['resistance_band'],
+  planning_equipment = array['resistance_band'],
+  planning_facilities = array['home','gym'],
+  estimated_minutes = 6,
+  planning_metadata_complete = true
+where id = 'e7777777-7777-4777-8777-777777777777'::uuid;
 insert into public.exercise_version_relations (
   source_version_id,target_version_id,relation_type,guidance,sort_order
 )

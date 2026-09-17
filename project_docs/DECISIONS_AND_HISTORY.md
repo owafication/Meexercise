@@ -68,6 +68,8 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 
 | `BR-20260910-02` | 2026-09-10 | PH-04 structured planning-profile prerequisite | PR #21/guided proposal is confirmed merged as `65f450e624cdb8b2414382afab8a05a0cbf3449b`; this slice locally verifies bounded private `REQ-003` planning-profile capture on the existing owner-RLS/concurrency row plus readable export v4. Fresh-PC verification required caching the separate `pg_prove:3.36` runner before network isolation; the focused test plan count and an unnecessary CHECK-helper privilege dependency were corrected before final 24/24 focused pgTAP, 21/21 PH-02 regression, complete pgTAP and authenticated E2E passed. Generator consumption, explicit exercise planning metadata, templates and remote CI/merge remain later evidence. |
 
+| `BR-20260917-01` | 2026-09-17 | PH-04 exact-version exercise planning-metadata prerequisite | PR #22/structured planning profile is confirmed merged as `4dbb02e00368cd435012c1fe18e18922d5b90f06`; this slice locally verifies bounded immutable exact-version planning goals, methods, equipment, facilities, estimated minutes and classification completeness plus server-library exposure. The first focused pgTAP declaration counted 18 tests while executing 17 and was corrected without product-code changes. Final 17/17 focused pgTAP, 20/20 PH-03 regression, complete pgTAP, authenticated E2E and isolated runtime passed. Generator profile consumption, templates and this slice remote CI/merge remain later evidence. |
+
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
 2. Inspect current repository/evidence before changing implementation claims.

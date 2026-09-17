@@ -19,6 +19,45 @@ export type ExerciseConstraintTag =
   | "surface_hand_loading"
   | "knee_bending";
 
+export type ExercisePlanningGoal =
+  | "general_strength"
+  | "mobility"
+  | "conditioning"
+  | "balance"
+  | "flexibility"
+  | "activity_consistency";
+
+export type ExercisePlanningMethod =
+  | "bodyweight"
+  | "resistance_band"
+  | "free_weights"
+  | "machines"
+  | "mobility_drills"
+  | "walking_cardio";
+
+export type ExercisePlanningEquipment =
+  | "none"
+  | "chair"
+  | "wall"
+  | "stable_support"
+  | "stable_elevated_surface"
+  | "counter_height_surface"
+  | "resistance_band"
+  | "dumbbells"
+  | "barbell"
+  | "bench"
+  | "cable_machine"
+  | "cardio_machine"
+  | "mat"
+  | "pull_up_bar"
+  | "step_box";
+
+export type ExercisePlanningFacility =
+  | "home"
+  | "gym"
+  | "outdoors"
+  | "pool";
+
 export type ExerciseLibraryItem = {
   id: string;
   exerciseKey: string;
@@ -31,6 +70,12 @@ export type ExerciseLibraryItem = {
   equipment: string[];
   constraintTags: ExerciseConstraintTag[];
   constraintsClassified: boolean;
+  planningGoalTags: ExercisePlanningGoal[];
+  planningMethodTags: ExercisePlanningMethod[];
+  planningEquipment: ExercisePlanningEquipment[];
+  planningFacilities: ExercisePlanningFacility[];
+  estimatedMinutes: number | null;
+  planningMetadataComplete: boolean;
 };
 
 export type ExerciseDetail = ExerciseLibraryItem & {
@@ -78,6 +123,12 @@ type RawVersion = {
   side_rule?: unknown;
   constraint_tags?: unknown;
   constraint_tags_complete?: unknown;
+  planning_goal_tags?: unknown;
+  planning_method_tags?: unknown;
+  planning_equipment?: unknown;
+  planning_facilities?: unknown;
+  estimated_minutes?: unknown;
+  planning_metadata_complete?: unknown;
   exercises?: Identity;
 };
 
@@ -113,6 +164,64 @@ function constraintTags(value: unknown): ExerciseConstraintTag[] {
   );
 }
 
+function planningGoals(value: unknown): ExercisePlanningGoal[] {
+  return strings(value).filter(
+    (item): item is ExercisePlanningGoal =>
+      [
+        "general_strength",
+        "mobility",
+        "conditioning",
+        "balance",
+        "flexibility",
+        "activity_consistency",
+      ].includes(item),
+  );
+}
+
+function planningMethods(value: unknown): ExercisePlanningMethod[] {
+  return strings(value).filter(
+    (item): item is ExercisePlanningMethod =>
+      [
+        "bodyweight",
+        "resistance_band",
+        "free_weights",
+        "machines",
+        "mobility_drills",
+        "walking_cardio",
+      ].includes(item),
+  );
+}
+
+function planningEquipment(value: unknown): ExercisePlanningEquipment[] {
+  return strings(value).filter(
+    (item): item is ExercisePlanningEquipment =>
+      [
+        "none",
+        "chair",
+        "wall",
+        "stable_support",
+        "stable_elevated_surface",
+        "counter_height_surface",
+        "resistance_band",
+        "dumbbells",
+        "barbell",
+        "bench",
+        "cable_machine",
+        "cardio_machine",
+        "mat",
+        "pull_up_bar",
+        "step_box",
+      ].includes(item),
+  );
+}
+
+function planningFacilities(value: unknown): ExercisePlanningFacility[] {
+  return strings(value).filter(
+    (item): item is ExercisePlanningFacility =>
+      ["home", "gym", "outdoors", "pool"].includes(item),
+  );
+}
+
 function libraryItem(row: RawVersion): ExerciseLibraryItem | null {
   const exerciseKey = keyFrom(row.exercises ?? null);
 
@@ -124,6 +233,11 @@ function libraryItem(row: RawVersion): ExerciseLibraryItem | null {
     typeof row.summary !== "string" ||
     typeof row.purpose !== "string" ||
     typeof row.constraint_tags_complete !== "boolean" ||
+    typeof row.planning_metadata_complete !== "boolean" ||
+    !(
+      row.estimated_minutes === null ||
+      typeof row.estimated_minutes === "number"
+    ) ||
     !exerciseKey
   ) {
     return null;
@@ -141,6 +255,13 @@ function libraryItem(row: RawVersion): ExerciseLibraryItem | null {
     equipment: strings(row.equipment),
     constraintTags: constraintTags(row.constraint_tags),
     constraintsClassified: row.constraint_tags_complete,
+    planningGoalTags: planningGoals(row.planning_goal_tags),
+    planningMethodTags: planningMethods(row.planning_method_tags),
+    planningEquipment: planningEquipment(row.planning_equipment),
+    planningFacilities: planningFacilities(row.planning_facilities),
+    estimatedMinutes:
+      typeof row.estimated_minutes === "number" ? row.estimated_minutes : null,
+    planningMetadataComplete: row.planning_metadata_complete,
   };
 }
 
@@ -149,7 +270,7 @@ export async function getExerciseLibrary(): Promise<ExerciseLibraryItem[]> {
   const { data, error } = await supabase
     .from("exercise_versions")
     .select(
-      "id,version_number,status,title,summary,purpose,target_areas,equipment,constraint_tags,constraint_tags_complete,exercises!inner(exercise_key)",
+      "id,version_number,status,title,summary,purpose,target_areas,equipment,constraint_tags,constraint_tags_complete,planning_goal_tags,planning_method_tags,planning_equipment,planning_facilities,estimated_minutes,planning_metadata_complete,exercises!inner(exercise_key)",
     )
     .order("version_number", { ascending: false });
 
@@ -181,7 +302,7 @@ export async function getExerciseDetail(
   const baseQuery = supabase
     .from("exercise_versions")
     .select(
-      "id,version_number,status,title,summary,purpose,setup,steps,cues,dosage_guidance,common_errors,safety_notes,accessible_text,target_areas,equipment,side_rule,constraint_tags,constraint_tags_complete,exercises!inner(exercise_key)",
+      "id,version_number,status,title,summary,purpose,setup,steps,cues,dosage_guidance,common_errors,safety_notes,accessible_text,target_areas,equipment,side_rule,constraint_tags,constraint_tags_complete,planning_goal_tags,planning_method_tags,planning_equipment,planning_facilities,estimated_minutes,planning_metadata_complete,exercises!inner(exercise_key)",
     )
     .eq("exercises.exercise_key", exerciseKey);
 
