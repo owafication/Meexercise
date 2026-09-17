@@ -264,3 +264,18 @@ Use `BR-YYYYMMDD-##` for material repository-execution reports:
 - **Isolation evidence:** after online dependency-image acquisition, the physical default-route adapter was disabled; local Supabase/database/browser verification completed with external-network isolation; Supabase was stopped and WiFi plus the original `.env.local` were restored.
 - **Passed / locally Verified:** `REQ-003` structured current-profile capture; owner-private persistence; profile stale-write protection for the expanded row; database validation of accepted planning vocabulary/bounds; export-v4 inclusion of the current structured planning profile.
 - **Partial / Unproven:** the deterministic generator does not yet consume the structured planning profile; exercise versions do not yet own all explicit planning metadata needed to honour those inputs; unlimited templates (`REQ-018`, `AC-011`); this slice exact-head remote CI/merge; PH-04 closure and production/release gates.
+
+### `BR-20260917-01`
+- **Mode/scope:** PH-04 exact-version exercise planning-metadata prerequisite implementation and isolated local verification; advances `REQ-008`, `REQ-009` and the prerequisite boundary for `REQ-014` / `AC-006` / `VAL-027`.
+- **Starting remote evidence:** PR #22 exact head `b6f72a292d954fc1b33392127b10d9e71142aa1c` is merged into `main` as `4dbb02e00368cd435012c1fe18e18922d5b90f06`; this branch starts from that exact merged SHA.
+- **Implemented:** exact-version planning goal tags, method tags, equipment tokens, facility tokens, estimated minutes and explicit planning-metadata completeness on `exercise_versions`; finalisation requires complete planning classification; finalised planning metadata is immutable; server exercise library exposes the structured fields; synthetic visible fixtures receive explicit planning classification.
+- **Inference boundary:** metadata is authored explicitly and is not derived from exercise titles, instructions, target areas, user free text or runtime AI. Synthetic classifications prove mechanism only.
+- **Test-harness correction:** the focused pgTAP file declared 18 assertions while containing 17. Product/migration code was preserved and only `plan(18)` was corrected to `plan(17)`.
+- **Static evidence:** final continuation `npm run verify` passed.
+- **Migration evidence:** local database reset replayed the full migration chain plus synthetic seed successfully.
+- **Focused database evidence:** exercise-planning-metadata pgTAP passed 17/17; existing PH-03 exercise-content regression passed 20/20.
+- **Complete database evidence:** `npm run test:db` passed the complete repository pgTAP suite.
+- **Authenticated browser evidence:** `npm run test:e2e:auth` passed.
+- **Isolation evidence:** verification ran with the physical default-route adapter disabled after cached dependency acquisition; local Supabase remained reachable, then was stopped and WiFi plus the original `.env.local` were restored.
+- **Passed / locally Verified:** planning vocabularies/bounds, explicit completeness, draft-finalisation gate, finalised metadata immutability, seed classification mechanics, library exposure and regression coverage.
+- **Partial / Unproven:** deterministic guided generation does not yet consume the complete structured profile; production catalogue/taxonomy breadth and editorial review; unlimited templates (`REQ-018`, `AC-011`); this slice exact-head remote CI/merge; PH-04 closure and production/release gates.

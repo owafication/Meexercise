@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; PH-04 manual create/edit/versioning, structured constraints, manual consumer and guided proposal/review merged; structured planning-profile prerequisite locally verified; legal applicability and production exposure unproven
+**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; PH-04 manual create/edit/versioning, structured constraints, manual consumer, guided proposal/review and structured planning profile merged; exact-version exercise planning metadata locally verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule
@@ -86,6 +86,15 @@ The new values are current editable planning preferences, not diagnoses, treatme
 Data lifecycle coverage advances with export v4, which includes the structured planning fields in the authenticated readable export. Permanent account deletion still removes the owning profile row by the existing Auth-user cascade. No new logs, analytics payloads, third-party services or runtime AI receive these values.
 
 `RISK-016` remains partial: this slice deliberately does not claim that generation respects goals/preferences/equipment/time/frequency yet. The later deterministic generator consumer must use explicit exercise planning metadata and fail closed when required profile context or compatible content is unavailable.
+
+## PH-04 exercise planning-metadata prerequisite risk evidence
+The exact-version planning-metadata slice advances `RISK-016` without adding a weaker compatibility authority. Goals, methods, equipment, facilities and estimated time are explicit structured fields on the existing immutable exercise version rather than inferred from user wellness text, exercise titles or prose.
+
+The database boundary constrains every planning vocabulary and time range. Finalisation is fail-closed: content cannot leave draft until planning metadata is explicitly complete, and finalised metadata cannot be rewritten. Existing movement-constraint classification remains a separate required finalisation condition.
+
+The synthetic classifications demonstrate mechanics only. They do not prove production editorial breadth, professional authorship, medical appropriateness or completeness for every user goal/facility/equipment combination.
+
+`RISK-016` remains partial because the generator has not yet consumed the merged private planning profile. The next deterministic consumer must require complete profile context, filter/select against these exact-version fields, preserve current readiness/constraint/approval checks, and fail closed when the requested structure cannot be satisfied. Runtime AI and free-text inference remain absent.
 
 No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system or complex RBAC is assumed before its threat/contract/exposure requires it.
 
