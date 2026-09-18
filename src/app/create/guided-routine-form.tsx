@@ -9,7 +9,7 @@ import {
 } from "@/modules/planning/generator";
 
 import {
-  createManualRoutineAction,
+  createGuidedRoutineAction,
   generateGuidedRoutineAction,
 } from "./actions";
 import { initialCreateRoutineActionState } from "./state";
@@ -20,7 +20,7 @@ function GuidedReviewForm({
   proposal: GuidedRoutineProposal;
 }) {
   const [state, formAction, pending] = useActionState(
-    createManualRoutineAction,
+    createGuidedRoutineAction,
     initialCreateRoutineActionState,
   );
 
@@ -30,6 +30,8 @@ function GuidedReviewForm({
         <p className="status-label">Proposal explanation</p>
         <h3>Purpose</h3>
         <p>{proposal.purposeExplanation}</p>
+        <h3>Planning profile</h3>
+        <p>{proposal.profileExplanation}</p>
         <h3>Balance</h3>
         <p>{proposal.balanceExplanation}</p>
         <h3>Constraints</h3>
@@ -98,6 +100,10 @@ function GuidedReviewForm({
                 {item.equipment.length > 0
                   ? item.equipment.join(", ")
                   : "No listed equipment"}
+              </p>
+              <p>
+                <strong>Estimated routine time:</strong>{" "}
+                {item.estimatedMinutes === null ? "Unavailable" : `${item.estimatedMinutes} minutes`}
               </p>
 
               {item.substitutionNotes.length > 0 ? (
@@ -195,7 +201,8 @@ export function GuidedRoutineForm() {
         <p className="field-help">
           Generation is deterministic and uses only current approved exact
           exercise versions that pass the current structured readiness
-          constraints. Runtime AI is not used.
+          constraints and complete planning-profile rules for goals, methods,
+          equipment, facilities, and routine time. Runtime AI is not used.
         </p>
 
         {state.status === "error" ? (

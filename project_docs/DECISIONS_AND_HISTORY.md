@@ -70,6 +70,8 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 
 | `BR-20260917-01` | 2026-09-17 | PH-04 exact-version exercise planning-metadata prerequisite | PR #22/structured planning profile is confirmed merged as `4dbb02e00368cd435012c1fe18e18922d5b90f06`; this slice locally verifies bounded immutable exact-version planning goals, methods, equipment, facilities, estimated minutes and classification completeness plus server-library exposure. The first focused pgTAP declaration counted 18 tests while executing 17 and was corrected without product-code changes. Final 17/17 focused pgTAP, 20/20 PH-03 regression, complete pgTAP, authenticated E2E and isolated runtime passed. Generator profile consumption, templates and this slice remote CI/merge remain later evidence. |
 
+| `BR-20260918-01` | 2026-09-18 | PH-04 profile-aware deterministic guided generation | PR #23/exercise planning metadata is confirmed merged as `2e9652871f6fc53a84dec85af275f69c6860e790`; this slice locally verifies complete-profile gating and deterministic goal/method/equipment/facility/time consumption after existing readiness/constraint checks, profile-aware explanation/replacements, and current-profile revalidation before guided persistence. `npm run verify`, DB reset, focused routine-builder E2E and complete authenticated E2E passed under isolated runtime verification. Weekly frequency is consumed as planning context only; manual routine semantics remain user-directed. Templates, this slice remote CI/merge and PH-04 closure remain later evidence. |
+
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
 2. Inspect current repository/evidence before changing implementation claims.

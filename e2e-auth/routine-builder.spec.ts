@@ -56,6 +56,28 @@ async function completeStructuredRestrictedReadiness(page: Page) {
   ).toBeVisible();
 }
 
+async function completePlanningProfile(page: Page) {
+  await page.goto("/profile");
+  await page.getByLabel("Primary goal").selectOption("general_strength");
+  await page.getByLabel("Secondary goal").selectOption("balance");
+  await page.getByLabel("Bodyweight exercise").check();
+  await page.getByLabel("Resistance-band exercise").check();
+
+  for (const equipment of ["Chair", "Wall", "Stable support", "Stable elevated surface", "Counter-height surface", "Resistance band equipment"]) {
+    await page.getByLabel(equipment, { exact: true }).check();
+  }
+
+  await page.getByLabel("Home", { exact: true }).check();
+  await page.getByLabel("Available time per routine").selectOption("20");
+  await page.getByLabel("Preferred routine frequency").selectOption("3");
+  await page.getByRole("button", { name: "Save profile" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Profile saved." })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Primary goal")).toHaveValue("general_strength");
+  await expect(page.getByLabel("Available time per routine")).toHaveValue("20");
+  await expect(page.getByLabel("Preferred routine frequency")).toHaveValue("3");
+}
+
 async function readDownloadText(download: Download) {
   const stream = await download.createReadStream();
   if (!stream) {
@@ -364,6 +386,11 @@ test("guided proposal explains and permits replacement of every item before save
   await completeUnrestrictedReadiness(page);
 
   await page.goto("/create");
+  await expect(page.getByRole("heading", { level: 2, name: "Complete your planning profile" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Build a manual routine" })).toBeVisible();
+
+  await completePlanningProfile(page);
+  await page.goto("/create");
 
   await expect(
     page.getByRole("heading", {
@@ -388,6 +415,11 @@ test("guided proposal explains and permits replacement of every item before save
   await expect(
     page.getByRole("heading", { level: 3, name: "Purpose" }),
   ).toBeVisible();
+  await expect(page.getByRole("heading", { level: 3, name: "Planning profile" })).toBeVisible();
+  await expect(page.getByText(/Primary goal: General strength\./)).toBeVisible();
+  await expect(page.getByText(/Estimated proposal time: 11 of 20 available minutes\./)).toBeVisible();
+  await expect(page.getByText(/Preferred routine frequency: 3 days per week/)).toBeVisible();
+
   await expect(
     page.getByRole("heading", { level: 3, name: "Balance" }),
   ).toBeVisible();
@@ -408,7 +440,7 @@ test("guided proposal explains and permits replacement of every item before save
     "e1111111-1111-4111-8111-111111111111",
   );
   await expect(reviewTwo).toHaveValue(
-    "e6666666-6666-4666-8666-666666666666",
+    "e3333333-3333-4333-8333-333333333334",
   );
 
   await reviewOne.selectOption({
@@ -451,6 +483,7 @@ test("guided proposal respects supported structured restrictions", async ({
 }) => {
   await signUp(page, "guided-restricted");
   await completeStructuredRestrictedReadiness(page);
+  await completePlanningProfile(page);
 
   await page.goto("/create");
 
@@ -492,4 +525,33 @@ test("guided proposal respects supported structured restrictions", async ({
       name: "Restricted guided routine",
     }),
   ).toBeVisible();
+});
+
+test("guided save revalidates a changed planning profile before persistence", async ({ page }: { page: Page }) => {
+  await signUp(page, "guided-profile-revalidate");
+  await completeUnrestrictedReadiness(page);
+  await completePlanningProfile(page);
+
+  await page.goto("/create");
+  await page.getByLabel("Routine focus").selectOption("upper_body");
+  await page.getByLabel("Number of exercises").selectOption("1");
+  await page.getByRole("button", { name: "Generate routine proposal" }).click();
+
+  await expect(page.getByRole("heading", { level: 3, name: "Wall push-up — version 2" })).toBeVisible();
+
+  const profilePage = await page.context().newPage();
+  try {
+    await profilePage.goto("/profile");
+    await profilePage.getByLabel("Bodyweight exercise").uncheck();
+    await profilePage.getByRole("button", { name: "Save profile" }).click();
+    await expect(profilePage.getByRole("status").filter({ hasText: "Profile saved." })).toBeVisible();
+    await profilePage.reload();
+    await expect(profilePage.getByLabel("Bodyweight exercise")).not.toBeChecked();
+
+    await page.locator("#guided-review-routine-title").fill("Stale profile guided routine");
+    await page.getByRole("button", { name: "Save reviewed routine" }).click();
+    await expect(page.getByRole("alert").filter({ hasText:"The reviewed guided routine no longer fits your current planning profile." })).toBeVisible();
+  } finally {
+    await profilePage.close();
+  }
 });

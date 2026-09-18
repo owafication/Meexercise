@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; PH-04 manual create/edit/versioning, structured constraint handling, manual consumer and guided proposal/review merged; structured planning profile locally verified; later feature-route paths remain proposed
+**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; seven PH-04 slices through exact-version exercise planning metadata merged; profile-aware guided generation locally verified; later feature-route paths remain proposed
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -125,7 +125,19 @@ PH-04 structured planning-profile prerequisite extends existing `ROUTE-025` `/pr
 
 Authenticated browser evidence verifies persistence of a complete planning profile across reload/sign-out/sign-in, preservation of structured values through a stale two-session write conflict, readable export-v4 coverage and continued account deletion behaviour.
 
-The first public flow is still incomplete at phase level because deterministic guided generation does not yet consume this planning profile, and unlimited template management remains unimplemented.
+The first public flow remains incomplete at phase level because unlimited template management remains unimplemented. Profile-aware deterministic guided generation is now locally verified but its exact-head remote CI/merge remains separate evidence.
+
+PH-04 profile-aware guided generation further extends existing `ROUTE-019` `/create` without adding a route:
+- the manual builder remains available after readiness is satisfied even when the planning profile is incomplete;
+- the guided builder is shown only when the private planning profile is complete; otherwise the user is directed to `/profile`;
+- guided generation applies primary/secondary goals, preferred methods, available equipment, facilities and total routine-time budget to approved exact-version candidates after readiness/movement compatibility;
+- preferred weekly frequency is displayed as planning context and is not presented as an implemented schedule;
+- proposal explanation now includes the planning-profile factors and estimated proposal time versus available time;
+- each review replacement remains target-area-compatible and must keep the entire reviewed proposal inside the same current planning/time constraints;
+- guided save rechecks the current planning profile before persistence, so changing preferences after proposal generation can invalidate the stale reviewed proposal;
+- manual routine semantics remain user-directed and are not silently converted into preference-enforced generation semantics.
+
+Authenticated browser evidence covers incomplete-profile guided blocking with the manual builder still available, complete-profile proposal/explanation, structured-restriction generation, explicit review/replacement, and stale-profile rejection before guided save.
 
 Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v4: assessment correction linkage and PH-04 routine history remain present, and the current private structured planning profile is now included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
 
