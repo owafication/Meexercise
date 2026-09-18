@@ -8,17 +8,26 @@ import {
   getExerciseDetail,
   getExerciseLibrary,
   getExercisePlanningCompatibility,
+  type ExerciseLibraryItem,
 } from "@/modules/exercise-content/server/library";
 import { getVerifiedUserId } from "@/modules/identity/server/auth";
 import {
   guidedFocusLabel,
+  guidedSelectionFitsPlanningProfile,
   replacementOptionsForCandidate,
   selectGuidedRoutineCandidates,
   type GuidedExerciseCandidate,
   type GuidedRoutineActionState,
   type GuidedRoutineFocus,
 } from "@/modules/planning/generator";
+import {
+  PLANNING_EQUIPMENT_OPTIONS,
+  PLANNING_FACILITY_OPTIONS,
+  PLANNING_GOAL_OPTIONS,
+  PLANNING_METHOD_OPTIONS,
+} from "@/modules/profile-assessment/planning-profile";
 import { getPlanningConstraintContext } from "@/modules/profile-assessment/server/assessment";
+import { getProfilePageState } from "@/modules/profile-assessment/server/profile";
 
 import type { CreateRoutineActionState } from "./state";
 
@@ -180,6 +189,66 @@ function parseGuidedItemCount(value: FormDataEntryValue | null) {
   return Number(value);
 }
 
+function toGuidedCandidate(exercise: ExerciseLibraryItem): GuidedExerciseCandidate {
+  return {
+    id: exercise.id,
+    exerciseKey: exercise.exerciseKey,
+    versionNumber: exercise.versionNumber,
+    title: exercise.title,
+    summary: exercise.summary,
+    purpose: exercise.purpose,
+    targetAreas: exercise.targetAreas,
+    equipment: exercise.equipment,
+    planningGoalTags: exercise.planningGoalTags,
+    planningMethodTags: exercise.planningMethodTags,
+    planningEquipment: exercise.planningEquipment,
+    planningFacilities: exercise.planningFacilities,
+    estimatedMinutes: exercise.estimatedMinutes,
+    planningMetadataComplete: exercise.planningMetadataComplete,
+  };
+}
+
+function optionLabels<T extends string>(values: readonly T[], options: readonly { readonly value: T; readonly label: string }[]) {
+  return values.map((value) => options.find((option) => option.value === value)?.label ?? value).join(", ");
+}
+
+export async function createGuidedRoutineAction(
+  previousState: CreateRoutineActionState,
+  formData: FormData,
+): Promise<CreateRoutineActionState> {
+  const submittedIds = formData.getAll("exerciseVersionId").filter((value): value is string => typeof value === "string" && value.length > 0);
+  const exerciseVersionIds = Array.from(new Set(submittedIds));
+
+  if (submittedIds.length < 1 || submittedIds.length > 12 || exerciseVersionIds.length !== submittedIds.length) {
+    return createManualRoutineAction(previousState, formData);
+  }
+
+  const profileState = await getProfilePageState();
+  if (profileState.kind !== "authenticated" || !profileState.profile?.planningComplete) {
+    return errorState("Complete your planning profile before saving a guided routine.", { exercises:"Regenerate the proposal after the planning profile is complete." });
+  }
+
+  let library: ExerciseLibraryItem[];
+  try { library = await getExerciseLibrary(); }
+  catch { return errorState("Current exercise planning metadata could not be verified. Regenerate the proposal."); }
+
+  const byId = new Map(library.map((exercise) => [exercise.id, exercise]));
+  const reviewedCandidates: GuidedExerciseCandidate[] = [];
+  for (const id of exerciseVersionIds) {
+    const exercise = byId.get(id);
+    if (!exercise) {
+      return errorState("The reviewed guided proposal is stale. Reload and generate it again.", { exercises:"One or more reviewed exercise versions are no longer current guided candidates." });
+    }
+    reviewedCandidates.push(toGuidedCandidate(exercise));
+  }
+
+  if (!guidedSelectionFitsPlanningProfile(reviewedCandidates, profileState.profile.planning)) {
+    return errorState("The reviewed guided routine no longer fits your current planning profile.", { exercises:"Regenerate the proposal after reviewing goals, methods, equipment, facilities, and available routine time." });
+  }
+
+  return createManualRoutineAction(previousState, formData);
+}
+
 export async function generateGuidedRoutineAction(
   previousState: GuidedRoutineActionState,
   formData: FormData,
@@ -237,6 +306,16 @@ export async function generateGuidedRoutineAction(
     );
   }
 
+  const profileState = await getProfilePageState();
+  if (profileState.kind !== "authenticated" || !profileState.profile?.planningComplete) {
+    return guidedError("Complete your planning profile before generating a guided routine.");
+  }
+
+  const planningProfile = profileState.profile.planning;
+  if (planningProfile.primaryGoal === null || planningProfile.availableMinutes === null || planningProfile.routineFrequencyDays === null) {
+    return guidedError("Complete your planning profile before generating a guided routine.");
+  }
+
   let library;
 
   try {
@@ -266,26 +345,13 @@ export async function generateGuidedRoutineAction(
 
   const candidates: GuidedExerciseCandidate[] = library
     .filter((exercise) => compatibleIds.has(exercise.id))
-    .map((exercise) => ({
-      id: exercise.id,
-      exerciseKey: exercise.exerciseKey,
-      versionNumber: exercise.versionNumber,
-      title: exercise.title,
-      summary: exercise.summary,
-      purpose: exercise.purpose,
-      targetAreas: exercise.targetAreas,
-      equipment: exercise.equipment,
-    }));
+    .map(toGuidedCandidate);
 
-  const selected = selectGuidedRoutineCandidates(
-    candidates,
-    focus,
-    itemCount,
-  );
+  const selected = selectGuidedRoutineCandidates(candidates, focus, itemCount, planningProfile);
 
   if (!selected) {
     return guidedError(
-      "There are not enough approved compatible exercise versions for that focus and routine size. Choose a smaller routine or another focus.",
+      "There are not enough approved exercise versions that satisfy your planning profile, current movement constraints, focus, routine size, and available routine time. Review the profile or choose a smaller routine or another focus.",
     );
   }
 
@@ -296,8 +362,10 @@ export async function generateGuidedRoutineAction(
     ),
   );
 
+  const candidateById = new Map(candidates.map((candidate) => [candidate.id, candidate]));
+
   const items = await Promise.all(
-    selected.map(async (candidate) => {
+    selected.map(async (candidate, index) => {
       let substitutionNotes: string[] = [];
 
       try {
@@ -326,10 +394,12 @@ export async function generateGuidedRoutineAction(
       return {
         ...candidate,
         primaryTargetArea: candidate.targetAreas[0] ?? "General",
-        replacementOptions: replacementOptionsForCandidate(
-          candidate,
-          candidates,
-        ),
+        replacementOptions: replacementOptionsForCandidate(candidate, candidates).filter((option) => {
+          const replacement = candidateById.get(option.id);
+          if (!replacement) return false;
+          const reviewed = selected.map((item, itemIndex) => itemIndex === index ? replacement : item);
+          return guidedSelectionFitsPlanningProfile(reviewed, planningProfile);
+        }),
         substitutionNotes,
       };
     }),
@@ -340,6 +410,12 @@ export async function generateGuidedRoutineAction(
   ).sort();
 
   const focusLabel = guidedFocusLabel(focus);
+  const totalMinutes = selected.reduce((total, candidate) => total + (candidate.estimatedMinutes ?? 0), 0);
+  const primaryGoalLabel = optionLabels([planningProfile.primaryGoal], PLANNING_GOAL_OPTIONS);
+  const secondaryGoalLabel = planningProfile.secondaryGoal === null ? null : optionLabels([planningProfile.secondaryGoal], PLANNING_GOAL_OPTIONS);
+  const methodLabels = optionLabels(planningProfile.preferredMethods, PLANNING_METHOD_OPTIONS);
+  const equipmentLabels = optionLabels(planningProfile.equipment, PLANNING_EQUIPMENT_OPTIONS);
+  const facilityLabels = optionLabels(planningProfile.facilities, PLANNING_FACILITY_OPTIONS);
 
   return {
     status: "proposal",
@@ -348,7 +424,9 @@ export async function generateGuidedRoutineAction(
       focus,
       itemCount,
       purposeExplanation:
-        `This ${itemCount}-item proposal uses only current approved exact exercise versions for a self-directed general-wellness ${focusLabel.toLowerCase()} routine.`,
+        `This ${itemCount}-item proposal uses only current approved exact exercise versions for a self-directed general-wellness ${focusLabel.toLowerCase()} routine aligned to your ${primaryGoalLabel.toLowerCase()} primary goal.`,
+      profileExplanation:
+        `Primary goal: ${primaryGoalLabel}. ${secondaryGoalLabel ? `Secondary goal: ${secondaryGoalLabel}. ` : ""}Preferred methods: ${methodLabels}. Available equipment: ${equipmentLabels}. Facilities: ${facilityLabels}. Estimated proposal time: ${totalMinutes} of ${planningProfile.availableMinutes} available minutes. Preferred routine frequency: ${planningProfile.routineFrequencyDays} ${planningProfile.routineFrequencyDays === 1 ? "day" : "days"} per week; scheduling is not created by this proposal.`,
       balanceExplanation:
         focus === "balanced"
           ? `The deterministic selector rotates across available target-area groups where possible. This proposal covers: ${targetAreas.join(", ")}.`

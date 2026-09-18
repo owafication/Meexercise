@@ -1,6 +1,6 @@
 # Security, Privacy and Risk
 
-**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; PH-04 manual create/edit/versioning, structured constraints, manual consumer, guided proposal/review and structured planning profile merged; exact-version exercise planning metadata locally verified; legal applicability and production exposure unproven
+**Status:** Risk baseline active; PH-02 private-data and PH-03 exercise-content boundaries Passed / Verified; seven PH-04 slices through exact-version exercise planning metadata merged; profile-aware deterministic guided generation locally verified; legal applicability and production exposure unproven
 **Owner:** Safety boundary, data protection, access control and material risk
 
 ## Proportional safeguard rule
@@ -95,6 +95,15 @@ The database boundary constrains every planning vocabulary and time range. Final
 The synthetic classifications demonstrate mechanics only. They do not prove production editorial breadth, professional authorship, medical appropriateness or completeness for every user goal/facility/equipment combination.
 
 `RISK-016` remains partial because the generator has not yet consumed the merged private planning profile. The next deterministic consumer must require complete profile context, filter/select against these exact-version fields, preserve current readiness/constraint/approval checks, and fail closed when the requested structure cannot be satisfied. Runtime AI and free-text inference remain absent.
+
+## PH-04 profile-aware guided-generation risk evidence
+The profile-aware consumer further advances `RISK-016` without allowing user preferences to override safety. Current readiness/blocked/unresolved states and structured movement constraints remain mandatory upstream gates before profile matching. The planning profile is used only after these safety checks and only against approved exact-version structured metadata.
+
+Generation fails closed when the private planning profile is incomplete, when required exact-version planning metadata is incomplete, when primary goal/method/equipment/facility compatibility cannot be satisfied, or when the requested proposal exceeds the available routine-time budget. Weekly routine frequency is treated as non-safety planning context; no schedule or recovery prescription is inferred from it in this slice.
+
+The reviewed-save path rechecks the current private planning profile and current approved library before persistence. A proposal generated under an older profile cannot be saved as a guided routine if the reviewed exact-version array no longer satisfies the current profile/time budget. Final persistence still passes through the established routine mutation, which rechecks readiness, approval and structured movement compatibility.
+
+Manual routine creation remains a deliberate user-directed capability and is not converted into automatic preference enforcement. This distinction prevents current preferences from being misrepresented as safety rules while preserving the guided-generation contract. Runtime AI and free-text interpretation remain absent. Production catalogue breadth/editorial review remain separate activation/release evidence.
 
 No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system or complex RBAC is assumed before its threat/contract/exposure requires it.
 

@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; PH-04 manual create/edit/versioning, structured constraints, manual constraint consumption, guided proposal/review and structured planning profile merged; exact-version exercise planning metadata locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; seven PH-04 slices through exact-version exercise planning metadata merged; profile-aware deterministic guided generation locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -127,6 +127,17 @@ Planning metadata follows the existing content-version lifecycle. Draft versions
 The synthetic seed explicitly classifies the current visible fixture versions before finalisation. These rows prove deterministic mechanics only and are not evidence of a complete production exercise taxonomy, professional review or medical suitability. No planning value is inferred from title, instructions, target area or free text.
 
 The server exercise library now exposes exact-version planning metadata to server consumers. Guided selection behaviour is deliberately unchanged in this prerequisite. The next PH-04 slice must require a complete structured planning profile and consume these fields deterministically, while preserving current readiness/constraint/approval gates and fail-closed behaviour when compatible content is insufficient.
+
+## Implemented PH-04 profile-aware deterministic guided-generation consumer
+`BR-20260918-01` consumes the merged private planning profile and merged exact-version exercise planning metadata in the existing guided-generation path. It adds no schema, service, proposal persistence, scheduling engine or runtime AI.
+
+Guided generation now requires a complete structured planning profile. The primary general-wellness goal is a hard exact-version eligibility condition; the optional secondary goal is a stable deterministic tie-break. At least one preferred method and one available facility must intersect the version-owned metadata. Every required equipment token must be present in the user's available equipment set, except the explicit `none` token. Unclassified planning metadata fails closed.
+
+Available routine time is enforced over the summed exact-version `estimated_minutes` of the selected proposal, not merely per exercise. Replacement options are filtered so substituting one review choice cannot push the reviewed proposal outside the same current profile/time budget. Preferred weekly frequency is included in the proposal explanation as planning context only; this slice does not create a schedule or infer per-exercise frequency semantics.
+
+Current readiness and movement-constraint gates remain upstream authorities. Candidate versions must still be current approved exact versions that pass structured movement compatibility before profile filtering occurs. Generated proposals remain ephemeral and every item remains explicitly reviewable.
+
+The review save no longer delegates directly to the manual action without profile validation. A guided-specific server wrapper reconstructs the current profile and current exercise library, verifies the complete reviewed exact-version array still satisfies the current planning profile and total-time budget, then calls the existing authoritative manual routine mutation. This closes the stale-profile/forged-replacement gap without creating a second persistence path. Manual routine creation remains intentionally user-directed and is not forced to match planning preferences.
 
 ## Proposed topology
 Start as one deployable **modular monolith**. This is a proposed default, not a claim about existing source.

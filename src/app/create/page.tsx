@@ -9,6 +9,7 @@ import {
 } from "@/modules/exercise-content/server/library";
 import { getVerifiedUserId } from "@/modules/identity/server/auth";
 import { getPlanningConstraintContext } from "@/modules/profile-assessment/server/assessment";
+import { getProfilePageState } from "@/modules/profile-assessment/server/profile";
 
 import { GuidedRoutineForm } from "./guided-routine-form";
 import { RoutineForm } from "./routine-form";
@@ -114,6 +115,18 @@ export default async function CreatePage() {
 
   const canBuild =
     state === "ready" || (state === "restricted" && exercises.length > 0);
+
+  let guidedProfileState: "complete" | "incomplete" | "unavailable" = "incomplete";
+
+  if (canBuild) {
+    try {
+      const profileState = await getProfilePageState();
+      if (profileState.kind === "unavailable") guidedProfileState = "unavailable";
+      else if (profileState.kind === "authenticated" && profileState.profile?.planningComplete) guidedProfileState = "complete";
+    } catch {
+      guidedProfileState = "unavailable";
+    }
+  }
 
   return (
     <>
@@ -272,14 +285,33 @@ export default async function CreatePage() {
         </section>
       ) : null}
 
-      {canBuild ? (
+      {canBuild && guidedProfileState !== "complete" ? (
+        <section className="card" aria-labelledby="guided-profile-title">
+          <p className="status-label">Planning profile required</p>
+          <h2 id="guided-profile-title">
+            {guidedProfileState === "unavailable" ? "Planning profile is unavailable" : "Complete your planning profile"}
+          </h2>
+          <p>
+            Guided generation requires structured goals, preferred methods,
+            equipment, facilities, available routine time, and preferred
+            routine frequency. Manual routine creation remains available
+            without forcing those preferences onto user-directed choices.
+          </p>
+          {guidedProfileState === "incomplete" ? (
+            <Link className="button button-secondary" href="/profile">Complete planning profile</Link>
+          ) : null}
+        </section>
+      ) : null}
+
+      {canBuild && guidedProfileState === "complete" ? (
         <section className="card" aria-labelledby="guided-routine-title">
           <p className="status-label">Deterministic guided builder</p>
           <h2 id="guided-routine-title">Generate and review a routine proposal</h2>
           <p>
             Choose a focus and routine size. MeExercise proposes an ordered
-            routine from approved compatible exact exercise versions, explains
-            the proposal, then requires review of every item before save.
+            routine from approved exact exercise versions that fit the complete
+            structured planning profile and current movement constraints,
+            explains the proposal, then requires review of every item before save.
           </p>
           <GuidedRoutineForm />
         </section>
