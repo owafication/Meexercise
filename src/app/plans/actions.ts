@@ -179,3 +179,169 @@ export async function createRoutineFromTemplateAction(
   revalidatePath("/plans");
   redirect(`/routines/${data}`);
 }
+export type PlanActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+function selectedRoutineVersionIds(formData: FormData) {
+  return formData
+    .getAll("routineVersionId")
+    .map((value) => normalizedText(value))
+    .filter((value) => value.length > 0);
+}
+
+function validatePlanInput(title: string, routineVersionIds: string[]) {
+  if (title.length < 1 || title.length > 80) {
+    return "Enter a plan title between 1 and 80 characters.";
+  }
+
+  if (routineVersionIds.length < 1 || routineVersionIds.length > 12) {
+    return "Select between 1 and 12 routine snapshots for this plan.";
+  }
+
+  if (routineVersionIds.some((id) => !validUuid(id))) {
+    return "One or more routine snapshots could not be verified.";
+  }
+
+  if (new Set(routineVersionIds).size !== routineVersionIds.length) {
+    return "Select each exact routine snapshot only once.";
+  }
+
+  return null;
+}
+
+function planMutationMessage(code: string | undefined) {
+  if (code === "42501") {
+    return "One or more selected routine snapshots are not available to this account.";
+  }
+
+  if (code === "23514") {
+    return "The selected plan composition is invalid or contains routine content that is no longer currently approved.";
+  }
+
+  if (code === "55000") {
+    return "Current readiness or movement constraints do not permit this plan composition. Review your current assessment first.";
+  }
+
+  return "Plan could not be saved. Try again later.";
+}
+
+export async function createPlanAction(
+  previousState: PlanActionState,
+  formData: FormData,
+): Promise<PlanActionState> {
+  void previousState;
+
+  const title = normalizedText(formData.get("planTitle"));
+  const routineVersionIds = selectedRoutineVersionIds(formData);
+  const validationMessage = validatePlanInput(title, routineVersionIds);
+
+  if (validationMessage) {
+    return { status: "error", message: validationMessage };
+  }
+
+  let supabase;
+
+  try {
+    supabase = await createClient();
+  } catch {
+    return { status: "error", message: "Plan storage is unavailable right now." };
+  }
+
+  const userId = await getVerifiedUserId(supabase);
+
+  if (!userId) {
+    return { status: "error", message: "Sign in again before saving a plan." };
+  }
+
+  const { data, error } = await supabase.rpc("create_plan", {
+    p_title: title,
+    p_routine_version_ids: routineVersionIds,
+  });
+
+  if (error || typeof data !== "string") {
+    return {
+      status: "error",
+      message: planMutationMessage(error?.code),
+    };
+  }
+
+  revalidatePath("/plans");
+  redirect(`/plans/${data}`);
+}
+
+export async function createPlanVersionAction(
+  previousState: PlanActionState,
+  formData: FormData,
+): Promise<PlanActionState> {
+  void previousState;
+
+  const planId = normalizedText(formData.get("planId"));
+  const expectedVersionText = normalizedText(
+    formData.get("expectedVersionNumber"),
+  );
+  const title = normalizedText(formData.get("planTitle"));
+  const routineVersionIds = selectedRoutineVersionIds(formData);
+  const expectedVersionNumber = Number(expectedVersionText);
+
+  if (!validUuid(planId)) {
+    return { status: "error", message: "Plan could not be verified." };
+  }
+
+  if (
+    !Number.isInteger(expectedVersionNumber) ||
+    expectedVersionNumber < 1
+  ) {
+    return { status: "error", message: "Plan version could not be verified." };
+  }
+
+  const validationMessage = validatePlanInput(title, routineVersionIds);
+
+  if (validationMessage) {
+    return { status: "error", message: validationMessage };
+  }
+
+  let supabase;
+
+  try {
+    supabase = await createClient();
+  } catch {
+    return { status: "error", message: "Plan storage is unavailable right now." };
+  }
+
+  const userId = await getVerifiedUserId(supabase);
+
+  if (!userId) {
+    return {
+      status: "error",
+      message: "Sign in again before saving a plan version.",
+    };
+  }
+
+  const { data, error } = await supabase.rpc("create_plan_version", {
+    p_plan_id: planId,
+    p_expected_version_number: expectedVersionNumber,
+    p_title: title,
+    p_routine_version_ids: routineVersionIds,
+  });
+
+  if (error?.code === "40001") {
+    return {
+      status: "error",
+      message:
+        "This plan changed in another session. Reload before saving another version.",
+    };
+  }
+
+  if (error || typeof data !== "number") {
+    return {
+      status: "error",
+      message: planMutationMessage(error?.code),
+    };
+  }
+
+  revalidatePath("/plans");
+  revalidatePath(`/plans/${planId}`);
+  redirect(`/plans/${planId}`);
+}

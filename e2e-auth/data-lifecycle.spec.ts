@@ -78,9 +78,10 @@ test("user can export current data and permanently delete the account", async ({
   const exportText = await readDownloadText(download);
   const exported = JSON.parse(exportText);
 
-  expect(exported.exportVersion).toBe(5);
+  expect(exported.exportVersion).toBe(6);
   expect(exported.routines).toEqual([]);
   expect(exported.templates).toEqual([]);
+  expect(exported.plans).toEqual([]);
   expect(exported.account.email).toBe(email);
   expect(exported.profile.displayName).toBe("Lifecycle Test User");
   expect(exported.profile.planning).toEqual({

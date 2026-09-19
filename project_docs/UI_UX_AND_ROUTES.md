@@ -125,7 +125,7 @@ PH-04 structured planning-profile prerequisite extends existing `ROUTE-025` `/pr
 
 Authenticated browser evidence verifies persistence of a complete planning profile across reload/sign-out/sign-in, preservation of structured values through a stale two-session write conflict, readable export-v4 coverage and continued account deletion behaviour.
 
-The first public flow remains incomplete at phase level because unlimited template management remains unimplemented. Profile-aware deterministic guided generation is now locally verified but its exact-head remote CI/merge remains separate evidence.
+The PH-04 routine-generation/profile foundation is now followed by merged reusable-template support and the locally verified versioned plan-composition foundation. PH-05 scheduling/progression remains intentionally separate.
 
 PH-04 profile-aware guided generation further extends existing `ROUTE-019` `/create` without adding a route:
 - the manual builder remains available after readiness is satisfied even when the planning profile is incomplete;
@@ -139,7 +139,7 @@ PH-04 profile-aware guided generation further extends existing `ROUTE-019` `/cre
 
 Authenticated browser evidence covers incomplete-profile guided blocking with the manual builder still available, complete-profile proposal/explanation, structured-restriction generation, explicit review/replacement, and stale-profile rejection before guided save.
 
-Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v4: assessment correction linkage and PH-04 routine history remain present, and the current private structured planning profile is now included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
+Signup/sign-in/sign-out/profile/concurrent-edit, readiness-assessment start/save/reload-resume/completion/conservative outcome, readable JSON export, failed-password deletion protection, permanent re-authenticated account deletion, rejected post-deletion sign-in, captured-email password recovery/update, completed-assessment correction and account-email correction are locally browser-verified. A completed assessment exposes `Correct this assessment`; the correction starts from the prior answers and completes as a linked successor while the original remains historical. `/profile/account` exposes current-email correction using current-password re-authentication and confirmation at the new address; The current JSON export is v6: assessment correction linkage, private structured planning profile, full PH-04 routine history, reusable routine-template metadata and immutable plan/version composition history are included. Recovery stays on the configured canonical application origin, reaches the password-update form only with a verified recovery session, rejects the old password after update and accepts the replacement password. The assessment outcome remains a general-wellness planning restriction/recommendation, not diagnosis or medical clearance; account deletion is deliberately destructive and is preceded by export guidance, password re-authentication and exact typed confirmation. Production email delivery and production backup-retention behaviour remain unproven.
 
 Unimplemented route URL syntax remains deferred until its owning capability exists. Route semantics and stable record IDs remain the contract.
 
@@ -190,4 +190,17 @@ Print/PDF consumes the same canonical plan/routine snapshot as interactive mode.
 - empty routine/template states remain separate and use the page's section/card heading hierarchy;
 - no subscription/count UI gate is introduced for routine templates.
 
-This slice does not establish `ROUTE-018` plan detail and does not add schedule/progression behaviour. Those remain gated by the PH-04 plan-snapshot foundation and PH-05 respectively.
+The reusable-template slice itself did not establish `ROUTE-018`; `BR-20260919-02` now provides the PH-04 plan-composition surface described below. Schedule/progression behaviour remains PH-05.
+
+## Implemented PH-04 versioned plan-composition surface
+
+`BR-20260919-02` extends `ROUTE-017` `/plans` and establishes the PH-04 portion of `ROUTE-018`.
+
+- `/plans` keeps the existing saved-routine and reusable-template sections and adds an owner-only saved-plan section plus a create-plan form.
+- Plan creation selects current latest routine snapshots and saves an explicit title plus ordered exact routine-version composition.
+- `/plans/[planId]` renders the current immutable plan version and its exact routine-version composition without silently resolving those references to newer routine versions.
+- `/plans/[planId]/edit` creates version N+1 instead of rewriting the prior plan snapshot. Current latest routine versions are offered while the currently selected historical exact version remains representable for deliberate review.
+- Stale plan edits surface the existing reload-before-saving conflict boundary rather than overwriting a newer version.
+- Another authenticated user receives the non-disclosing unavailable/not-owned result for a foreign plan ID.
+- No schedule, recurrence, timezone, activation or progression UI is claimed in this PH-04 slice; those portions of `ROUTE-018` remain PH-05.
+- No subscription/count UI gate is introduced for saved plans or routine templates.

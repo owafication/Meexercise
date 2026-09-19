@@ -1317,4 +1317,14 @@ The most important lessons from this chat are:
 13. **GitHub connector read access does not imply write access; `gh` may be the correct write path.**
 14. **Generated local state is not automatically user work and should not be deleted blindly.**
 15. **A green check proves only its scope. State remaining `Unproven` explicitly.**
+---
 
+## PH-04 plan-snapshot PowerShell harness lessons (2026-09-19)
+
+These are operational lessons, not product contracts.
+
+1. **Normalize newlines before exact text replacement.** A PowerShell here-string can carry CRLF while a tracked repository file uses LF. Exact matching should normalize both source and replacement to LF, then restore the target file's existing newline convention.
+2. **Use `-LiteralPath` for Next.js App Router bracket directories.** `Test-Path`, `Get-Content` and similar cmdlets treat `[planId]` as a wildcard character class unless `-LiteralPath` is used.
+3. **Do not let PowerShell 5.1 native stderr decide a status probe.** With `$ErrorActionPreference = 'Stop'`, expected stderr from commands such as `supabase status` against a stopped stack can become a terminating `NativeCommandError`. For probes, redirect through `cmd.exe` and inspect the native exit code.
+4. **Keep generated PowerShell scripts ASCII-only when they will write source containing typographic Unicode, or construct characters by code point.** UTF-8 scripts without a BOM can be decoded incorrectly by Windows PowerShell 5.1, producing mojibake such as em dash or middle dot sequences in generated tests.
+5. **A harness failure is not product evidence.** The plan-snapshot slice did not receive runtime credit until migration replay, focused/full pgTAP, focused/full authenticated E2E and the final external-network-isolated full verification all passed.

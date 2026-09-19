@@ -42,6 +42,7 @@ Each phase is implemented in small verifiable slices. A walking skeleton is used
 **Tasks:** plan/routine snapshots; sections/items; manual builder; deterministic generation constraints; substitution; explanation; user review; unlimited templates. Runtime AI is not required.  
 **Validation:** `VAL-027`, `VAL-026`.  
 **Completion boundary:** PH-04 requires a durable owner-private versioned plan snapshot authority in addition to routines/templates. A plan snapshot must preserve its own versioned meaning and exact routine-version composition so later edits cannot rewrite history. PH-05 owns recurrence/exceptions, timezone-aware scheduling and progression proposal/reversal behaviour; those mechanics are not pulled forward merely to close PH-04. Full `REQ-017` therefore spans the PH-04 plan-composition foundation and later PH-05 scheduling/progression capabilities.
+**Current evidence:** `BR-20260919-02` locally verifies this PH-04 completion boundary with stable plans, immutable append-only plan versions and exact routine-version composition. PH-04 implementation scope is locally complete; exact-head GitHub CI/merge for the final plan-snapshot slice remains required before canonical remote phase closure.
 **Rollback:** disable guided generator while retaining manual plans/data.  
 **Stop:** any generator path bypasses deterministic constraints or version authority.
 

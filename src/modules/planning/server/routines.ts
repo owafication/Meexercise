@@ -7,6 +7,7 @@ import { getVerifiedUserId } from "@/modules/identity/server/auth";
 
 export type RoutineListItem = {
   id: string;
+  versionId: string;
   title: string;
   versionNumber: number;
   itemCount: number;
@@ -234,6 +235,7 @@ export async function getRoutineListPageState(): Promise<RoutineListPageState> {
 
       mapped.push({
         id: String(routine.id),
+        versionId: version.id,
         title: version.title,
         versionNumber: version.version_number,
         itemCount: itemCountByVersion.get(version.id) ?? 0,
