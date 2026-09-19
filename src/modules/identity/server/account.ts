@@ -3,6 +3,10 @@ import {
   buildUserRoutineExport,
   type RoutineExportRecord,
 } from "@/modules/planning/server/routines";
+import {
+  buildUserRoutineTemplateExport,
+  type RoutineTemplateExportRecord,
+} from "@/modules/planning/server/templates";
 
 export type AccountLifecyclePageState =
   | {
@@ -20,7 +24,7 @@ export type UserDataExportResult =
   | {
       kind: "ok";
       data: {
-        exportVersion: 4;
+        exportVersion: 5;
         generatedAt: string;
         account: {
           id: string;
@@ -69,6 +73,7 @@ export type UserDataExportResult =
           }>;
         }>;
         routines: RoutineExportRecord[];
+        templates: RoutineTemplateExportRecord[];
       };
     }
   | {
@@ -275,10 +280,16 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
       return { kind: "unavailable" };
     }
 
+    const exportedTemplates = await buildUserRoutineTemplateExport(supabase, userId);
+
+    if (exportedTemplates === null) {
+      return { kind: "unavailable" };
+    }
+
     return {
       kind: "ok",
       data: {
-        exportVersion: 4,
+        exportVersion: 5,
         generatedAt: new Date().toISOString(),
         account: {
           id: user.id,
@@ -311,6 +322,7 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
           : null,
         assessments: exportedAssessments,
         routines: exportedRoutines,
+        templates: exportedTemplates,
       },
     };
   } catch {
