@@ -217,3 +217,15 @@ Runtime AI is conditional. If introduced later it must sit behind a narrow appli
 Hard-code true invariants. Configure demonstrated deployment variability. Persist real user preferences. Add flags only for actual rollout/runtime variants. Keep secrets out of source. Supabase project URLs/keys are environment configuration; privileged/service credentials remain server-only and are never exposed to browser code.
 
 Before adopting a dependency: identify capability gap, standard/platform alternative, transitive surface, maintenance/security status, licence compatibility, runtime/bundle cost, portability and exit cost. Do not add an abstraction around a dependency unless replacement/substitutability is a real requirement.
+
+## Implemented PH-04 reusable routine templates
+
+`BR-20260919-01` adds reusable owner-private routine templates without duplicating the existing routine section/item snapshot hierarchy. Each template is a stable record that points to one immutable source `routine_version`; saving a template therefore captures the exact routine snapshot current at that time, and later routine edits append new routine versions without changing the saved template.
+
+Template creation is available only through the authenticated mutation boundary and captures the owner's latest source routine version. The source snapshot must contain currently approved exact exercise versions when the template is created. Authenticated table access is read-only to the owner; direct authenticated updates are denied, while the existing immutable-snapshot trigger also rejects privileged direct rewrites as defence in depth.
+
+Creating a routine from a template reads the saved source routine version's ordered exact exercise-version IDs and delegates to the existing authoritative manual-routine mutation. Current readiness, exercise approval and structured movement constraints are therefore rechecked at instantiation instead of being frozen as permission in the template. A later-withdrawn exact exercise version remains readable through historical ownership but cannot silently propagate into a new routine.
+
+The implementation adds no subscription/entitlement service and no saved-template count gate. Focused database evidence created 26 templates for one owner while preserving cross-user isolation. Readable account export advances to v5 with template metadata, and Auth-user deletion cascades through template records. Runtime AI remains absent.
+
+Closure audit: this template mechanism completes the PH-04 reusable-routine-template task only. Canonical PH-04 also requires durable versioned plan snapshots; those remain a separate slice. PH-05 continues to own scheduling and progression mechanics.

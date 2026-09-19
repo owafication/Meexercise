@@ -72,6 +72,8 @@ The common conclusion adopted here is: mechanisms are justified by actual requir
 
 | `BR-20260918-01` | 2026-09-18 | PH-04 profile-aware deterministic guided generation | PR #23/exercise planning metadata is confirmed merged as `2e9652871f6fc53a84dec85af275f69c6860e790`; this slice locally verifies complete-profile gating and deterministic goal/method/equipment/facility/time consumption after existing readiness/constraint checks, profile-aware explanation/replacements, and current-profile revalidation before guided persistence. `npm run verify`, DB reset, focused routine-builder E2E and complete authenticated E2E passed under isolated runtime verification. Weekly frequency is consumed as planning context only; manual routine semantics remain user-directed. Templates, this slice remote CI/merge and PH-04 closure remain later evidence. |
 
+| `BR-20260919-01` | 2026-09-19 | PH-04 reusable routine templates + closure audit | Starting from PR #24 merge `ddb57a47ae5669e8d7ef575510f928a8a605aff1`, this slice locally verifies reusable owner-private routine templates pinned to immutable source routine versions, current safety/approval revalidation on instantiation, export v5, account-deletion cascade and no template count/subscription gate. The closure audit corrects the evidence boundary: `REQ-018` / `AC-011` remain partial because durable saved plans are not yet implemented. PH-04 remains In progress until a versioned plan-composition snapshot authority exists; PH-05 retains scheduling/progression mechanics. |
+
 ## Governance change procedure
 1. Identify the canonical owner and affected IDs.
 2. Inspect current repository/evidence before changing implementation claims.

@@ -213,7 +213,7 @@ test("manual routine creation and editing preserve ordered immutable versions", 
 
   await page.goto("/plans");
   await expect(
-    page.getByRole("heading", { level: 2, name: "Edited routine" }),
+    page.getByRole("heading", { level: 3, name: "Edited routine" }),
   ).toBeVisible();
   await expect(page.getByText("2 exercises", { exact: false })).toBeVisible();
 
@@ -223,8 +223,9 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   const exportDownload = await downloadPromise;
   const exported = JSON.parse(await readDownloadText(exportDownload));
 
-  expect(exported.exportVersion).toBe(4);
+  expect(exported.exportVersion).toBe(5);
   expect(exported.routines).toHaveLength(1);
+  expect(exported.templates).toEqual([]);
   expect(exported.routines[0].versions).toHaveLength(2);
 
   expect(exported.routines[0].versions[0].versionNumber).toBe(1);
@@ -309,7 +310,7 @@ test("manual routine creation and editing preserve ordered immutable versions", 
 
     await otherPage.goto("/plans");
     await expect(
-      otherPage.getByRole("heading", { level: 2, name: "No routines yet" }),
+      otherPage.getByRole("heading", { level: 3, name: "No routines yet" }),
     ).toBeVisible();
   } finally {
     await otherContext.close();
@@ -554,4 +555,55 @@ test("guided save revalidates a changed planning profile before persistence", as
   } finally {
     await profilePage.close();
   }
+});
+
+test("routine templates preserve an exact source snapshot and create a new validated routine", async ({ page, browser }: { page: Page; browser: Browser }) => {
+  await signUp(page, "routine-template-owner");
+  await completeUnrestrictedReadiness(page);
+  await page.goto("/create");
+  await page.getByLabel("Routine title").fill("Template source");
+  await page.getByLabel("Exercise 1", { exact: true }).selectOption({ label: "Wall push-up \u2014 version 2" });
+  await page.getByLabel("Exercise 2", { exact: true }).selectOption({ label: "Incline push-up \u2014 version 1" });
+  await page.getByRole("button", { name: "Save routine" }).click();
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+  const sourceRoutineUrl=page.url();
+
+  await page.goto("/plans");
+  await expect(page.getByRole("heading",{level:2,name:"Reusable routine templates"})).toBeVisible();
+  await page.getByLabel("Template name for Template source").fill("Reusable exact starter");
+  await page.getByRole("button",{name:"Save as template"}).click();
+  await expect(page.getByRole("status").filter({hasText:"Template saved."})).toBeVisible();
+  await expect(page.getByRole("heading",{level:3,name:"Reusable exact starter"})).toBeVisible();
+
+  await page.goto(`${sourceRoutineUrl}/edit`);
+  await page.getByLabel("Routine title").fill("Edited template source");
+  await page.getByLabel("Exercise 1", { exact: true }).selectOption({ label: "Incline push-up \u2014 version 1" });
+  await page.getByLabel("Exercise 2", { exact: true }).selectOption({ label: "Counter push-up \u2014 version 1" });
+  await page.getByRole("button",{name:"Save new version"}).click();
+  await expect(page.getByText(/Routine .* version 2/)).toBeVisible();
+
+  await page.goto("/plans");
+  const card=page.locator("article").filter({hasText:"Reusable exact starter"});
+  await expect(card).toContainText("source routine version 1");
+  await expect(card).toContainText("Template source");
+  await card.getByLabel("New routine title from Reusable exact starter").fill("Routine from saved template");
+  await card.getByRole("button",{name:"Create routine from template"}).click();
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+  await expect(page.getByRole("heading",{level:1,name:"Routine from saved template"})).toBeVisible();
+  const items=page.locator('section[aria-labelledby^="routine-section-"]').getByRole("listitem");
+  await expect(items).toHaveCount(2);
+  await expect(items.nth(0).getByRole("heading",{level:3})).toHaveText("Wall push-up");
+  await expect(items.nth(1).getByRole("heading",{level:3})).toHaveText("Incline push-up");
+
+  await page.goto("/profile/account");
+  const downloadPromise=page.waitForEvent("download");
+  await page.getByRole("link",{name:"Download JSON export"}).click();
+  const exported=JSON.parse(await readDownloadText(await downloadPromise));
+  expect(exported.exportVersion).toBe(5);
+  expect(exported.templates).toHaveLength(1);
+  expect(exported.templates[0]).toMatchObject({ title:"Reusable exact starter", sourceRoutineVersionNumber:1, sourceRoutineTitle:"Template source", itemCount:2 });
+
+  const otherContext=await browser.newContext();
+  try { const otherPage=await otherContext.newPage(); await signUp(otherPage,"routine-template-other"); await completeUnrestrictedReadiness(otherPage); await otherPage.goto("/plans"); await expect(otherPage.getByRole("heading",{level:3,name:"No routines yet"})).toBeVisible(); await expect(otherPage.getByRole("heading",{level:3,name:"No templates yet"})).toBeVisible(); }
+  finally { await otherContext.close(); }
 });

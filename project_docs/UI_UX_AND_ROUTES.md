@@ -177,3 +177,17 @@ Automated accessibility checks are useful but do not prove accessibility. Manual
 
 ## Print contract
 Print/PDF consumes the same canonical plan/routine snapshot as interactive mode. It must remain understandable without colour/background graphics and include overview, schedule, instructions, dosage, modifications, checkboxes and notes space where applicable. Print must not silently recalculate a newer routine version.
+
+## Implemented PH-04 reusable routine-template surface
+
+`BR-20260919-01` extends existing `ROUTE-017` `/plans` without adding a new route. The owner-only page continues to list saved routines and now also lists reusable routine templates.
+
+- each saved routine exposes an explicit template-name field and `Save as template` action;
+- each template shows its saved source-routine context and exposes an explicit new-routine title plus `Create routine from template`;
+- saving a template does not activate or schedule anything;
+- creating from a template produces a normal routine through the existing current safety/approval mutation boundary;
+- source-routine edits do not silently rewrite the saved template;
+- empty routine/template states remain separate and use the page's section/card heading hierarchy;
+- no subscription/count UI gate is introduced for routine templates.
+
+This slice does not establish `ROUTE-018` plan detail and does not add schedule/progression behaviour. Those remain gated by the PH-04 plan-snapshot foundation and PH-05 respectively.
