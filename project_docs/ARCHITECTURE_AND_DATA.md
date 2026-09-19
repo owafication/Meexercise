@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; nine PH-04 slices through reusable routine templates merged; versioned plan-composition foundation locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data, PH-03 exercise-content library and PH-04 routine/plan builder Passed / Verified; PH-05 scheduling/progression proposed; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
