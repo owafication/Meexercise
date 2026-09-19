@@ -223,9 +223,10 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   const exportDownload = await downloadPromise;
   const exported = JSON.parse(await readDownloadText(exportDownload));
 
-  expect(exported.exportVersion).toBe(5);
+  expect(exported.exportVersion).toBe(6);
   expect(exported.routines).toHaveLength(1);
   expect(exported.templates).toEqual([]);
+  expect(exported.plans).toEqual([]);
   expect(exported.routines[0].versions).toHaveLength(2);
 
   expect(exported.routines[0].versions[0].versionNumber).toBe(1);
@@ -599,11 +600,173 @@ test("routine templates preserve an exact source snapshot and create a new valid
   const downloadPromise=page.waitForEvent("download");
   await page.getByRole("link",{name:"Download JSON export"}).click();
   const exported=JSON.parse(await readDownloadText(await downloadPromise));
-  expect(exported.exportVersion).toBe(5);
+  expect(exported.exportVersion).toBe(6);
   expect(exported.templates).toHaveLength(1);
+  expect(exported.plans).toEqual([]);
   expect(exported.templates[0]).toMatchObject({ title:"Reusable exact starter", sourceRoutineVersionNumber:1, sourceRoutineTitle:"Template source", itemCount:2 });
 
   const otherContext=await browser.newContext();
   try { const otherPage=await otherContext.newPage(); await signUp(otherPage,"routine-template-other"); await completeUnrestrictedReadiness(otherPage); await otherPage.goto("/plans"); await expect(otherPage.getByRole("heading",{level:3,name:"No routines yet"})).toBeVisible(); await expect(otherPage.getByRole("heading",{level:3,name:"No templates yet"})).toBeVisible(); }
   finally { await otherContext.close(); }
+});
+test("plans preserve exact routine versions and append immutable plan versions", async ({
+  page,
+  browser,
+}: {
+  page: Page;
+  browser: Browser;
+}) => {
+  await signUp(page, "plan-snapshot-owner");
+  await completeUnrestrictedReadiness(page);
+
+  await page.goto("/create");
+  await page.getByLabel("Routine title").fill("Plan routine A");
+  await page
+    .getByLabel("Exercise 1", { exact: true })
+    .selectOption({ label: "Wall push-up — version 2" });
+  await page
+    .getByLabel("Exercise 2", { exact: true })
+    .selectOption({ label: "Incline push-up — version 1" });
+  await page.getByRole("button", { name: "Save routine" }).click();
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+  const routineAUrl = page.url();
+
+  await page.goto("/create");
+  await page.getByLabel("Routine title").fill("Plan routine B");
+  await page
+    .getByLabel("Exercise 1", { exact: true })
+    .selectOption({ label: "Supported bodyweight squat — version 1" });
+  await page
+    .getByLabel("Exercise 2", { exact: true })
+    .selectOption({ label: "Standing resistance-band press — version 1" });
+  await page.getByRole("button", { name: "Save routine" }).click();
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+
+  await page.goto("/plans");
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Saved plans" }),
+  ).toBeVisible();
+  await page.getByLabel("Plan title").fill("Durable training plan");
+  await page
+    .getByLabel("Plan routine A - routine version 1")
+    .check();
+  await page
+    .getByLabel("Plan routine B - routine version 1")
+    .check();
+  await page.getByRole("button", { name: "Save plan" }).click();
+
+  await expect(page).toHaveURL(/\/plans\/[0-9a-f-]+$/);
+  const planUrl = page.url();
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Durable training plan" }),
+  ).toBeVisible();
+  await expect(page.getByText("Plan - version 1")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Plan routine A" }),
+  ).toBeVisible();
+  await expect(page.getByText("Exact routine version 1").first()).toBeVisible();
+
+  await page.goto(`${routineAUrl}/edit`);
+  await page.getByLabel("Routine title").fill("Plan routine A updated");
+  await page
+    .getByLabel("Exercise 1", { exact: true })
+    .selectOption({ label: "Incline push-up — version 1" });
+  await page
+    .getByLabel("Exercise 2", { exact: true })
+    .selectOption({ label: "Counter push-up — version 1" });
+  await page.getByRole("button", { name: "Save new version" }).click();
+  await expect(page.getByText("Routine · version 2")).toBeVisible();
+
+  await page.goto(planUrl);
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Plan routine A" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Plan routine A updated" }),
+  ).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Edit plan" }).click();
+  await expect(page).toHaveURL(new RegExp(`${planUrl}/edit$`));
+  await expect(
+    page.getByLabel("Plan routine A - routine version 1"),
+  ).toBeChecked();
+  await expect(
+    page.getByLabel("Plan routine A updated - routine version 2"),
+  ).not.toBeChecked();
+
+  await page
+    .getByLabel("Plan routine A - routine version 1")
+    .uncheck();
+  await page
+    .getByLabel("Plan routine A updated - routine version 2")
+    .check();
+  await page.getByLabel("Plan title").fill("Durable training plan updated");
+  await page
+    .getByRole("button", { name: "Save new plan version" })
+    .click();
+
+  await expect(page).toHaveURL(planUrl);
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Durable training plan updated",
+    }),
+  ).toBeVisible();
+  await expect(page.getByText("Plan - version 2")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 3, name: "Plan routine A updated" }),
+  ).toBeVisible();
+
+  await page.goto("/profile/account");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Download JSON export" }).click();
+  const exported = JSON.parse(
+    await readDownloadText(await downloadPromise),
+  );
+
+  expect(exported.exportVersion).toBe(6);
+  expect(exported.plans).toHaveLength(1);
+  expect(exported.plans[0].versions).toHaveLength(2);
+  expect(exported.plans[0].versions[0].title).toBe("Durable training plan");
+  expect(exported.plans[0].versions[0].routines).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        routineTitle: "Plan routine A",
+        routineVersionNumber: 1,
+      }),
+      expect.objectContaining({
+        routineTitle: "Plan routine B",
+        routineVersionNumber: 1,
+      }),
+    ]),
+  );
+  expect(exported.plans[0].versions[1].title).toBe(
+    "Durable training plan updated",
+  );
+  expect(exported.plans[0].versions[1].routines).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        routineTitle: "Plan routine A updated",
+        routineVersionNumber: 2,
+      }),
+      expect.objectContaining({
+        routineTitle: "Plan routine B",
+        routineVersionNumber: 1,
+      }),
+    ]),
+  );
+
+  const otherContext = await browser.newContext();
+
+  try {
+    const otherPage = await otherContext.newPage();
+    await signUp(otherPage, "plan-snapshot-other");
+    await otherPage.goto(planUrl);
+    await expect(
+      otherPage.getByRole("heading", { level: 1, name: "Plan not available" }),
+    ).toBeVisible();
+  } finally {
+    await otherContext.close();
+  }
 });

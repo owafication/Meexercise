@@ -7,6 +7,10 @@ import {
   buildUserRoutineTemplateExport,
   type RoutineTemplateExportRecord,
 } from "@/modules/planning/server/templates";
+import {
+  buildUserPlanExport,
+  type PlanExportRecord,
+} from "@/modules/planning/server/plans";
 
 export type AccountLifecyclePageState =
   | {
@@ -24,7 +28,7 @@ export type UserDataExportResult =
   | {
       kind: "ok";
       data: {
-        exportVersion: 5;
+        exportVersion: 6;
         generatedAt: string;
         account: {
           id: string;
@@ -74,6 +78,7 @@ export type UserDataExportResult =
         }>;
         routines: RoutineExportRecord[];
         templates: RoutineTemplateExportRecord[];
+        plans: PlanExportRecord[];
       };
     }
   | {
@@ -286,10 +291,16 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
       return { kind: "unavailable" };
     }
 
+    const exportedPlans = await buildUserPlanExport(supabase, userId);
+
+    if (exportedPlans === null) {
+      return { kind: "unavailable" };
+    }
+
     return {
       kind: "ok",
       data: {
-        exportVersion: 5,
+        exportVersion: 6,
         generatedAt: new Date().toISOString(),
         account: {
           id: user.id,
@@ -323,6 +334,7 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
         assessments: exportedAssessments,
         routines: exportedRoutines,
         templates: exportedTemplates,
+        plans: exportedPlans,
       },
     };
   } catch {

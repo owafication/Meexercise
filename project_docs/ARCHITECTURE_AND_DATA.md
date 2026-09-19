@@ -1,6 +1,6 @@
 # Architecture and Data
 
-**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; seven PH-04 slices through exact-version exercise planning metadata merged; profile-aware deterministic guided generation locally verified; production hosting/data region deferred
+**Status:** PH-01 shell, PH-02 identity/private-data and PH-03 exercise-content library Passed / Verified; nine PH-04 slices through reusable routine templates merged; versioned plan-composition foundation locally verified; production hosting/data region deferred
 **Owner:** Application structure, data ownership and integration boundaries  
 **Read when:** Structure, persistence, API, auth, sync, billing, AI or integration work
 
@@ -228,4 +228,16 @@ Creating a routine from a template reads the saved source routine version's orde
 
 The implementation adds no subscription/entitlement service and no saved-template count gate. Focused database evidence created 26 templates for one owner while preserving cross-user isolation. Readable account export advances to v5 with template metadata, and Auth-user deletion cascades through template records. Runtime AI remains absent.
 
-Closure audit: this template mechanism completes the PH-04 reusable-routine-template task only. Canonical PH-04 also requires durable versioned plan snapshots; those remain a separate slice. PH-05 continues to own scheduling and progression mechanics.
+Closure audit result: the routine-template slice was subsequently published through PR #25 and merge `d4bebba1a535dfe321b43c17b4f1638b87021a6f`. The remaining PH-04 completion dependency was the durable versioned plan-composition authority implemented by `BR-20260919-02`. PH-05 continues to own scheduling and progression mechanics.
+
+## Implemented PH-04 versioned plan-composition foundation
+
+`BR-20260919-02` adds stable owner-private `plans`, immutable append-only `plan_versions`, and ordered `plan_version_routines` links to exact immutable `routine_versions`. A plan version therefore preserves its own title/version plus the exact routine snapshots composed at save time. Later routine edits append new routine versions and cannot rewrite an existing plan version.
+
+Plan creation and append-only plan editing are authenticated database mutations. The stable plan row is locked during version append; the caller supplies the expected current version and a stale expectation fails before a new version is inserted. Composition is bounded to one through twelve unique routine versions, and one plan version cannot contain two versions of the same stable routine.
+
+A newly saved plan composition is current planning authority rather than historical permission. Before insertion, the database resolves the exact exercise-version IDs contained by the selected routine snapshots and delegates to the existing `private.require_routine_exercise_constraints` authority. Current readiness, current exercise approval/visibility and current structured movement constraints are therefore revalidated. Previously saved plan versions remain immutable/readable history even if a referenced exercise is later withdrawn; that historical snapshot cannot be copied into a newly saved plan version unless it still satisfies the current boundary.
+
+Plan tables expose owner-only reads through RLS and revoke direct authenticated writes; immutable-update protection remains defence in depth for privileged paths. Account deletion cascades through plan identities, versions and composition links. Readable account export advances from v5 to v6 and includes every plan version with its exact ordered routine-version composition.
+
+No scheduling recurrence, timezone, progression proposal, activation state, entitlement service or plan-count gate is introduced. Focused database evidence creates 26 plans for one owner without a subscription/count boundary and verifies cross-user isolation. This satisfies the PH-04 plan-composition foundation and the saved-plan portion of `REQ-018` / `AC-011`; PH-05 still owns schedule/progression mechanics and therefore the remainder of full `REQ-017`.
