@@ -411,6 +411,23 @@ select throws_ok(
   'privileged direct reminder-setting rewrite is rejected'
 );
 
+-- Capture both settings of this plan before its schedule versions disappear.
+create temp table deleting_reminder_fixture(schedule_version_id uuid primary key) on commit drop;
+insert into deleting_reminder_fixture(schedule_version_id)
+select rs.schedule_version_id
+from public.plan_schedule_reminder_settings rs
+join public.plan_schedule_versions sv on sv.id = rs.schedule_version_id
+join public.plan_schedules ps on ps.id = sv.schedule_id
+where ps.plan_id = (select plan_id from reminder_plan);
+
+do $fixture$
+begin
+  if (select count(*) from deleting_reminder_fixture) <> 2 then
+    raise exception 'reminder deletion fixture must contain both historical settings';
+  end if;
+end
+$fixture$;
+
 -- 26
 select lives_ok(
   $$delete from auth.users
@@ -421,9 +438,10 @@ select lives_ok(
 -- 27
 select results_eq(
   $$select count(*)::bigint
-    from public.plan_schedule_reminder_settings$$,
+    from public.plan_schedule_reminder_settings
+    where schedule_version_id in (select schedule_version_id from deleting_reminder_fixture)$$,
   array[0::bigint],
-  'account deletion leaves no orphan reminder settings'
+  'account deletion removes both fixture reminder settings'
 );
 
 select * from finish();

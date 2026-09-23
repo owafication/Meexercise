@@ -1,6 +1,6 @@
 # UI, UX and Routes
 
-**Status:** PH-01 shell, PH-02 account/private-data and PH-03 exercise-library routes implemented; seven PH-04 slices through exact-version exercise planning metadata merged; profile-aware guided generation locally verified; later feature-route paths remain proposed
+**Status:** PH-01 through PH-04 scope verified; PH-05 weekly schedules, exceptions and in-app reminders published; initial plan-level review-only progression locally verified (BR-20260924-01); apply/reverse, missed-session and later routes remain outstanding
 **Owner:** User flows, navigation, reachable states, accessibility and print interaction  
 **Read when:** UI, route, form, navigation, print or accessibility work
 
@@ -245,3 +245,9 @@ Reminder delivery is not presented as implemented. Progression UI is unchanged a
 - Account export is v9 and includes optional reminder lead time on every historical schedule version, including null for versions without reminders.
 
 No push/email/SMS delivery, durable notification receipt/snooze/dismissal or progression interface is claimed by this slice. Background delivery would need separate product and deployment authority.
+
+## Implemented locally: PH-05 review-only progression on plan detail
+
+`BR-20260924-01` extends existing `ROUTE-018` at `/plans/[planId]` without introducing a new route. A labelled plan progression section collects explicit feedback: excessive difficulty, discomfort or a request for fewer scheduled days. For a multi-day difficulty/requested-reduction review, the user explicitly selects which existing scheduled weekday to remove; discomfort and single-day feedback preview a pause. The UI displays the old/new weekly frequency, feedback type, exact historical source schedule context and a conspicuous `Proposed / not applied` state.
+
+Review creation is unavailable if there is no current recurrence, the schedule is paused, the schedule cannot be read or it references an older plan version. An owner can dismiss a pending suggestion; dismissal is appended to its history rather than rewriting or applying the schedule. Stale source or review changes show reload-before-saving feedback. Account export v10 contains proposal and event history; foreign plan detail remains unavailable. Applying/reversing proposals, exercise/routine-level progression, missed-session inputs and diagnosis are not included in this slice.

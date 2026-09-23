@@ -6,6 +6,8 @@ import {
   describeReminderMinutes,
   getPlanSchedulePageState,
 } from "@/modules/planning/server/schedules";
+import { getPlanProgressionPageState } from "@/modules/planning/server/progression";
+import { ProgressionControls } from "./progression-controls";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +17,10 @@ type Props = {
 
 export default async function PlanDetailPage({ params }: Props) {
   const { planId } = await params;
-  const [state, scheduleState] = await Promise.all([
+  const [state, scheduleState, progressionState] = await Promise.all([
     getPlanDetailPageState(planId),
     getPlanSchedulePageState(planId),
+    getPlanProgressionPageState(planId),
   ]);
 
   if (state.kind === "signed-out") {
@@ -177,6 +180,26 @@ export default async function PlanDetailPage({ params }: Props) {
               Review schedule and occurrence exceptions
             </Link>
           </>
+        )}
+      </section>
+
+      <section className="card" aria-labelledby="plan-progression-title">
+        <p className="status-label">Self-directed planning</p>
+        <h2 id="plan-progression-title">Conservative progression review</h2>
+        {progressionState.kind !== "authenticated" ? (
+          <p>Private progression review data is currently unavailable.</p>
+        ) : (
+          <ProgressionControls
+            planId={plan.id}
+            planVersionNumber={plan.versionNumber}
+            schedule={
+              scheduleState.kind === "authenticated"
+                ? scheduleState.schedule
+                : null
+            }
+            scheduleAvailable={scheduleState.kind === "authenticated"}
+            reviews={progressionState.reviews}
+          />
         )}
       </section>
     </>

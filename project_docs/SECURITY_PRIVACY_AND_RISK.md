@@ -122,6 +122,14 @@ No WAF, SIEM, dedicated vault, penetration-test programme, multi-region system o
 - Do not sell user health information.
 - Support bundles, if introduced, must be user-initiated, reviewable and redacted.
 
+## PH-05 progression review-only local risk evidence
+
+`BR-20260924-01` introduces sensitive explicit difficulty/discomfort feedback without interpreting it as a diagnosis. Only review-only bounded schedule proposals are recorded: discomfort produces a pause preview, and multi-day frequency reduction requires the user's explicit weekday selection. Creating or dismissing feedback does not alter the effective schedule, exercise instructions or historical activity; a displayed suggestion is not represented as applied treatment or a clinical recommendation (`RISK-015`).
+
+Owner-derived authenticated RPCs recheck plan/schedule version and ownership before privileged inserts. Owner-select RLS, revoked direct table writes, immutable snapshot/event triggers and negative cross-user tests protect the records (`RISK-018`, `RISK-019`, `RISK-027`). The recorded self-report, exact source versions, complete event history and readable export v10 remain private. The primary-datastore deletion checks now target their own fixture IDs rather than assuming an otherwise empty preserved development database. No production backup-retention or remote privacy assurance is implied.
+
+No current mechanism implements/validates safe proposal application and reversal or missed-session processing; conservative review-only evidence cannot be used to mark full progression safety or `REQ-021`–`REQ-023` complete.
+
 ## Runtime AI safeguards
 No runtime AI is baseline. If later activated: minimise prompt data; separate instructions from untrusted content; validate model outputs against schema/business/safety rules; restrict tools/permissions; log metadata rather than sensitive prompt bodies by default; evaluate prompt injection/misuse; require human/user confirmation before any high-impact action. AI output never overrides deterministic safety rules.
 

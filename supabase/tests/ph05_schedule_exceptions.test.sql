@@ -510,6 +510,29 @@ select throws_ok(
   'privileged direct exception-version rewrite is rejected'
 );
 
+-- Capture exact owned IDs before deleting their parent; unrelated local data
+-- must not cause a failure or mask failed deletion of this fixture.
+create temp table deleting_exception_fixture(exception_id uuid primary key) on commit drop;
+insert into deleting_exception_fixture(exception_id)
+select ex.id
+from public.plan_schedule_occurrence_exceptions ex
+join public.plan_schedule_rules sr on sr.id = ex.schedule_rule_id
+join public.plan_schedule_versions sv on sv.id = sr.schedule_version_id
+join public.plan_schedules ps on ps.id = sv.schedule_id
+where ps.plan_id = (select plan_id from exception_plan);
+
+do $fixture$
+begin
+  if (select count(*) from deleting_exception_fixture) <> 1 then
+    raise exception 'exception deletion fixture must contain exactly one identity';
+  end if;
+  if (select count(*) from public.plan_schedule_occurrence_exception_versions ev
+      join deleting_exception_fixture f on f.exception_id = ev.exception_id) <> 3 then
+    raise exception 'exception deletion fixture must retain all three versions';
+  end if;
+end
+$fixture$;
+
 -- 37
 select lives_ok(
   $$delete from auth.users
@@ -520,17 +543,19 @@ select lives_ok(
 -- 38
 select results_eq(
   $$select count(*)::bigint
-    from public.plan_schedule_occurrence_exceptions$$,
+    from public.plan_schedule_occurrence_exceptions
+    where id in (select exception_id from deleting_exception_fixture)$$,
   array[0::bigint],
-  'account deletion cascades occurrence exception identities'
+  'account deletion cascades fixture occurrence exception identities'
 );
 
 -- 39
 select results_eq(
   $$select count(*)::bigint
-    from public.plan_schedule_occurrence_exception_versions$$,
+    from public.plan_schedule_occurrence_exception_versions
+    where exception_id in (select exception_id from deleting_exception_fixture)$$,
   array[0::bigint],
-  'account deletion leaves no orphan occurrence exception versions'
+  'account deletion removes all fixture occurrence exception versions'
 );
 
 select * from finish();

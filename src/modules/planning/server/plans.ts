@@ -8,6 +8,10 @@ import {
   buildPlanScheduleExports,
   type PlanScheduleExportRecord,
 } from "@/modules/planning/server/schedules";
+import {
+  buildPlanProgressionExports,
+  type ProgressionReviewSnapshot,
+} from "@/modules/planning/server/progression";
 
 export type PlanRoutineSnapshot = {
   position: number;
@@ -48,6 +52,7 @@ export type PlanExportRecord = {
   id: string;
   createdAt: string;
   schedule: PlanScheduleExportRecord | null;
+  progressionReviews: ProgressionReviewSnapshot[];
   versions: Array<{
     id: string;
     versionNumber: number;
@@ -340,6 +345,12 @@ export async function buildUserPlanExport(
     return null;
   }
 
+  const progressionByPlan = await buildPlanProgressionExports(supabase, planIds);
+
+  if (progressionByPlan === null) {
+    return null;
+  }
+
   const versionsByPlan = new Map<string, PlanExportRecord["versions"]>();
 
   for (const version of versions ?? []) {
@@ -361,6 +372,7 @@ export async function buildUserPlanExport(
     id: String(plan.id),
     createdAt: String(plan.created_at),
     schedule: schedulesByPlan.get(String(plan.id)) ?? null,
+    progressionReviews: progressionByPlan.get(String(plan.id)) ?? [],
     versions: versionsByPlan.get(String(plan.id)) ?? [],
   }));
 }
