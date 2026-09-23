@@ -1,7 +1,10 @@
 import Link from "next/link";
 
 import { PageIntro } from "@/components/page-intro";
-import { getPlanSchedulePageState } from "@/modules/planning/server/schedules";
+import {
+  describeReminderMinutes,
+  getPlanSchedulePageState,
+} from "@/modules/planning/server/schedules";
 
 import {
   ExceptionRestoreControl,
@@ -67,7 +70,8 @@ export default async function PlanSchedulePage({ params }: Props) {
           Weekly schedule versions are immutable and pin exact routine versions
           from a specific plan version. Per-occurrence skip and reschedule
           changes are also append-only and stay pinned to the exact schedule
-          version they modify.
+          version they modify. Optional in-app reminders are versioned with
+          the recurring schedule snapshot.
         </p>
       </PageIntro>
 
@@ -81,6 +85,11 @@ export default async function PlanSchedulePage({ params }: Props) {
             Pinned to plan version {schedule.planVersionNumber}. Timezone:{" "}
             {schedule.timezoneName}. Starts on {schedule.startsOn}.
             {schedule.isPaused ? " This schedule is paused." : ""}
+          </p>
+          <p>
+            In-app reminder:{" "}
+            {describeReminderMinutes(schedule.reminderMinutesBefore)} each
+            occurrence.
           </p>
           <ul className="instruction-list">
             {schedule.rules.map((rule) => (
@@ -153,6 +162,15 @@ export default async function PlanSchedulePage({ params }: Props) {
                     <p>
                       Rescheduled from original local date{" "}
                       {occurrence.originalLocalDate}.
+                    </p>
+                  ) : null}
+                  {occurrence.reminderMinutesBefore !== null ? (
+                    <p>
+                      In-app reminder:{" "}
+                      {describeReminderMinutes(
+                        occurrence.reminderMinutesBefore,
+                      )}{" "}
+                      this occurrence.
                     </p>
                   ) : null}
                   <OccurrenceExceptionControls

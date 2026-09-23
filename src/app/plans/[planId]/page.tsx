@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { PageIntro } from "@/components/page-intro";
 import { getPlanDetailPageState } from "@/modules/planning/server/plans";
-import { getPlanSchedulePageState } from "@/modules/planning/server/schedules";
+import {
+  describeReminderMinutes,
+  getPlanSchedulePageState,
+} from "@/modules/planning/server/schedules";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +124,14 @@ export default async function PlanDetailPage({ params }: Props) {
               {scheduleState.schedule.isPaused
                 ? " It is currently paused."
                 : ""}
+            </p>
+
+            <p>
+              In-app reminder:{" "}
+              {describeReminderMinutes(
+                scheduleState.schedule.reminderMinutesBefore,
+              )}{" "}
+              each occurrence.
             </p>
 
             {scheduleState.schedule.planVersionNumber !== plan.versionNumber ? (

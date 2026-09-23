@@ -375,6 +375,12 @@ export async function savePlanScheduleAction(
   const timezoneName = normalizedText(formData.get("timezoneName"));
   const startsOn = normalizedText(formData.get("startsOn"));
   const isPaused = formData.get("schedulePaused") === "on";
+  const reminderMinutesText = normalizedText(
+    formData.get("reminderMinutesBefore"),
+  );
+  const reminderMinutesBefore = reminderMinutesText
+    ? Number(reminderMinutesText)
+    : null;
 
   if (!validUuid(planId)) {
     return { status: "error", message: "Plan could not be verified." };
@@ -403,6 +409,21 @@ export async function savePlanScheduleAction(
     return {
       status: "error",
       message: "Choose the date when this recurring schedule starts.",
+    };
+  }
+
+  const allowedReminderMinutes = [15, 30, 60, 120, 1440, 2880, 10080];
+
+  if (
+    reminderMinutesBefore !== null &&
+    (
+      !Number.isInteger(reminderMinutesBefore) ||
+      !allowedReminderMinutes.includes(reminderMinutesBefore)
+    )
+  ) {
+    return {
+      status: "error",
+      message: "Choose a supported in-app reminder lead time.",
     };
   }
 
@@ -484,15 +505,19 @@ export async function savePlanScheduleAction(
     };
   }
 
-  const { data, error } = await supabase.rpc("save_plan_schedule", {
-    p_plan_id: planId,
-    p_expected_plan_version_number: expectedPlanVersionNumber,
-    p_expected_schedule_version_number: expectedScheduleVersionNumber,
-    p_timezone_name: timezoneName,
-    p_starts_on: startsOn,
-    p_is_paused: isPaused,
-    p_rules: rules,
-  });
+  const { data, error } = await supabase.rpc(
+    "save_plan_schedule_with_reminder",
+    {
+      p_plan_id: planId,
+      p_expected_plan_version_number: expectedPlanVersionNumber,
+      p_expected_schedule_version_number: expectedScheduleVersionNumber,
+      p_timezone_name: timezoneName,
+      p_starts_on: startsOn,
+      p_is_paused: isPaused,
+      p_rules: rules,
+      p_reminder_minutes_before: reminderMinutesBefore,
+    },
+  );
 
   if (error?.code === "40001") {
     return {
@@ -521,7 +546,7 @@ export async function savePlanScheduleAction(
     return {
       status: "error",
       message:
-        "The schedule timezone, dates, time windows, or selected routine snapshots are not valid for the current plan.",
+        "The schedule timezone, dates, time windows, reminder setting, or selected routine snapshots are not valid for the current plan.",
     };
   }
 

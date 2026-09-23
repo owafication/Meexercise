@@ -28,7 +28,7 @@ export type UserDataExportResult =
   | {
       kind: "ok";
       data: {
-        exportVersion: 8;
+        exportVersion: 9;
         generatedAt: string;
         account: {
           id: string;
@@ -300,7 +300,7 @@ export async function buildUserDataExport(): Promise<UserDataExportResult> {
     return {
       kind: "ok",
       data: {
-        exportVersion: 8,
+        exportVersion: 9,
         generatedAt: new Date().toISOString(),
         account: {
           id: user.id,

@@ -234,3 +234,14 @@ Per-occurrence skip/reschedule controls, reminder delivery and progression UI ar
 - Foreign-plan schedule access remains non-disclosing.
 
 Reminder delivery is not presented as implemented. Progression UI is unchanged and remains later PH-05 work.
+
+## Implemented PH-05 in-app reminder controls
+
+`BR-20260923-03` extends the established `ROUTE-018` schedule editor and `ROUTE-015` Today. It adds no new top-level route.
+
+- `/plans/[planId]/schedule` offers an optional reminder lead time: off, 15 or 30 minutes, 1 or 2 hours, 1 or 2 days, or 1 week before each effective occurrence. Changing/off appends a new immutable recurring schedule version rather than rewriting an old version.
+- Schedule editor, plan detail and projected occurrences display the configured in-app reminder setting explicitly. Rescheduled occurrences retain their own original-date explanation and move reminder calculation to the effective start.
+- Today displays `Reminder due` for the next projected occurrence after its configured due time and before its start. This indicator is evaluated when the server page loads; it does not proactively notify users when the application is closed.
+- Account export is v9 and includes optional reminder lead time on every historical schedule version, including null for versions without reminders.
+
+No push/email/SMS delivery, durable notification receipt/snooze/dismissal or progression interface is claimed by this slice. Background delivery would need separate product and deployment authority.
