@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { getVerifiedUserId } from "@/modules/identity/server/auth";
+import {
+  buildPlanScheduleExports,
+  type PlanScheduleExportRecord,
+} from "@/modules/planning/server/schedules";
 
 export type PlanRoutineSnapshot = {
   position: number;
@@ -43,6 +47,7 @@ export type PlanDetailPageState =
 export type PlanExportRecord = {
   id: string;
   createdAt: string;
+  schedule: PlanScheduleExportRecord | null;
   versions: Array<{
     id: string;
     versionNumber: number;
@@ -329,6 +334,12 @@ export async function buildUserPlanExport(
     snapshotsByVersion.set(versionId, snapshots);
   }
 
+  const schedulesByPlan = await buildPlanScheduleExports(supabase, planIds);
+
+  if (schedulesByPlan === null) {
+    return null;
+  }
+
   const versionsByPlan = new Map<string, PlanExportRecord["versions"]>();
 
   for (const version of versions ?? []) {
@@ -349,6 +360,7 @@ export async function buildUserPlanExport(
   return (plans ?? []).map((plan) => ({
     id: String(plan.id),
     createdAt: String(plan.created_at),
+    schedule: schedulesByPlan.get(String(plan.id)) ?? null,
     versions: versionsByPlan.get(String(plan.id)) ?? [],
   }));
 }

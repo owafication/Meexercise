@@ -204,3 +204,18 @@ The reusable-template slice itself did not establish `ROUTE-018`; `BR-20260919-0
 - Another authenticated user receives the non-disclosing unavailable/not-owned result for a foreign plan ID.
 - No schedule, recurrence, timezone, activation or progression UI is claimed in this PH-04 slice; those portions of `ROUTE-018` remain PH-05.
 - No subscription/count UI gate is introduced for saved plans or routine templates.
+
+## Implemented PH-05 versioned weekly scheduling surface
+
+`BR-20260923-01` completes the first scheduling portion of `ROUTE-018` and extends `ROUTE-015` Today without creating a separate top-level navigation destination.
+
+- `/plans/[planId]` keeps exact plan composition and now shows the current recurring schedule summary, pinned plan-version context, local weekday/time windows, paused state and upcoming projected occurrences.
+- `/plans/[planId]/schedule` is the owner-only schedule editor under `ROUTE-018`. First save creates schedule version 1; later saves append a new immutable schedule version.
+- The editor captures a recognized named timezone, local schedule start date, paused state, and at most one routine window for each weekday. It offers only exact routine versions from the current plan version.
+- If the plan version changed after the prior schedule version, the editor makes that mismatch explicit and requires deliberate resave against the current plan version rather than silently retargeting the old schedule.
+- Stale plan/schedule saves surface reload-before-save conflict feedback rather than overwriting a newer cross-device schedule version.
+- `ROUTE-015` `/` now renders the next projected recurring routine window for an authenticated user, including local date/window, timezone, exact plan version and exact routine version. A signed-out state, unavailable state and no-upcoming-window state remain explicit.
+- Another authenticated user receives the non-disclosing schedule-not-available state for a foreign plan.
+- Account JSON export is v7 and includes immutable schedule version/rule history.
+
+Per-occurrence skip/reschedule controls, reminder delivery and progression UI are not claimed by this slice. `REQ-020` / `AC-012` remain partial and `ROUTE-018` progression semantics remain future PH-05 work.

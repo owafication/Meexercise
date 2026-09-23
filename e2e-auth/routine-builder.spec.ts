@@ -223,7 +223,7 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   const exportDownload = await downloadPromise;
   const exported = JSON.parse(await readDownloadText(exportDownload));
 
-  expect(exported.exportVersion).toBe(6);
+  expect(exported.exportVersion).toBe(7);
   expect(exported.routines).toHaveLength(1);
   expect(exported.templates).toEqual([]);
   expect(exported.plans).toEqual([]);
@@ -600,7 +600,7 @@ test("routine templates preserve an exact source snapshot and create a new valid
   const downloadPromise=page.waitForEvent("download");
   await page.getByRole("link",{name:"Download JSON export"}).click();
   const exported=JSON.parse(await readDownloadText(await downloadPromise));
-  expect(exported.exportVersion).toBe(6);
+  expect(exported.exportVersion).toBe(7);
   expect(exported.templates).toHaveLength(1);
   expect(exported.plans).toEqual([]);
   expect(exported.templates[0]).toMatchObject({ title:"Reusable exact starter", sourceRoutineVersionNumber:1, sourceRoutineTitle:"Template source", itemCount:2 });
@@ -725,7 +725,7 @@ test("plans preserve exact routine versions and append immutable plan versions",
     await readDownloadText(await downloadPromise),
   );
 
-  expect(exported.exportVersion).toBe(6);
+  expect(exported.exportVersion).toBe(7);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].versions).toHaveLength(2);
   expect(exported.plans[0].versions[0].title).toBe("Durable training plan");
@@ -765,6 +765,175 @@ test("plans preserve exact routine versions and append immutable plan versions",
     await otherPage.goto(planUrl);
     await expect(
       otherPage.getByRole("heading", { level: 1, name: "Plan not available" }),
+    ).toBeVisible();
+  } finally {
+    await otherContext.close();
+  }
+});
+
+test("weekly plan schedule preserves exact snapshots, timezone recurrence, pause, and stale-write protection", async ({
+  page,
+  browser,
+}: {
+  page: Page;
+  browser: Browser;
+}) => {
+  await signUp(page, "plan-schedule-owner");
+  await completeUnrestrictedReadiness(page);
+
+  await page.goto("/create");
+  await page.getByLabel("Routine title").fill("Scheduled routine");
+  await page
+    .getByLabel("Exercise 1", { exact: true })
+    .selectOption({ label: "Wall push-up — version 2" });
+  await page
+    .getByLabel("Exercise 2", { exact: true })
+    .selectOption({ label: "Incline push-up — version 1" });
+  await page.getByRole("button", { name: "Save routine" }).click();
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+
+  await page.goto("/plans");
+  await page.getByLabel("Plan title").fill("Scheduled plan");
+  await page
+    .getByLabel("Scheduled routine - routine version 1")
+    .check();
+  await page.getByRole("button", { name: "Save plan" }).click();
+  await expect(page).toHaveURL(/\/plans\/[0-9a-f-]+$/);
+
+  const planUrl = page.url();
+  const scheduleUrl = `${planUrl}/schedule`;
+
+  const tomorrow = new Date();
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const startsOn = tomorrow.toISOString().slice(0, 10);
+  const isoWeekday = ((tomorrow.getUTCDay() + 6) % 7) + 1;
+  const weekdayNames = [
+    "",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+  const weekdayName = weekdayNames[isoWeekday];
+
+  await page.getByRole("link", { name: "Add schedule" }).click();
+  await expect(page).toHaveURL(scheduleUrl);
+  await page.getByLabel("Schedule timezone").fill("Etc/UTC");
+  await page.getByLabel("Schedule starts on").fill(startsOn);
+  await page
+    .getByLabel(`${weekdayName} routine`)
+    .selectOption({ label: "Scheduled routine - routine version 1" });
+  await page.getByLabel(`${weekdayName} window start`).fill("09:00");
+  await page.getByLabel(`${weekdayName} window end`).fill("10:00");
+  await page.getByRole("button", { name: "Save recurring schedule" }).click();
+
+  await expect(page).toHaveURL(planUrl);
+  await expect(
+    page.getByText(/Schedule version 1 is pinned to plan version 1/),
+  ).toBeVisible();
+  await expect(page.getByText(/Etc\/UTC/)).toBeVisible();
+
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Scheduled routine" }),
+  ).toBeVisible();
+  await expect(page.getByText(/09:00-10:00 in Etc\/UTC/)).toBeVisible();
+  await expect(
+    page.getByText(/exact plan version 1 and routine version 1/),
+  ).toBeVisible();
+
+  await page.goto(scheduleUrl);
+  const stalePage = await page.context().newPage();
+
+  try {
+    await stalePage.goto(scheduleUrl);
+
+    await page.getByLabel(`${weekdayName} window start`).fill("10:00");
+    await page.getByLabel(`${weekdayName} window end`).fill("11:00");
+    await page
+      .getByRole("button", { name: "Save new schedule version" })
+      .click();
+
+    await expect(page).toHaveURL(planUrl);
+    await expect(
+      page.getByText(/Schedule version 2 is pinned to plan version 1/),
+    ).toBeVisible();
+
+    await stalePage.getByLabel(`${weekdayName} window start`).fill("11:00");
+    await stalePage.getByLabel(`${weekdayName} window end`).fill("12:00");
+    await stalePage
+      .getByRole("button", { name: "Save new schedule version" })
+      .click();
+
+    await expect(
+      stalePage
+        .getByRole("alert")
+        .filter({
+          hasText: "This plan or schedule changed in another session.",
+        }),
+    ).toBeVisible();
+  } finally {
+    await stalePage.close();
+  }
+
+  await page.goto(scheduleUrl);
+  await page.getByLabel(/Pause this recurring schedule/).check();
+  await page
+    .getByRole("button", { name: "Save new schedule version" })
+    .click();
+
+  await expect(page).toHaveURL(planUrl);
+  await expect(
+    page.getByText(/Schedule version 3 is pinned to plan version 1/),
+  ).toBeVisible();
+  await expect(page.getByText(/currently paused/)).toBeVisible();
+
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: "No routine scheduled in the next 14 days",
+    }),
+  ).toBeVisible();
+
+  await page.goto("/profile/account");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Download JSON export" }).click();
+  const exported = JSON.parse(await readDownloadText(await downloadPromise));
+
+  expect(exported.exportVersion).toBe(7);
+  expect(exported.plans).toHaveLength(1);
+  expect(exported.plans[0].schedule.versions).toHaveLength(3);
+  expect(exported.plans[0].schedule.versions[0]).toMatchObject({
+    versionNumber: 1,
+    planVersionNumber: 1,
+    timezoneName: "Etc/UTC",
+    startsOn,
+    isPaused: false,
+  });
+  expect(exported.plans[0].schedule.versions[0].rules[0]).toMatchObject({
+    weekday: isoWeekday,
+    windowStart: "09:00",
+    windowEnd: "10:00",
+    routineTitle: "Scheduled routine",
+    routineVersionNumber: 1,
+  });
+  expect(exported.plans[0].schedule.versions[2].isPaused).toBe(true);
+
+  const otherContext = await browser.newContext();
+
+  try {
+    const otherPage = await otherContext.newPage();
+    await signUp(otherPage, "plan-schedule-other");
+    await otherPage.goto(scheduleUrl);
+    await expect(
+      otherPage.getByRole("heading", {
+        level: 1,
+        name: "Schedule not available",
+      }),
     ).toBeVisible();
   } finally {
     await otherContext.close();
