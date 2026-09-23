@@ -1,10 +1,27 @@
 import { render, screen } from "@testing-library/react";
-import { expect, test } from "vitest";
+import { beforeEach, expect, test, vi } from "vitest";
+
+vi.mock("@/modules/planning/server/schedules", () => ({
+  getTodaySchedulePageState: vi.fn(),
+}));
+
+import { getTodaySchedulePageState } from "@/modules/planning/server/schedules";
 
 import TodayPage from "./page";
 
-test("renders the Today shell with a meaningful empty state", () => {
-  render(<TodayPage />);
+const mockedGetTodaySchedulePageState = vi.mocked(
+  getTodaySchedulePageState,
+);
+
+beforeEach(() => {
+  mockedGetTodaySchedulePageState.mockResolvedValue({
+    kind: "authenticated",
+    occurrences: [],
+  });
+});
+
+test("renders the Today shell with an authenticated empty schedule state", async () => {
+  render(await TodayPage());
 
   expect(
     screen.getByRole("heading", {
@@ -16,13 +33,13 @@ test("renders the Today shell with a meaningful empty state", () => {
   expect(
     screen.getByRole("heading", {
       level: 2,
-      name: "No routine scheduled yet",
+      name: "No routine scheduled in the next 14 days",
     }),
   ).toBeInTheDocument();
 
   expect(
     screen.getByRole("link", {
-      name: "Explore routine setup",
+      name: "Open Plans",
     }),
-  ).toHaveAttribute("href", "/create");
+  ).toHaveAttribute("href", "/plans");
 });

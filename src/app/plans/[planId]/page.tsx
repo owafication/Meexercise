@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { PageIntro } from "@/components/page-intro";
 import { getPlanDetailPageState } from "@/modules/planning/server/plans";
+import { getPlanSchedulePageState } from "@/modules/planning/server/schedules";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,10 @@ type Props = {
 
 export default async function PlanDetailPage({ params }: Props) {
   const { planId } = await params;
-  const state = await getPlanDetailPageState(planId);
+  const [state, scheduleState] = await Promise.all([
+    getPlanDetailPageState(planId),
+    getPlanSchedulePageState(planId),
+  ]);
 
   if (state.kind === "signed-out") {
     return (
@@ -70,6 +74,11 @@ export default async function PlanDetailPage({ params }: Props) {
         <Link className="button" href={`/plans/${plan.id}/edit`}>
           Edit plan
         </Link>
+        <Link className="button button-secondary" href={`/plans/${plan.id}/schedule`}>
+          {scheduleState.kind === "authenticated" && scheduleState.schedule
+            ? "Edit schedule"
+            : "Add schedule"}
+        </Link>
         <Link className="button button-secondary" href="/plans">
           Back to Plans
         </Link>
@@ -88,6 +97,73 @@ export default async function PlanDetailPage({ params }: Props) {
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="card" aria-labelledby="plan-schedule-title">
+        <p className="status-label">Schedule</p>
+        <h2 id="plan-schedule-title">Weekly recurrence</h2>
+
+        {scheduleState.kind !== "authenticated" ? (
+          <p>Schedule data is unavailable right now.</p>
+        ) : scheduleState.schedule === null ? (
+          <>
+            <p>No recurring schedule has been saved for this plan.</p>
+            <Link className="text-link" href={`/plans/${plan.id}/schedule`}>
+              Add a weekly schedule
+            </Link>
+          </>
+        ) : (
+          <>
+            <p>
+              Schedule version {scheduleState.schedule.versionNumber} is pinned
+              to plan version {scheduleState.schedule.planVersionNumber} in{" "}
+              {scheduleState.schedule.timezoneName}.
+              {scheduleState.schedule.isPaused
+                ? " It is currently paused."
+                : ""}
+            </p>
+
+            {scheduleState.schedule.planVersionNumber !== plan.versionNumber ? (
+              <p>
+                This schedule still uses an earlier plan snapshot. Review the
+                schedule before moving future recurrence to plan version{" "}
+                {plan.versionNumber}.
+              </p>
+            ) : null}
+
+            <ul className="instruction-list">
+              {scheduleState.schedule.rules.map((rule) => (
+                <li key={`${rule.weekday}-${rule.routineVersionId}`}>
+                  <strong>{rule.weekdayLabel}</strong>: {rule.windowStart}-
+                  {rule.windowEnd} - {rule.routineTitle}, routine version{" "}
+                  {rule.routineVersionNumber}
+                </li>
+              ))}
+            </ul>
+
+            {!scheduleState.schedule.isPaused &&
+            scheduleState.upcoming.length > 0 ? (
+              <>
+                <h3>Upcoming</h3>
+                <ol className="instruction-list">
+                  {scheduleState.upcoming.slice(0, 5).map((occurrence) => (
+                    <li key={`${occurrence.startsAt}-${occurrence.routineVersionId}`}>
+                      <time dateTime={occurrence.startsAt}>
+                        {occurrence.localDateLabel}
+                      </time>
+                      : {occurrence.windowStart}-{occurrence.windowEnd} -{" "}
+                      {occurrence.routineTitle}
+                    </li>
+                  ))}
+                </ol>
+              </>
+            ) : null}
+
+            <Link className="text-link" href={`/plans/${plan.id}/schedule`}>
+              Review or edit schedule
+            </Link>
+          </>
+        )}
       </section>
     </>
   );

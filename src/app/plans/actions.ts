@@ -345,3 +345,197 @@ export async function createPlanVersionAction(
   revalidatePath(`/plans/${planId}`);
   redirect(`/plans/${planId}`);
 }
+
+export type ScheduleActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+function validDateText(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+function validTimeText(value: string) {
+  return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+export async function savePlanScheduleAction(
+  previousState: ScheduleActionState,
+  formData: FormData,
+): Promise<ScheduleActionState> {
+  void previousState;
+
+  const planId = normalizedText(formData.get("planId"));
+  const expectedPlanVersionNumber = Number(
+    normalizedText(formData.get("expectedPlanVersionNumber")),
+  );
+  const expectedScheduleVersionNumber = Number(
+    normalizedText(formData.get("expectedScheduleVersionNumber")),
+  );
+  const timezoneName = normalizedText(formData.get("timezoneName"));
+  const startsOn = normalizedText(formData.get("startsOn"));
+  const isPaused = formData.get("schedulePaused") === "on";
+
+  if (!validUuid(planId)) {
+    return { status: "error", message: "Plan could not be verified." };
+  }
+
+  if (
+    !Number.isInteger(expectedPlanVersionNumber) ||
+    expectedPlanVersionNumber < 1 ||
+    !Number.isInteger(expectedScheduleVersionNumber) ||
+    expectedScheduleVersionNumber < 0
+  ) {
+    return {
+      status: "error",
+      message: "Plan or schedule version could not be verified.",
+    };
+  }
+
+  if (timezoneName.length < 1 || timezoneName.length > 64) {
+    return {
+      status: "error",
+      message: "Enter a valid named schedule timezone.",
+    };
+  }
+
+  if (!validDateText(startsOn)) {
+    return {
+      status: "error",
+      message: "Choose the date when this recurring schedule starts.",
+    };
+  }
+
+  const rules: Array<{
+    weekday: number;
+    window_start: string;
+    window_end: string;
+    routine_version_id: string;
+  }> = [];
+
+  for (let weekday = 1; weekday <= 7; weekday += 1) {
+    const routineVersionId = normalizedText(
+      formData.get(`scheduleRoutine-${weekday}`),
+    );
+
+    if (!routineVersionId) {
+      continue;
+    }
+
+    const windowStart = normalizedText(
+      formData.get(`scheduleStart-${weekday}`),
+    );
+    const windowEnd = normalizedText(formData.get(`scheduleEnd-${weekday}`));
+
+    if (!validUuid(routineVersionId)) {
+      return {
+        status: "error",
+        message: "One scheduled routine could not be verified.",
+      };
+    }
+
+    if (!validTimeText(windowStart) || !validTimeText(windowEnd)) {
+      return {
+        status: "error",
+        message: "Each scheduled routine needs a valid start and end time.",
+      };
+    }
+
+    if (windowStart >= windowEnd) {
+      return {
+        status: "error",
+        message:
+          "Each schedule window must end later than it starts on the same day.",
+      };
+    }
+
+    rules.push({
+      weekday,
+      window_start: windowStart,
+      window_end: windowEnd,
+      routine_version_id: routineVersionId,
+    });
+  }
+
+  if (rules.length < 1) {
+    return {
+      status: "error",
+      message: "Choose at least one weekday and routine for this schedule.",
+    };
+  }
+
+  let supabase;
+
+  try {
+    supabase = await createClient();
+  } catch {
+    return {
+      status: "error",
+      message: "Schedule storage is unavailable right now.",
+    };
+  }
+
+  const userId = await getVerifiedUserId(supabase);
+
+  if (!userId) {
+    return {
+      status: "error",
+      message: "Sign in again before saving a schedule.",
+    };
+  }
+
+  const { data, error } = await supabase.rpc("save_plan_schedule", {
+    p_plan_id: planId,
+    p_expected_plan_version_number: expectedPlanVersionNumber,
+    p_expected_schedule_version_number: expectedScheduleVersionNumber,
+    p_timezone_name: timezoneName,
+    p_starts_on: startsOn,
+    p_is_paused: isPaused,
+    p_rules: rules,
+  });
+
+  if (error?.code === "40001") {
+    return {
+      status: "error",
+      message:
+        "This plan or schedule changed in another session. Reload before saving another schedule version.",
+    };
+  }
+
+  if (error?.code === "42501") {
+    return {
+      status: "error",
+      message: "This plan is not available to schedule.",
+    };
+  }
+
+  if (error?.code === "55000") {
+    return {
+      status: "error",
+      message:
+        "Current readiness or movement constraints do not permit the selected scheduled routine snapshots. Review your current assessment or plan first.",
+    };
+  }
+
+  if (error?.code === "23514") {
+    return {
+      status: "error",
+      message:
+        "The schedule timezone, dates, time windows, or selected routine snapshots are not valid for the current plan.",
+    };
+  }
+
+  if (error || typeof data !== "number") {
+    return {
+      status: "error",
+      message: "Schedule could not be saved. Try again later.",
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/plans");
+  revalidatePath(`/plans/${planId}`);
+  revalidatePath(`/plans/${planId}/schedule`);
+  revalidatePath("/profile/export");
+  redirect(`/plans/${planId}`);
+}

@@ -241,3 +241,17 @@ A newly saved plan composition is current planning authority rather than histori
 Plan tables expose owner-only reads through RLS and revoke direct authenticated writes; immutable-update protection remains defence in depth for privileged paths. Account deletion cascades through plan identities, versions and composition links. Readable account export advances from v5 to v6 and includes every plan version with its exact ordered routine-version composition.
 
 No scheduling recurrence, timezone, progression proposal, activation state, entitlement service or plan-count gate is introduced. Focused database evidence creates 26 plans for one owner without a subscription/count boundary and verifies cross-user isolation. This satisfies the PH-04 plan-composition foundation and the saved-plan portion of `REQ-018` / `AC-011`; PH-05 still owns schedule/progression mechanics and therefore the remainder of full `REQ-017`.
+
+## Implemented PH-05 versioned weekly scheduling foundation
+
+`BR-20260923-01` introduces the first `schedule-progression` persistence slice without adding a service boundary, background worker, queue, calendar integration or progression engine.
+
+Each owner plan can have one stable `plan_schedules` identity. Meaning lives in immutable append-only `plan_schedule_versions`, each of which pins one exact `plan_version_id`, a recognized named timezone, local start date and paused state. `plan_schedule_rules` stores the selected ISO weekday, local start/end window and exact `routine_version_id`. The schedule therefore preserves the plan/routine interpretation used when that schedule version was saved; later plan or routine edits do not rewrite it.
+
+Authenticated schedule save is one transactional database mutation. It locks the stable plan and schedule identities, requires expected current plan and schedule version numbers, rejects stale callers, requires every scheduled exact routine version to belong to the current exact plan version, and reuses the existing current routine/readiness/approval/structured-constraint boundary before persistence. Direct authenticated writes to schedule tables are revoked; owner-only reads are protected through RLS, with immutable-update triggers as defence in depth.
+
+Timezone authority is a recognized PostgreSQL named timezone rather than a stored UTC offset. Weekly rules are local wall-clock values. `get_my_plan_schedule_occurrences` projects the owner's latest unpaused schedule versions into bounded timestamp occurrences while preserving local wall-clock recurrence across timezone offset changes, including daylight-saving transitions. The projection range is bounded to at most 31 days. Versioned pause retains schedule history but suppresses occurrences from the current paused version.
+
+Readable account export advances from v6 to v7 and nests every schedule version/rule under its stable plan record. Auth-user deletion cascades through plans, schedules and schedule rules; the schedule-rule exact routine-version foreign key also cascades so routine-history deletion order cannot block account lifecycle deletion.
+
+This slice does not implement per-occurrence exception records, skip/reschedule, reminders or progression proposals. It therefore advances the schedule portion of `REQ-017` and partially implements `REQ-020` / `AC-012`; `REQ-021`-`REQ-023` and the exception/reminder remainder of PH-05 stay unimplemented. Runtime AI remains absent.
