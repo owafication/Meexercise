@@ -223,7 +223,7 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   const exportDownload = await downloadPromise;
   const exported = JSON.parse(await readDownloadText(exportDownload));
 
-  expect(exported.exportVersion).toBe(7);
+  expect(exported.exportVersion).toBe(8);
   expect(exported.routines).toHaveLength(1);
   expect(exported.templates).toEqual([]);
   expect(exported.plans).toEqual([]);
@@ -600,7 +600,7 @@ test("routine templates preserve an exact source snapshot and create a new valid
   const downloadPromise=page.waitForEvent("download");
   await page.getByRole("link",{name:"Download JSON export"}).click();
   const exported=JSON.parse(await readDownloadText(await downloadPromise));
-  expect(exported.exportVersion).toBe(7);
+  expect(exported.exportVersion).toBe(8);
   expect(exported.templates).toHaveLength(1);
   expect(exported.plans).toEqual([]);
   expect(exported.templates[0]).toMatchObject({ title:"Reusable exact starter", sourceRoutineVersionNumber:1, sourceRoutineTitle:"Template source", itemCount:2 });
@@ -725,7 +725,7 @@ test("plans preserve exact routine versions and append immutable plan versions",
     await readDownloadText(await downloadPromise),
   );
 
-  expect(exported.exportVersion).toBe(7);
+  expect(exported.exportVersion).toBe(8);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].versions).toHaveLength(2);
   expect(exported.plans[0].versions[0].title).toBe("Durable training plan");
@@ -904,7 +904,7 @@ test("weekly plan schedule preserves exact snapshots, timezone recurrence, pause
   await page.getByRole("link", { name: "Download JSON export" }).click();
   const exported = JSON.parse(await readDownloadText(await downloadPromise));
 
-  expect(exported.exportVersion).toBe(7);
+  expect(exported.exportVersion).toBe(8);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].schedule.versions).toHaveLength(3);
   expect(exported.plans[0].schedule.versions[0]).toMatchObject({
@@ -928,6 +928,182 @@ test("weekly plan schedule preserves exact snapshots, timezone recurrence, pause
   try {
     const otherPage = await otherContext.newPage();
     await signUp(otherPage, "plan-schedule-other");
+    await otherPage.goto(scheduleUrl);
+    await expect(
+      otherPage.getByRole("heading", {
+        level: 1,
+        name: "Schedule not available",
+      }),
+    ).toBeVisible();
+  } finally {
+    await otherContext.close();
+  }
+});
+
+test("schedule occurrence exceptions preserve skip, restore, reschedule, and exact schedule-version history", async ({
+  page,
+  browser,
+}: {
+  page: Page;
+  browser: Browser;
+}) => {
+  await signUp(page, "schedule-exception-owner");
+  await completeUnrestrictedReadiness(page);
+
+  await page.goto("/create");
+  await page.getByLabel("Routine title").fill("Exception controlled routine");
+  await page
+    .getByLabel("Exercise 1", { exact: true })
+    .selectOption("e3333333-3333-4333-8333-333333333334");
+  await page
+    .getByLabel("Exercise 2", { exact: true })
+    .selectOption("e4444444-4444-4444-8444-444444444444");
+  await page.getByRole("button", { name: "Save routine" }).click();
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+
+  await page.goto("/plans");
+  await page.getByLabel("Plan title").fill("Exception controlled plan");
+  await page
+    .getByLabel("Exception controlled routine - routine version 1")
+    .check();
+  await page.getByRole("button", { name: "Save plan" }).click();
+  await expect(page).toHaveURL(/\/plans\/[0-9a-f-]+$/);
+
+  const planUrl = page.url();
+  const scheduleUrl = `${planUrl}/schedule`;
+
+  const original = new Date();
+  original.setUTCDate(original.getUTCDate() + 1);
+  const originalDate = original.toISOString().slice(0, 10);
+  const isoWeekday = ((original.getUTCDay() + 6) % 7) + 1;
+  const weekdayNames = [
+    "",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+  const weekdayName = weekdayNames[isoWeekday];
+
+  const target = new Date(`${originalDate}T00:00:00Z`);
+  target.setUTCDate(target.getUTCDate() + 1);
+  const targetDate = target.toISOString().slice(0, 10);
+
+  await page.goto(scheduleUrl);
+  await page.getByLabel("Schedule timezone").fill("Etc/UTC");
+  await page.getByLabel("Schedule starts on").fill(originalDate);
+  await page
+    .getByLabel(`${weekdayName} routine`)
+    .selectOption({
+      label: "Exception controlled routine - routine version 1",
+    });
+  await page.getByLabel(`${weekdayName} window start`).fill("09:00");
+  await page.getByLabel(`${weekdayName} window end`).fill("10:00");
+  await page.getByRole("button", { name: "Save recurring schedule" }).click();
+
+  await expect(page).toHaveURL(planUrl);
+  await page.goto(scheduleUrl);
+
+  const upcoming = page.locator(
+    'section[aria-labelledby="schedule-upcoming-title"]',
+  );
+  await expect(
+    upcoming.getByRole("heading", {
+      level: 3,
+      name: "Exception controlled routine",
+    }).first(),
+  ).toBeVisible();
+
+  await upcoming
+    .getByRole("button", { name: "Skip this occurrence" })
+    .first()
+    .click();
+
+  await expect(page).toHaveURL(scheduleUrl);
+  const exceptions = page.locator(
+    'section[aria-labelledby="schedule-exceptions-title"]',
+  );
+  await expect(exceptions.getByText("Skipped.")).toBeVisible();
+
+  await exceptions
+    .getByRole("button", { name: "Restore original occurrence" })
+    .click();
+
+  await expect(page).toHaveURL(scheduleUrl);
+  await expect(
+    page.getByText("No active skip or reschedule exceptions."),
+  ).toBeVisible();
+
+  const restoredUpcoming = page.locator(
+    'section[aria-labelledby="schedule-upcoming-title"]',
+  );
+  const firstOccurrence = restoredUpcoming
+    .locator("article")
+    .filter({ hasText: "Exception controlled routine" })
+    .first();
+
+  await firstOccurrence.getByLabel("Rescheduled date").fill(targetDate);
+  await firstOccurrence.getByLabel("Rescheduled window start").fill("12:00");
+  await firstOccurrence.getByLabel("Rescheduled window end").fill("13:00");
+  await firstOccurrence
+    .getByRole("button", { name: "Reschedule this occurrence" })
+    .click();
+
+  await expect(page).toHaveURL(scheduleUrl);
+  await expect(
+    page.getByText(`Rescheduled to ${targetDate} at 12:00-13:00.`),
+  ).toBeVisible();
+
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: "Exception controlled routine",
+    }),
+  ).toBeVisible();
+  await expect(page.getByText(/12:00-13:00 in Etc\/UTC/)).toBeVisible();
+  await expect(
+    page.getByText(
+      new RegExp(`Rescheduled from original local date ${originalDate}`),
+    ),
+  ).toBeVisible();
+
+  await page.goto(scheduleUrl);
+  await page.getByLabel(`${weekdayName} window start`).fill("14:00");
+  await page.getByLabel(`${weekdayName} window end`).fill("15:00");
+  await page
+    .getByRole("button", { name: "Save new schedule version" })
+    .click();
+
+  await expect(page).toHaveURL(planUrl);
+  await page.goto("/");
+  await expect(page.getByText(/14:00-15:00 in Etc\/UTC/)).toBeVisible();
+  await expect(page.getByText(/Rescheduled from original local date/)).toHaveCount(0);
+
+  await page.goto("/profile/account");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Download JSON export" }).click();
+  const exported = JSON.parse(await readDownloadText(await downloadPromise));
+
+  expect(exported.exportVersion).toBe(8);
+  expect(exported.plans).toHaveLength(1);
+  expect(exported.plans[0].schedule.versions).toHaveLength(2);
+  expect(exported.plans[0].schedule.versions[0].exceptions).toHaveLength(1);
+  expect(
+    exported.plans[0].schedule.versions[0].exceptions[0].versions.map(
+      (version: { action: string }) => version.action,
+    ),
+  ).toEqual(["skip", "restore", "reschedule"]);
+  expect(exported.plans[0].schedule.versions[1].exceptions).toEqual([]);
+
+  const otherContext = await browser.newContext();
+
+  try {
+    const otherPage = await otherContext.newPage();
+    await signUp(otherPage, "schedule-exception-other");
     await otherPage.goto(scheduleUrl);
     await expect(
       otherPage.getByRole("heading", {

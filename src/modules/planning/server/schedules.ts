@@ -60,6 +60,26 @@ export type ScheduleOccurrence = {
   routineVersionId: string;
   routineVersionNumber: number;
   routineTitle: string;
+  originalLocalDate: string;
+  exceptionId: string | null;
+  exceptionVersionNumber: number;
+  status: "scheduled" | "rescheduled";
+};
+
+export type PlanScheduleExceptionSnapshot = ScheduleRoutineOption & {
+  id: string;
+  versionNumber: number;
+  action: "skip" | "reschedule";
+  originalLocalDate: string;
+  originalLocalDateLabel: string;
+  originalWeekday: number;
+  originalWeekdayLabel: string;
+  originalWindowStart: string;
+  originalWindowEnd: string;
+  rescheduledLocalDate: string | null;
+  rescheduledWindowStart: string | null;
+  rescheduledWindowEnd: string | null;
+  createdAt: string;
 };
 
 export type PlanSchedulePageState =
@@ -73,6 +93,7 @@ export type PlanSchedulePageState =
       };
       schedule: PlanScheduleSnapshot | null;
       upcoming: ScheduleOccurrence[];
+      exceptions: PlanScheduleExceptionSnapshot[];
     }
   | { kind: "signed-out" }
   | { kind: "not-found" }
@@ -82,6 +103,25 @@ export type TodaySchedulePageState =
   | { kind: "authenticated"; occurrences: ScheduleOccurrence[] }
   | { kind: "signed-out" }
   | { kind: "unavailable" };
+
+export type PlanScheduleExceptionExportRecord = ScheduleRoutineOption & {
+  id: string;
+  originalLocalDate: string;
+  originalWeekday: number;
+  originalWeekdayLabel: string;
+  originalWindowStart: string;
+  originalWindowEnd: string;
+  createdAt: string;
+  versions: Array<{
+    id: string;
+    versionNumber: number;
+    action: "skip" | "reschedule" | "restore";
+    rescheduledLocalDate: string | null;
+    rescheduledWindowStart: string | null;
+    rescheduledWindowEnd: string | null;
+    createdAt: string;
+  }>;
+};
 
 export type PlanScheduleExportRecord = {
   id: string;
@@ -96,11 +136,16 @@ export type PlanScheduleExportRecord = {
     isPaused: boolean;
     createdAt: string;
     rules: PlanScheduleRuleSnapshot[];
+    exceptions: PlanScheduleExceptionExportRecord[];
   }>;
 };
 
 function timeText(value: unknown) {
   return String(value).slice(0, 5);
+}
+
+function optionalTimeText(value: unknown) {
+  return value === null || value === undefined ? null : timeText(value);
 }
 
 function weekdayLabel(value: number) {
@@ -316,9 +361,148 @@ async function latestPlanSchedule(
   };
 }
 
+async function latestPlanScheduleExceptions(
+  supabase: SupabaseClient,
+  scheduleVersionId: string,
+): Promise<PlanScheduleExceptionSnapshot[]> {
+  const { data: rules, error: rulesError } = await supabase
+    .from("plan_schedule_rules")
+    .select("id,weekday,window_start,window_end,routine_version_id")
+    .eq("schedule_version_id", scheduleVersionId);
+
+  if (rulesError) {
+    throw new Error("schedule-exception-rule-read-failed");
+  }
+
+  const ruleRows = (rules ?? []) as Array<Record<string, unknown>>;
+  const ruleIds = ruleRows.map((rule) => String(rule.id));
+
+  if (ruleIds.length === 0) {
+    return [];
+  }
+
+  const { data: exceptions, error: exceptionsError } = await supabase
+    .from("plan_schedule_occurrence_exceptions")
+    .select("id,schedule_rule_id,original_local_date,created_at")
+    .in("schedule_rule_id", ruleIds)
+    .order("original_local_date", { ascending: true });
+
+  if (exceptionsError) {
+    throw new Error("schedule-exception-read-failed");
+  }
+
+  const exceptionRows = (exceptions ?? []) as Array<Record<string, unknown>>;
+  const exceptionIds = exceptionRows.map((exception) => String(exception.id));
+
+  if (exceptionIds.length === 0) {
+    return [];
+  }
+
+  const { data: versions, error: versionsError } = await supabase
+    .from("plan_schedule_occurrence_exception_versions")
+    .select(
+      "exception_id,version_number,action,rescheduled_local_date,rescheduled_window_start,rescheduled_window_end,created_at",
+    )
+    .in("exception_id", exceptionIds)
+    .order("version_number", { ascending: false });
+
+  if (versionsError) {
+    throw new Error("schedule-exception-version-read-failed");
+  }
+
+  const latestByException = new Map<string, Record<string, unknown>>();
+
+  for (const version of (versions ?? []) as Array<Record<string, unknown>>) {
+    const exceptionId = String(version.exception_id);
+
+    if (!latestByException.has(exceptionId)) {
+      latestByException.set(exceptionId, version);
+    }
+  }
+
+  const ruleById = new Map(
+    ruleRows.map((rule) => [String(rule.id), rule]),
+  );
+
+  const routineVersionIds = Array.from(
+    new Set(ruleRows.map((rule) => String(rule.routine_version_id))),
+  );
+  const routineById = await routineDetailsByVersionId(
+    supabase,
+    routineVersionIds,
+  );
+
+  const mapped: PlanScheduleExceptionSnapshot[] = [];
+
+  for (const exception of exceptionRows) {
+    const exceptionId = String(exception.id);
+    const latest = latestByException.get(exceptionId);
+
+    if (!latest) {
+      throw new Error("schedule-exception-version-missing");
+    }
+
+    const action = String(latest.action);
+
+    if (action === "restore") {
+      continue;
+    }
+
+    if (action !== "skip" && action !== "reschedule") {
+      throw new Error("schedule-exception-action-invalid");
+    }
+
+    const rule = ruleById.get(String(exception.schedule_rule_id));
+
+    if (!rule) {
+      throw new Error("schedule-exception-rule-missing");
+    }
+
+    const routineVersionId = String(rule.routine_version_id);
+    const routine = routineById.get(routineVersionId);
+
+    if (!routine) {
+      throw new Error("schedule-exception-routine-missing");
+    }
+
+    const originalWeekday = Number(rule.weekday);
+    const originalLocalDate = String(exception.original_local_date);
+
+    mapped.push({
+      id: exceptionId,
+      versionNumber: Number(latest.version_number),
+      action,
+      originalLocalDate,
+      originalLocalDateLabel: localDateLabel(originalLocalDate),
+      originalWeekday,
+      originalWeekdayLabel: weekdayLabel(originalWeekday),
+      originalWindowStart: timeText(rule.window_start),
+      originalWindowEnd: timeText(rule.window_end),
+      rescheduledLocalDate: latest.rescheduled_local_date
+        ? String(latest.rescheduled_local_date)
+        : null,
+      rescheduledWindowStart: optionalTimeText(
+        latest.rescheduled_window_start,
+      ),
+      rescheduledWindowEnd: optionalTimeText(latest.rescheduled_window_end),
+      createdAt: String(latest.created_at),
+      routineId: String(routine.routine_id),
+      routineVersionId,
+      routineVersionNumber: Number(routine.version_number),
+      routineTitle: String(routine.title),
+    });
+  }
+
+  return mapped.sort((left, right) =>
+    left.originalLocalDate.localeCompare(right.originalLocalDate),
+  );
+}
+
 function mapOccurrence(row: Record<string, unknown>): ScheduleOccurrence {
   const weekday = Number(row.weekday);
   const localDate = String(row.local_date);
+  const status =
+    row.occurrence_status === "rescheduled" ? "rescheduled" : "scheduled";
 
   return {
     planId: String(row.plan_id),
@@ -337,6 +521,10 @@ function mapOccurrence(row: Record<string, unknown>): ScheduleOccurrence {
     routineVersionId: String(row.routine_version_id),
     routineVersionNumber: Number(row.routine_version_number),
     routineTitle: String(row.routine_title),
+    originalLocalDate: String(row.original_local_date),
+    exceptionId: row.exception_id ? String(row.exception_id) : null,
+    exceptionVersionNumber: Number(row.exception_version_number ?? 0),
+    status,
   };
 }
 
@@ -379,9 +567,12 @@ export async function getPlanSchedulePageState(
       return { kind: "not-found" };
     }
 
-    const [schedule, occurrences] = await Promise.all([
-      latestPlanSchedule(supabase, planId),
+    const schedule = await latestPlanSchedule(supabase, planId);
+    const [occurrences, exceptions] = await Promise.all([
       upcomingOccurrences(supabase, 28),
+      schedule
+        ? latestPlanScheduleExceptions(supabase, schedule.versionId)
+        : Promise.resolve([]),
     ]);
 
     return {
@@ -391,6 +582,7 @@ export async function getPlanSchedulePageState(
       upcoming: occurrences.filter(
         (occurrence) => occurrence.planId === planId,
       ),
+      exceptions,
     };
   } catch {
     return { kind: "unavailable" };
@@ -466,7 +658,7 @@ export async function buildPlanScheduleExports(
       : await supabase
           .from("plan_schedule_rules")
           .select(
-            "schedule_version_id,weekday,window_start,window_end,routine_version_id",
+            "id,schedule_version_id,weekday,window_start,window_end,routine_version_id",
           )
           .in("schedule_version_id", versionIds)
           .order("weekday", { ascending: true });
@@ -475,8 +667,9 @@ export async function buildPlanScheduleExports(
     return null;
   }
 
+  const ruleRows = (rules ?? []) as Array<Record<string, unknown>>;
   const routineVersionIds = Array.from(
-    new Set((rules ?? []).map((rule) => String(rule.routine_version_id))),
+    new Set(ruleRows.map((rule) => String(rule.routine_version_id))),
   );
 
   const routineMap = await routineDetailsByVersionId(
@@ -504,8 +697,15 @@ export async function buildPlanScheduleExports(
   );
 
   const rulesByVersion = new Map<string, PlanScheduleRuleSnapshot[]>();
+  const ruleMetadataById = new Map<
+    string,
+    {
+      scheduleVersionId: string;
+      snapshot: PlanScheduleRuleSnapshot;
+    }
+  >();
 
-  for (const rule of rules ?? []) {
+  for (const rule of ruleRows) {
     const scheduleVersionId = String(rule.schedule_version_id);
     const routineVersionId = String(rule.routine_version_id);
     const routine = routineMap.get(routineVersionId);
@@ -515,9 +715,7 @@ export async function buildPlanScheduleExports(
     }
 
     const weekday = Number(rule.weekday);
-    const current = rulesByVersion.get(scheduleVersionId) ?? [];
-
-    current.push({
+    const snapshot: PlanScheduleRuleSnapshot = {
       weekday,
       weekdayLabel: weekdayLabel(weekday),
       windowStart: timeText(rule.window_start),
@@ -526,9 +724,119 @@ export async function buildPlanScheduleExports(
       routineVersionId,
       routineVersionNumber: Number(routine.version_number),
       routineTitle: String(routine.title),
+    };
+    const current = rulesByVersion.get(scheduleVersionId) ?? [];
+
+    current.push(snapshot);
+    rulesByVersion.set(scheduleVersionId, current);
+    ruleMetadataById.set(String(rule.id), {
+      scheduleVersionId,
+      snapshot,
+    });
+  }
+
+  const ruleIds = Array.from(ruleMetadataById.keys());
+
+  const { data: exceptionRows, error: exceptionsError } =
+    ruleIds.length === 0
+      ? { data: [], error: null }
+      : await supabase
+          .from("plan_schedule_occurrence_exceptions")
+          .select("id,schedule_rule_id,original_local_date,created_at")
+          .in("schedule_rule_id", ruleIds)
+          .order("original_local_date", { ascending: true });
+
+  if (exceptionsError) {
+    return null;
+  }
+
+  const exceptionIds = (exceptionRows ?? []).map((row) => String(row.id));
+
+  const { data: exceptionVersionRows, error: exceptionVersionsError } =
+    exceptionIds.length === 0
+      ? { data: [], error: null }
+      : await supabase
+          .from("plan_schedule_occurrence_exception_versions")
+          .select(
+            "id,exception_id,version_number,action,rescheduled_local_date,rescheduled_window_start,rescheduled_window_end,created_at",
+          )
+          .in("exception_id", exceptionIds)
+          .order("version_number", { ascending: true });
+
+  if (exceptionVersionsError) {
+    return null;
+  }
+
+  const exceptionVersionsByException = new Map<
+    string,
+    PlanScheduleExceptionExportRecord["versions"]
+  >();
+
+  for (const version of exceptionVersionRows ?? []) {
+    const exceptionId = String(version.exception_id);
+    const action = String(version.action);
+
+    if (
+      action !== "skip" &&
+      action !== "reschedule" &&
+      action !== "restore"
+    ) {
+      return null;
+    }
+
+    const current = exceptionVersionsByException.get(exceptionId) ?? [];
+
+    current.push({
+      id: String(version.id),
+      versionNumber: Number(version.version_number),
+      action,
+      rescheduledLocalDate: version.rescheduled_local_date
+        ? String(version.rescheduled_local_date)
+        : null,
+      rescheduledWindowStart: optionalTimeText(
+        version.rescheduled_window_start,
+      ),
+      rescheduledWindowEnd: optionalTimeText(
+        version.rescheduled_window_end,
+      ),
+      createdAt: String(version.created_at),
     });
 
-    rulesByVersion.set(scheduleVersionId, current);
+    exceptionVersionsByException.set(exceptionId, current);
+  }
+
+  const exceptionsByScheduleVersion = new Map<
+    string,
+    PlanScheduleExceptionExportRecord[]
+  >();
+
+  for (const exception of exceptionRows ?? []) {
+    const metadata = ruleMetadataById.get(String(exception.schedule_rule_id));
+
+    if (!metadata) {
+      return null;
+    }
+
+    const current =
+      exceptionsByScheduleVersion.get(metadata.scheduleVersionId) ?? [];
+
+    current.push({
+      id: String(exception.id),
+      originalLocalDate: String(exception.original_local_date),
+      originalWeekday: metadata.snapshot.weekday,
+      originalWeekdayLabel: metadata.snapshot.weekdayLabel,
+      originalWindowStart: metadata.snapshot.windowStart,
+      originalWindowEnd: metadata.snapshot.windowEnd,
+      routineId: metadata.snapshot.routineId,
+      routineVersionId: metadata.snapshot.routineVersionId,
+      routineVersionNumber: metadata.snapshot.routineVersionNumber,
+      routineTitle: metadata.snapshot.routineTitle,
+      createdAt: String(exception.created_at),
+      versions:
+        exceptionVersionsByException.get(String(exception.id)) ?? [],
+    });
+
+    exceptionsByScheduleVersion.set(metadata.scheduleVersionId, current);
   }
 
   const versionsBySchedule = new Map<
@@ -545,10 +853,11 @@ export async function buildPlanScheduleExports(
     }
 
     const scheduleId = String(version.schedule_id);
+    const versionId = String(version.id);
     const current = versionsBySchedule.get(scheduleId) ?? [];
 
     current.push({
-      id: String(version.id),
+      id: versionId,
       versionNumber: Number(version.version_number),
       planVersionId,
       planVersionNumber,
@@ -556,7 +865,8 @@ export async function buildPlanScheduleExports(
       startsOn: String(version.starts_on),
       isPaused: Boolean(version.is_paused),
       createdAt: String(version.created_at),
-      rules: rulesByVersion.get(String(version.id)) ?? [],
+      rules: rulesByVersion.get(versionId) ?? [],
+      exceptions: exceptionsByScheduleVersion.get(versionId) ?? [],
     });
 
     versionsBySchedule.set(scheduleId, current);

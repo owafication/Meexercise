@@ -255,3 +255,17 @@ Timezone authority is a recognized PostgreSQL named timezone rather than a store
 Readable account export advances from v6 to v7 and nests every schedule version/rule under its stable plan record. Auth-user deletion cascades through plans, schedules and schedule rules; the schedule-rule exact routine-version foreign key also cascades so routine-history deletion order cannot block account lifecycle deletion.
 
 This slice does not implement per-occurrence exception records, skip/reschedule, reminders or progression proposals. It therefore advances the schedule portion of `REQ-017` and partially implements `REQ-020` / `AC-012`; `REQ-021`-`REQ-023` and the exception/reminder remainder of PH-05 stay unimplemented. Runtime AI remains absent.
+
+## Implemented PH-05 per-occurrence schedule exceptions
+
+`BR-20260923-02` extends the existing weekly schedule authority rather than creating a second scheduling engine. A stable `plan_schedule_occurrence_exceptions` row identifies one original occurrence by exact immutable `plan_schedule_rule` plus `original_local_date`. Meaning changes append through immutable `plan_schedule_occurrence_exception_versions` whose actions are `skip`, `reschedule` or `restore`.
+
+The authenticated mutation locks the owning stable schedule identity, requires the caller's expected current schedule-version number and expected current exception-version number, verifies that the original date actually maps to a rule in the current exact schedule version, and rejects stale/foreign/invalid changes. A reschedule changes only the effective local date/time window; the exact routine version, plan-version context and named schedule timezone remain pinned through the original exact schedule rule. Skip and restore carry no replacement date/time.
+
+`get_my_plan_schedule_occurrences` remains the single occurrence projection authority. It now suppresses active skips, replaces active reschedules at their effective local date/time and restores ordinary recurrence when the latest exception action is `restore`. Returned rows expose the original local occurrence identity, current exception version and scheduled/rescheduled status so application writes can preserve optimistic concurrency.
+
+Exceptions are deliberately schedule-version-specific. Saving a new recurring schedule version creates new exact schedule rules and does not silently migrate earlier occurrence exceptions. Historical exception rows remain attached to their original immutable schedule snapshot and are included in export v8. This avoids applying a prior skip/reschedule to recurrence whose rule, plan snapshot or routine meaning may have changed.
+
+Both exception tables are owner-readable through RLS, deny direct authenticated mutation, and use the existing immutable-snapshot trigger as defence in depth. Auth-user deletion cascades through plan/schedule/rule/exception history. No worker, queue, calendar integration or reminder-delivery service is introduced.
+
+With this slice, weekly recurrence, timezone-safe projection, pause, skip and reschedule are implemented for the current scheduling contract. `REQ-020` / `AC-012` remain partial for reminders; progression `REQ-021`-`REQ-023` remains future PH-05 work. Runtime AI remains absent.

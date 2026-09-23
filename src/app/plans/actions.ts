@@ -539,3 +539,158 @@ export async function savePlanScheduleAction(
   revalidatePath("/profile/export");
   redirect(`/plans/${planId}`);
 }
+
+export type ScheduleExceptionActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+export async function savePlanScheduleOccurrenceExceptionAction(
+  previousState: ScheduleExceptionActionState,
+  formData: FormData,
+): Promise<ScheduleExceptionActionState> {
+  void previousState;
+
+  const planId = normalizedText(formData.get("planId"));
+  const expectedScheduleVersionNumber = Number(
+    normalizedText(formData.get("expectedScheduleVersionNumber")),
+  );
+  const originalLocalDate = normalizedText(
+    formData.get("originalLocalDate"),
+  );
+  const exceptionAction = normalizedText(formData.get("exceptionAction"));
+  const expectedExceptionVersionNumber = Number(
+    normalizedText(formData.get("expectedExceptionVersionNumber")),
+  );
+  const rescheduledLocalDate = normalizedText(
+    formData.get("rescheduledLocalDate"),
+  );
+  const rescheduledWindowStart = normalizedText(
+    formData.get("rescheduledWindowStart"),
+  );
+  const rescheduledWindowEnd = normalizedText(
+    formData.get("rescheduledWindowEnd"),
+  );
+
+  if (!validUuid(planId)) {
+    return { status: "error", message: "Plan could not be verified." };
+  }
+
+  if (
+    !Number.isInteger(expectedScheduleVersionNumber) ||
+    expectedScheduleVersionNumber < 1 ||
+    !Number.isInteger(expectedExceptionVersionNumber) ||
+    expectedExceptionVersionNumber < 0
+  ) {
+    return {
+      status: "error",
+      message: "Schedule or occurrence exception version could not be verified.",
+    };
+  }
+
+  if (!validDateText(originalLocalDate)) {
+    return {
+      status: "error",
+      message: "The original scheduled date could not be verified.",
+    };
+  }
+
+  if (
+    exceptionAction !== "skip" &&
+    exceptionAction !== "reschedule" &&
+    exceptionAction !== "restore"
+  ) {
+    return {
+      status: "error",
+      message: "Choose a valid occurrence action.",
+    };
+  }
+
+  if (exceptionAction === "reschedule") {
+    if (
+      !validDateText(rescheduledLocalDate) ||
+      !validTimeText(rescheduledWindowStart) ||
+      !validTimeText(rescheduledWindowEnd) ||
+      rescheduledWindowStart >= rescheduledWindowEnd
+    ) {
+      return {
+        status: "error",
+        message:
+          "Choose a valid rescheduled date and a window whose end is later than its start.",
+      };
+    }
+  }
+
+  let supabase;
+
+  try {
+    supabase = await createClient();
+  } catch {
+    return {
+      status: "error",
+      message: "Schedule exception storage is unavailable right now.",
+    };
+  }
+
+  const userId = await getVerifiedUserId(supabase);
+
+  if (!userId) {
+    return {
+      status: "error",
+      message: "Sign in again before changing a scheduled occurrence.",
+    };
+  }
+
+  const { data, error } = await supabase.rpc(
+    "save_plan_schedule_occurrence_exception",
+    {
+      p_plan_id: planId,
+      p_expected_schedule_version_number: expectedScheduleVersionNumber,
+      p_original_local_date: originalLocalDate,
+      p_action: exceptionAction,
+      p_expected_exception_version_number: expectedExceptionVersionNumber,
+      p_rescheduled_local_date:
+        exceptionAction === "reschedule" ? rescheduledLocalDate : null,
+      p_rescheduled_window_start:
+        exceptionAction === "reschedule" ? rescheduledWindowStart : null,
+      p_rescheduled_window_end:
+        exceptionAction === "reschedule" ? rescheduledWindowEnd : null,
+    },
+  );
+
+  if (error?.code === "40001") {
+    return {
+      status: "error",
+      message:
+        "This schedule or occurrence changed in another session. Reload before saving another occurrence exception.",
+    };
+  }
+
+  if (error?.code === "42501") {
+    return {
+      status: "error",
+      message: "This scheduled occurrence is not available.",
+    };
+  }
+
+  if (error?.code === "23514") {
+    return {
+      status: "error",
+      message:
+        "This occurrence is no longer valid for the current schedule, or the requested reschedule window is invalid.",
+    };
+  }
+
+  if (error || typeof data !== "number") {
+    return {
+      status: "error",
+      message: "Scheduled occurrence could not be changed. Try again later.",
+    };
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/plans/${planId}`);
+  revalidatePath(`/plans/${planId}/schedule`);
+  revalidatePath("/profile/export");
+  redirect(`/plans/${planId}/schedule`);
+}

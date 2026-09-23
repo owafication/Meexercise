@@ -153,6 +153,9 @@ export default async function PlanDetailPage({ params }: Props) {
                       </time>
                       : {occurrence.windowStart}-{occurrence.windowEnd} -{" "}
                       {occurrence.routineTitle}
+                      {occurrence.status === "rescheduled"
+                        ? ` (rescheduled from ${occurrence.originalLocalDate})`
+                        : ""}
                     </li>
                   ))}
                 </ol>
@@ -160,7 +163,7 @@ export default async function PlanDetailPage({ params }: Props) {
             ) : null}
 
             <Link className="text-link" href={`/plans/${plan.id}/schedule`}>
-              Review or edit schedule
+              Review schedule and occurrence exceptions
             </Link>
           </>
         )}

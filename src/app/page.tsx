@@ -15,9 +15,9 @@ export default async function TodayPage() {
     <>
       <PageIntro eyebrow="Today" title="Your day, at a glance">
         <p>
-          Your next recurring plan window appears here from the exact schedule
-          snapshot you saved. Session performance and completion tracking arrive
-          in PH-06.
+          Your next effective plan window appears here from the exact schedule
+          snapshot and occurrence exceptions you saved. Session performance and
+          completion tracking arrive in PH-06.
         </p>
       </PageIntro>
 
@@ -50,9 +50,12 @@ export default async function TodayPage() {
                 Scheduled from {next.planTitle}, exact plan version{" "}
                 {next.planVersionNumber} and routine version{" "}
                 {next.routineVersionNumber}.
+                {next.status === "rescheduled"
+                  ? ` Rescheduled from original local date ${next.originalLocalDate}.`
+                  : ""}
               </p>
-              <Link className="button" href={`/plans/${next.planId}`}>
-                View scheduled plan
+              <Link className="button" href={`/plans/${next.planId}/schedule`}>
+                Review scheduled occurrence
               </Link>
             </>
           ) : (
