@@ -219,3 +219,18 @@ The reusable-template slice itself did not establish `ROUTE-018`; `BR-20260919-0
 - Account JSON export is v7 and includes immutable schedule version/rule history.
 
 Per-occurrence skip/reschedule controls, reminder delivery and progression UI are not claimed by this slice. `REQ-020` / `AC-012` remain partial and `ROUTE-018` progression semantics remain future PH-05 work.
+
+## Implemented PH-05 per-occurrence schedule controls
+
+`BR-20260923-02` extends the existing `ROUTE-018` `/plans/[planId]/schedule` surface and `ROUTE-015` Today without creating another route.
+
+- The schedule page lists effective upcoming occurrences for the current exact schedule version and exposes explicit `Skip this occurrence` and `Reschedule this occurrence` controls.
+- Reschedule requires a local target date plus start/end window in the schedule's existing named timezone. It retains the exact routine version from the original scheduled rule.
+- Active skip/reschedule exceptions are shown separately with their original local occurrence identity and a `Restore original occurrence` action.
+- Exception edits use expected exception versions; stale changes show reload-before-saving feedback instead of silently overwriting another session's occurrence decision.
+- A new recurring schedule version does not inherit active exceptions. The editor warns when active exception history exists so the user can deliberately review the new recurrence snapshot.
+- Plan detail and Today consume the same exception-aware occurrence projection. Rescheduled occurrences are explicitly labelled and retain their original local date for explanation.
+- Account JSON export advances to v8 and includes full historical exception version sequences under the exact schedule version/rule they modified.
+- Foreign-plan schedule access remains non-disclosing.
+
+Reminder delivery is not presented as implemented. Progression UI is unchanged and remains later PH-05 work.
