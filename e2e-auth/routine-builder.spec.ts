@@ -223,7 +223,7 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   const exportDownload = await downloadPromise;
   const exported = JSON.parse(await readDownloadText(exportDownload));
 
-  expect(exported.exportVersion).toBe(9);
+  expect(exported.exportVersion).toBe(10);
   expect(exported.routines).toHaveLength(1);
   expect(exported.templates).toEqual([]);
   expect(exported.plans).toEqual([]);
@@ -600,7 +600,7 @@ test("routine templates preserve an exact source snapshot and create a new valid
   const downloadPromise=page.waitForEvent("download");
   await page.getByRole("link",{name:"Download JSON export"}).click();
   const exported=JSON.parse(await readDownloadText(await downloadPromise));
-  expect(exported.exportVersion).toBe(9);
+  expect(exported.exportVersion).toBe(10);
   expect(exported.templates).toHaveLength(1);
   expect(exported.plans).toEqual([]);
   expect(exported.templates[0]).toMatchObject({ title:"Reusable exact starter", sourceRoutineVersionNumber:1, sourceRoutineTitle:"Template source", itemCount:2 });
@@ -725,7 +725,7 @@ test("plans preserve exact routine versions and append immutable plan versions",
     await readDownloadText(await downloadPromise),
   );
 
-  expect(exported.exportVersion).toBe(9);
+  expect(exported.exportVersion).toBe(10);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].versions).toHaveLength(2);
   expect(exported.plans[0].versions[0].title).toBe("Durable training plan");
@@ -904,7 +904,7 @@ test("weekly plan schedule preserves exact snapshots, timezone recurrence, pause
   await page.getByRole("link", { name: "Download JSON export" }).click();
   const exported = JSON.parse(await readDownloadText(await downloadPromise));
 
-  expect(exported.exportVersion).toBe(9);
+  expect(exported.exportVersion).toBe(10);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].schedule.versions).toHaveLength(3);
   expect(exported.plans[0].schedule.versions[0]).toMatchObject({
@@ -1088,7 +1088,7 @@ test("schedule occurrence exceptions preserve skip, restore, reschedule, and exa
   await page.getByRole("link", { name: "Download JSON export" }).click();
   const exported = JSON.parse(await readDownloadText(await downloadPromise));
 
-  expect(exported.exportVersion).toBe(9);
+  expect(exported.exportVersion).toBe(10);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].schedule.versions).toHaveLength(2);
   expect(exported.plans[0].schedule.versions[0].exceptions).toHaveLength(1);
@@ -1201,11 +1201,147 @@ test("in-app schedule reminders are versioned and follow effective occurrences",
   await page.getByRole("link", { name: "Download JSON export" }).click();
   const exported = JSON.parse(await readDownloadText(await downloadPromise));
 
-  expect(exported.exportVersion).toBe(9);
+  expect(exported.exportVersion).toBe(10);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].schedule.versions).toHaveLength(2);
   expect(exported.plans[0].schedule.versions[0].reminderMinutesBefore).toBe(
     2880,
   );
   expect(exported.plans[0].schedule.versions[1].reminderMinutesBefore).toBeNull();
+});
+
+test("conservative plan progression feedback is review-only, exportable and dismissible", async ({
+  page,
+  browser,
+}: {
+  page: Page;
+  browser: Browser;
+}) => {
+  await signUp(page, "plan-progression-owner");
+  await completeUnrestrictedReadiness(page);
+
+  await page.goto("/create");
+  await page.getByLabel("Routine title").fill("Progression review routine");
+  await page
+    .getByLabel("Exercise 1", { exact: true })
+    .selectOption("e3333333-3333-4333-8333-333333333334");
+  await page
+    .getByLabel("Exercise 2", { exact: true })
+    .selectOption("e4444444-4444-4444-8444-444444444444");
+  await page.getByRole("button", { name: "Save routine" }).click();
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+
+  await page.goto("/plans");
+  await page.getByLabel("Plan title").fill("Progression review plan");
+  await page
+    .getByLabel("Progression review routine - routine version 1")
+    .check();
+  await page.getByRole("button", { name: "Save plan" }).click();
+  await expect(page).toHaveURL(/\/plans\/[0-9a-f-]+$/);
+
+  const planUrl = page.url();
+  const scheduleUrl = `${planUrl}/schedule`;
+  const first = new Date();
+  first.setUTCDate(first.getUTCDate() + 2);
+  const second = new Date(first);
+  second.setUTCDate(second.getUTCDate() + 1);
+  const firstDay = ((first.getUTCDay() + 6) % 7) + 1;
+  const secondDay = ((second.getUTCDay() + 6) % 7) + 1;
+  const weekdays = [
+    "",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
+  await page.goto(scheduleUrl);
+  await page.getByLabel("Schedule timezone").fill("Etc/UTC");
+  await page.getByLabel("Schedule starts on").fill(first.toISOString().slice(0, 10));
+  for (const weekday of [firstDay, secondDay]) {
+    await page
+      .getByLabel(`${weekdays[weekday]} routine`)
+      .selectOption({
+        label: "Progression review routine - routine version 1",
+      });
+    await page.getByLabel(`${weekdays[weekday]} window start`).fill("09:00");
+    await page.getByLabel(`${weekdays[weekday]} window end`).fill("10:00");
+  }
+  await page.getByRole("button", { name: "Save recurring schedule" }).click();
+  await expect(page).toHaveURL(planUrl);
+
+  const reviewSection = page.locator(
+    'section[aria-labelledby="plan-progression-title"]',
+  );
+  await reviewSection
+    .getByLabel("Feedback for this plan")
+    .selectOption("excessive_difficulty");
+  await reviewSection
+    .getByLabel("Scheduled day to remove")
+    .selectOption(String(secondDay));
+  await reviewSection
+    .getByRole("button", { name: "Review conservative proposal" })
+    .click();
+  await expect(page).toHaveURL(`${planUrl}#plan-progression-title`);
+  await expect(reviewSection.getByText("Proposed / not applied")).toBeVisible();
+  await expect(
+    reviewSection.getByText(/Reduce the recurring schedule from 2 to 1 days per week/),
+  ).toBeVisible();
+  await expect(reviewSection.getByText(/That schedule is still current/)).toBeVisible();
+  await expect(page.getByText(/Schedule version 1 is pinned to plan version 1/)).toBeVisible();
+
+  await page.goto("/profile/account");
+  const firstDownload = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Download JSON export" }).click();
+  const firstExport = JSON.parse(await readDownloadText(await firstDownload));
+  expect(firstExport.exportVersion).toBe(10);
+  expect(firstExport.plans).toHaveLength(1);
+  expect(firstExport.plans[0].schedule.versions).toHaveLength(1);
+  expect(firstExport.plans[0].schedule.versions[0].rules).toHaveLength(2);
+  expect(firstExport.plans[0].progressionReviews).toHaveLength(1);
+  expect(firstExport.plans[0].progressionReviews[0]).toMatchObject({
+    feedbackKind: "excessive_difficulty",
+    proposedAction: "reduce_frequency",
+    oldWeeklySessions: 2,
+    newWeeklySessions: 1,
+    removeWeekday: secondDay,
+  });
+  expect(firstExport.plans[0].progressionReviews[0].events).toHaveLength(1);
+
+  await page.goto(planUrl);
+  await reviewSection
+    .getByRole("button", { name: "Dismiss this proposal" })
+    .click();
+  await expect(page).toHaveURL(`${planUrl}#plan-progression-title`);
+  await expect(reviewSection.getByText("Dismissed")).toBeVisible();
+  await expect(
+    reviewSection.getByRole("button", { name: "Dismiss this proposal" }),
+  ).toHaveCount(0);
+
+  await page.goto("/profile/account");
+  const secondDownload = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Download JSON export" }).click();
+  const afterExport = JSON.parse(await readDownloadText(await secondDownload));
+  expect(afterExport.plans[0].progressionReviews[0].events.map(
+    (event: { action: string }) => event.action,
+  )).toEqual(["proposed", "dismissed"]);
+  expect(afterExport.plans[0].schedule.versions).toHaveLength(1);
+
+  const otherContext = await browser.newContext();
+  try {
+    const otherPage = await otherContext.newPage();
+    await signUp(otherPage, "plan-progression-other");
+    await otherPage.goto(planUrl);
+    await expect(
+      otherPage.getByRole("heading", {
+        level: 1,
+        name: "Plan not available",
+      }),
+    ).toBeVisible();
+  } finally {
+    await otherContext.close();
+  }
 });
