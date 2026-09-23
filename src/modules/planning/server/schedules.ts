@@ -39,6 +39,7 @@ export type PlanScheduleSnapshot = {
   timezoneName: string;
   startsOn: string;
   isPaused: boolean;
+  reminderMinutesBefore: number | null;
   createdAt: string;
   rules: PlanScheduleRuleSnapshot[];
 };
@@ -57,6 +58,9 @@ export type ScheduleOccurrence = {
   windowEnd: string;
   startsAt: string;
   endsAt: string;
+  reminderMinutesBefore: number | null;
+  reminderAt: string | null;
+  reminderDue: boolean;
   routineVersionId: string;
   routineVersionNumber: number;
   routineTitle: string;
@@ -134,6 +138,7 @@ export type PlanScheduleExportRecord = {
     timezoneName: string;
     startsOn: string;
     isPaused: boolean;
+    reminderMinutesBefore: number | null;
     createdAt: string;
     rules: PlanScheduleRuleSnapshot[];
     exceptions: PlanScheduleExceptionExportRecord[];
@@ -166,6 +171,29 @@ function localDateLabel(localDate: string) {
     year: "numeric",
     timeZone: "UTC",
   }).format(date);
+}
+
+export function describeReminderMinutes(minutes: number | null) {
+  switch (minutes) {
+    case null:
+      return "off";
+    case 15:
+      return "15 minutes before";
+    case 30:
+      return "30 minutes before";
+    case 60:
+      return "1 hour before";
+    case 120:
+      return "2 hours before";
+    case 1440:
+      return "1 day before";
+    case 2880:
+      return "2 days before";
+    case 10080:
+      return "1 week before";
+    default:
+      return `${minutes} minutes before`;
+  }
 }
 
 async function routineDetailsByVersionId(
@@ -295,6 +323,16 @@ async function latestPlanSchedule(
     throw new Error("schedule-version-read-failed");
   }
 
+  const { data: reminder, error: reminderError } = await supabase
+    .from("plan_schedule_reminder_settings")
+    .select("minutes_before")
+    .eq("schedule_version_id", version.id)
+    .maybeSingle();
+
+  if (reminderError) {
+    throw new Error("schedule-reminder-read-failed");
+  }
+
   const { data: planVersion, error: planVersionError } = await supabase
     .from("plan_versions")
     .select("version_number")
@@ -356,6 +394,9 @@ async function latestPlanSchedule(
     timezoneName: String(version.timezone_name),
     startsOn: String(version.starts_on),
     isPaused: Boolean(version.is_paused),
+    reminderMinutesBefore: reminder
+      ? Number(reminder.minutes_before)
+      : null,
     createdAt: String(version.created_at),
     rules: mappedRules,
   };
@@ -503,6 +544,9 @@ function mapOccurrence(row: Record<string, unknown>): ScheduleOccurrence {
   const localDate = String(row.local_date);
   const status =
     row.occurrence_status === "rescheduled" ? "rescheduled" : "scheduled";
+  const startsAt = String(row.starts_at);
+  const reminderAt = row.reminder_at ? String(row.reminder_at) : null;
+  const now = Date.now();
 
   return {
     planId: String(row.plan_id),
@@ -516,8 +560,18 @@ function mapOccurrence(row: Record<string, unknown>): ScheduleOccurrence {
     weekdayLabel: weekdayLabel(weekday),
     windowStart: timeText(row.window_start),
     windowEnd: timeText(row.window_end),
-    startsAt: String(row.starts_at),
+    startsAt,
     endsAt: String(row.ends_at),
+    reminderMinutesBefore:
+      row.reminder_minutes_before === null ||
+      row.reminder_minutes_before === undefined
+        ? null
+        : Number(row.reminder_minutes_before),
+    reminderAt,
+    reminderDue:
+      reminderAt !== null &&
+      new Date(reminderAt).getTime() <= now &&
+      new Date(startsAt).getTime() > now,
     routineVersionId: String(row.routine_version_id),
     routineVersionNumber: Number(row.routine_version_number),
     routineTitle: String(row.routine_title),
@@ -650,6 +704,25 @@ export async function buildPlanScheduleExports(
   const versionIds = (versions ?? []).map((version) => String(version.id));
   const planVersionIds = Array.from(
     new Set((versions ?? []).map((version) => String(version.plan_version_id))),
+  );
+
+  const { data: reminderRows, error: reminderRowsError } =
+    versionIds.length === 0
+      ? { data: [], error: null }
+      : await supabase
+          .from("plan_schedule_reminder_settings")
+          .select("schedule_version_id,minutes_before")
+          .in("schedule_version_id", versionIds);
+
+  if (reminderRowsError) {
+    return null;
+  }
+
+  const reminderMinutesByVersionId = new Map(
+    (reminderRows ?? []).map((row) => [
+      String(row.schedule_version_id),
+      Number(row.minutes_before),
+    ]),
   );
 
   const { data: rules, error: rulesError } =
@@ -864,6 +937,8 @@ export async function buildPlanScheduleExports(
       timezoneName: String(version.timezone_name),
       startsOn: String(version.starts_on),
       isPaused: Boolean(version.is_paused),
+      reminderMinutesBefore:
+        reminderMinutesByVersionId.get(versionId) ?? null,
       createdAt: String(version.created_at),
       rules: rulesByVersion.get(versionId) ?? [],
       exceptions: exceptionsByScheduleVersion.get(versionId) ?? [],

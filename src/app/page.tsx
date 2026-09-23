@@ -1,7 +1,10 @@
 import Link from "next/link";
 
 import { PageIntro } from "@/components/page-intro";
-import { getTodaySchedulePageState } from "@/modules/planning/server/schedules";
+import {
+  describeReminderMinutes,
+  getTodaySchedulePageState,
+} from "@/modules/planning/server/schedules";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +13,7 @@ export default async function TodayPage() {
 
   const next =
     state.kind === "authenticated" ? state.occurrences[0] : undefined;
+  const reminderDue = next?.reminderDue ?? false;
 
   return (
     <>
@@ -23,7 +27,9 @@ export default async function TodayPage() {
 
       <div className="card-grid">
         <section className="card card-featured" aria-labelledby="today-next-title">
-          <p className="status-label">Next up</p>
+          <p className="status-label">
+            {reminderDue ? "Reminder due" : "Next up"}
+          </p>
 
           {state.kind === "signed-out" ? (
             <>
@@ -54,6 +60,16 @@ export default async function TodayPage() {
                   ? ` Rescheduled from original local date ${next.originalLocalDate}.`
                   : ""}
               </p>
+              {next.reminderMinutesBefore !== null ? (
+                <p>
+                  In-app reminder is set{" "}
+                  {describeReminderMinutes(next.reminderMinutesBefore)} this
+                  occurrence.
+                  {reminderDue
+                    ? " The reminder lead time has been reached."
+                    : ""}
+                </p>
+              ) : null}
               <Link className="button" href={`/plans/${next.planId}/schedule`}>
                 Review scheduled occurrence
               </Link>

@@ -223,7 +223,7 @@ test("manual routine creation and editing preserve ordered immutable versions", 
   const exportDownload = await downloadPromise;
   const exported = JSON.parse(await readDownloadText(exportDownload));
 
-  expect(exported.exportVersion).toBe(8);
+  expect(exported.exportVersion).toBe(9);
   expect(exported.routines).toHaveLength(1);
   expect(exported.templates).toEqual([]);
   expect(exported.plans).toEqual([]);
@@ -600,7 +600,7 @@ test("routine templates preserve an exact source snapshot and create a new valid
   const downloadPromise=page.waitForEvent("download");
   await page.getByRole("link",{name:"Download JSON export"}).click();
   const exported=JSON.parse(await readDownloadText(await downloadPromise));
-  expect(exported.exportVersion).toBe(8);
+  expect(exported.exportVersion).toBe(9);
   expect(exported.templates).toHaveLength(1);
   expect(exported.plans).toEqual([]);
   expect(exported.templates[0]).toMatchObject({ title:"Reusable exact starter", sourceRoutineVersionNumber:1, sourceRoutineTitle:"Template source", itemCount:2 });
@@ -725,7 +725,7 @@ test("plans preserve exact routine versions and append immutable plan versions",
     await readDownloadText(await downloadPromise),
   );
 
-  expect(exported.exportVersion).toBe(8);
+  expect(exported.exportVersion).toBe(9);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].versions).toHaveLength(2);
   expect(exported.plans[0].versions[0].title).toBe("Durable training plan");
@@ -904,7 +904,7 @@ test("weekly plan schedule preserves exact snapshots, timezone recurrence, pause
   await page.getByRole("link", { name: "Download JSON export" }).click();
   const exported = JSON.parse(await readDownloadText(await downloadPromise));
 
-  expect(exported.exportVersion).toBe(8);
+  expect(exported.exportVersion).toBe(9);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].schedule.versions).toHaveLength(3);
   expect(exported.plans[0].schedule.versions[0]).toMatchObject({
@@ -1088,7 +1088,7 @@ test("schedule occurrence exceptions preserve skip, restore, reschedule, and exa
   await page.getByRole("link", { name: "Download JSON export" }).click();
   const exported = JSON.parse(await readDownloadText(await downloadPromise));
 
-  expect(exported.exportVersion).toBe(8);
+  expect(exported.exportVersion).toBe(9);
   expect(exported.plans).toHaveLength(1);
   expect(exported.plans[0].schedule.versions).toHaveLength(2);
   expect(exported.plans[0].schedule.versions[0].exceptions).toHaveLength(1);
@@ -1114,4 +1114,98 @@ test("schedule occurrence exceptions preserve skip, restore, reschedule, and exa
   } finally {
     await otherContext.close();
   }
+});
+
+test("in-app schedule reminders are versioned and follow effective occurrences", async ({
+  page,
+}: {
+  page: Page;
+}) => {
+  await signUp(page, "schedule-reminder-owner");
+  await completeUnrestrictedReadiness(page);
+
+  await page.goto("/create");
+  await page.getByLabel("Routine title").fill("Reminder controlled routine");
+  await page
+    .getByLabel("Exercise 1", { exact: true })
+    .selectOption("e3333333-3333-4333-8333-333333333334");
+  await page
+    .getByLabel("Exercise 2", { exact: true })
+    .selectOption("e4444444-4444-4444-8444-444444444444");
+  await page.getByRole("button", { name: "Save routine" }).click();
+  await expect(page).toHaveURL(/\/routines\/[0-9a-f-]+$/);
+
+  await page.goto("/plans");
+  await page.getByLabel("Plan title").fill("Reminder controlled plan");
+  await page
+    .getByLabel("Reminder controlled routine - routine version 1")
+    .check();
+  await page.getByRole("button", { name: "Save plan" }).click();
+  await expect(page).toHaveURL(/\/plans\/[0-9a-f-]+$/);
+
+  const planUrl = page.url();
+  const scheduleUrl = `${planUrl}/schedule`;
+
+  const tomorrow = new Date();
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const startsOn = tomorrow.toISOString().slice(0, 10);
+  const isoWeekday = ((tomorrow.getUTCDay() + 6) % 7) + 1;
+  const weekdayNames = [
+    "",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+  const weekdayName = weekdayNames[isoWeekday];
+
+  await page.goto(scheduleUrl);
+  await page.getByLabel("Schedule timezone").fill("Etc/UTC");
+  await page.getByLabel("Schedule starts on").fill(startsOn);
+  await page.getByLabel("In-app reminder").selectOption("2880");
+  await page
+    .getByLabel(`${weekdayName} routine`)
+    .selectOption({
+      label: "Reminder controlled routine - routine version 1",
+    });
+  await page.getByLabel(`${weekdayName} window start`).fill("09:00");
+  await page.getByLabel(`${weekdayName} window end`).fill("10:00");
+  await page.getByRole("button", { name: "Save recurring schedule" }).click();
+
+  await expect(page).toHaveURL(planUrl);
+  await expect(page.getByText(/In-app reminder: 2 days before each occurrence/)).toBeVisible();
+
+  await page.goto("/");
+  await expect(page.getByText("Reminder due")).toBeVisible();
+  await expect(
+    page.getByText(/In-app reminder is set 2 days before this occurrence/),
+  ).toBeVisible();
+
+  await page.goto(scheduleUrl);
+  await expect(page.getByLabel("In-app reminder")).toHaveValue("2880");
+  await page.getByLabel("In-app reminder").selectOption("");
+  await page.getByRole("button", { name: "Save new schedule version" }).click();
+
+  await expect(page).toHaveURL(planUrl);
+  await expect(page.getByText(/In-app reminder: off/)).toBeVisible();
+
+  await page.goto("/");
+  await expect(page.getByText("Next up")).toBeVisible();
+  await expect(page.getByText("Reminder due")).toHaveCount(0);
+
+  await page.goto("/profile/account");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Download JSON export" }).click();
+  const exported = JSON.parse(await readDownloadText(await downloadPromise));
+
+  expect(exported.exportVersion).toBe(9);
+  expect(exported.plans).toHaveLength(1);
+  expect(exported.plans[0].schedule.versions).toHaveLength(2);
+  expect(exported.plans[0].schedule.versions[0].reminderMinutesBefore).toBe(
+    2880,
+  );
+  expect(exported.plans[0].schedule.versions[1].reminderMinutesBefore).toBeNull();
 });

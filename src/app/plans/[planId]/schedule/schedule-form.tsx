@@ -27,6 +27,7 @@ type ExistingSchedule = {
   timezoneName: string;
   startsOn: string;
   isPaused: boolean;
+  reminderMinutesBefore: number | null;
   rules: ExistingRule[];
 };
 
@@ -161,6 +162,34 @@ export function ScheduleForm({
           required
           defaultValue={schedule?.startsOn ?? ""}
         />
+      </div>
+
+      <div className="field">
+        <label htmlFor={`schedule-reminder-${planId}`}>In-app reminder</label>
+        <select
+          id={`schedule-reminder-${planId}`}
+          name="reminderMinutesBefore"
+          defaultValue={
+            schedule?.reminderMinutesBefore === null ||
+            schedule?.reminderMinutesBefore === undefined
+              ? ""
+              : String(schedule.reminderMinutesBefore)
+          }
+        >
+          <option value="">Off</option>
+          <option value="15">15 minutes before</option>
+          <option value="30">30 minutes before</option>
+          <option value="60">1 hour before</option>
+          <option value="120">2 hours before</option>
+          <option value="1440">1 day before</option>
+          <option value="2880">2 days before</option>
+          <option value="10080">1 week before</option>
+        </select>
+        <p className="field-help">
+          The reminder becomes visible in Today when its lead time is reached.
+          This does not send push, email, or SMS notifications while the app is
+          closed.
+        </p>
       </div>
 
       <label className="choice-option">
